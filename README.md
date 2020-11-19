@@ -1,11 +1,11 @@
-# Elmo EtherCAT SDK
+# Maxon EtherCAT SDK
 
 ## Overview
-This is a C++ library providing a high-level interface for controlling [Elmo](https://www.elmomc.com/) motor controllers of the [Gold line](https://www.elmomc.com/products/harsh-environment/servo-drive-gold-family/) over EtherCAT (using the [CANopen over EtherCAT CoE](https://www.ethercat.org/en/technology.html#1.9.1) protocol).
+This is a C++ library providing a high-level interface for controlling [Maxon](https://www.maxonmc.com/) motor controllers of the [Gold line](https://www.maxonmc.com/products/harsh-environment/servo-drive-gold-family/) over EtherCAT (using the [CANopen over EtherCAT CoE](https://www.ethercat.org/en/technology.html#1.9.1) protocol).
 
 The lower level EtherCAT communication is handled by the [soem_interface](https://github.com/leggedrobotics/soem_interface) library.
 
-The elmo_ethercat_sdk is developed on Ubuntu 18.04 LTS with [ROS Melodic](https://wiki.ros.org/melodic).
+The maxon_ethercat_sdk is developed on Ubuntu 18.04 LTS with [ROS Melodic](https://wiki.ros.org/melodic).
 
 The source code is released under the GPLv3 license.
 A copy of the license is available in the *COPYING* file.
@@ -42,13 +42,13 @@ To build the library from source, clone the latest version from this repository 
 	git clone https://github.com/leggedrobotics/soem_interface.git
     git clone https://github.com/leggedrobotics/ethercat_sdk_master.git
     git clone https://github.com/leggedrobotics/message_logger.git
-    git clone https://github.com/leggedrobotics/elmo_ethercat_sdk.git
+    git clone https://github.com/leggedrobotics/maxon_ethercat_sdk.git
 	cd ../
-	catkin build elmo_ethercat 
+	catkin build maxon_ethercat 
 
 To build the examples, execute the following command inside of your catkin workspace:
 	
-	catkin build elmo_examples
+	catkin build maxon_examples
 	
 
 ## Firmware version

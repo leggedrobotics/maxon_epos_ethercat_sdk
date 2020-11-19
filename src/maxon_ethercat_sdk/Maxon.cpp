@@ -3,32 +3,32 @@
 ** Jonas Junger, Johannes Pankert, Fabio Dubois, Lennart Nachtigall,
 ** Markus Staeuble
 **
-** This file is part of the elmo_ethercat_sdk.
-** The elmo_ethercat_sdk is free software: you can redistribute it and/or modify
+** This file is part of the maxon_ethercat_sdk.
+** The maxon_ethercat_sdk is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation, either version 3 of the License, or
 ** (at your option) any later version.
 **
-** The elmo_ethercat_sdk is distributed in the hope that it will be useful,
+** The maxon_ethercat_sdk is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 **
 ** You should have received a copy of the GNU General Public License
-** along with the elmo_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
+** along with the maxon_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "elmo_ethercat_sdk/Elmo.hpp"
-#include "elmo_ethercat_sdk/ConfigurationParser.hpp"
-#include "elmo_ethercat_sdk/ObjectDictionary.hpp"
-#include "elmo_ethercat_sdk/RxPdo.hpp"
-#include "elmo_ethercat_sdk/TxPdo.hpp"
+#include "maxon_ethercat_sdk/Maxon.hpp"
+#include "maxon_ethercat_sdk/ConfigurationParser.hpp"
+#include "maxon_ethercat_sdk/ObjectDictionary.hpp"
+#include "maxon_ethercat_sdk/RxPdo.hpp"
+#include "maxon_ethercat_sdk/TxPdo.hpp"
 
 #include <cmath>
 #include <thread>
 #include <chrono>
 
-namespace elmo{
+namespace maxon{
   std::string binstring(uint16_t var){
     std::string s = "0000000000000000";
     for(int i = 0; i < 16; i++){
@@ -48,18 +48,18 @@ namespace elmo{
     return s;
   }
 
-  Elmo::SharedPtr Elmo::deviceFromFile(const std::string &configFile, const std::string& name, const uint32_t address){
-    auto elmo = std::make_shared<Elmo>(name, address);
-    elmo->loadConfigFile(configFile);
-    return elmo;
+  Maxon::SharedPtr Maxon::deviceFromFile(const std::string &configFile, const std::string& name, const uint32_t address){
+    auto maxon = std::make_shared<Maxon>(name, address);
+    maxon->loadConfigFile(configFile);
+    return maxon;
   }
 
-  Elmo::Elmo(const std::string& name, const uint32_t address){
+  Maxon::Maxon(const std::string& name, const uint32_t address) {
     address_ = address;
     name_ = name;
   }
 
-  bool Elmo::startup(){
+  bool Maxon::startup(){
     bool success = true;
     success &= bus_->waitForState(EC_STATE_PRE_OP, address_, 50, 0.05);
     bus_->syncDistributedClock0(address_, true, timeStep_, timeStep_/2.f);
@@ -69,7 +69,7 @@ namespace elmo{
     // TODO test
     if(configuration_.motorRatedCurrentA == 0.0){
       uint32_t motorRatedCurrent;
-      success &= sendSdoRead(OD_INDEX_MOTOR_RATED_CURRENT, 0, false, motorRatedCurrent);
+      // success &= sendSdoRead(OD_INDEX_MOTOR_RATED_CURRENT, 0, false, motorRatedCurrent);
       // update the configuration to accomodate the new motor rated current value
       configuration_.motorRatedCurrentA = static_cast<double>(motorRatedCurrent)/1000.0 ;
       // update the reading_ object to ensure correct unit conversion
@@ -89,15 +89,15 @@ namespace elmo{
     // write the motor rated current / torque to the drives
     uint32_t motorRatedCurrent = static_cast<uint32_t>(
       round(1000.0 * configuration_.motorRatedCurrentA));
-    success &= sdoVerifyWrite(OD_INDEX_MOTOR_RATED_CURRENT, 0, false, motorRatedCurrent);
+    // success &= sdoVerifyWrite(OD_INDEX_MOTOR_RATED_CURRENT, 0, false, motorRatedCurrent);
     success &= sdoVerifyWrite(OD_INDEX_MOTOR_RATED_TORQUE, 0, false, motorRatedCurrent);
 
     // Write maximum current to drive
     uint16_t maxCurrent = static_cast<uint16_t>(floor(1000.0 * configuration_.maxCurrentA));
-    success &= sdoVerifyWrite(OD_INDEX_MAX_CURRENT, 0, false, maxCurrent);
+    // success &= sdoVerifyWrite(OD_INDEX_MAX_CURRENT, 0, false, maxCurrent);
 
     if(!success){
-      MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::preStartupOnlineConfiguration] hardware configuration of '"
+      MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::preStartupOnlineConfiguration] hardware configuration of '"
                         << name_ <<"' not successful!");
       addErrorToReading(ErrorType::ConfigurationError);
     }
@@ -105,11 +105,11 @@ namespace elmo{
     return success;
   }
 
-  void Elmo::shutdown(){
+  void Maxon::shutdown(){
     bus_->setState(EC_STATE_INIT, address_);
   }
 
-  void Elmo::updateWrite(){
+  void Maxon::updateWrite(){
     std::lock_guard<std::recursive_mutex> lock(mutex_);
 
     /*
@@ -117,7 +117,7 @@ namespace elmo{
     */
     if (modeOfOperation_ == ModeOfOperationEnum::NA) {
       reading_.addError(ErrorType::ModeOfOperationError);
-      MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::updateWrite] Mode of operation for '"
+      MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::updateWrite] Mode of operation for '"
                         << name_ << "' has not been set.");
       return;
     }
@@ -154,14 +154,14 @@ namespace elmo{
       } break;
 
       default:
-        MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::updateWrite] Unsupported Rx Pdo type for '"
+        MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::updateWrite] Unsupported Rx Pdo type for '"
                         << name_ << "'");
         addErrorToReading(ErrorType::RxPdoTypeError);
     }
 
   }
 
-  void Elmo::updateRead(){
+  void Maxon::updateRead(){
     std::lock_guard<std::recursive_mutex> lock(mutex_);
 
     // TODO(duboisf): implement some sort of time stamp
@@ -190,7 +190,7 @@ namespace elmo{
       } break;
 
       default:
-        MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::updateRrite] Unsupported Tx Pdo type for '"
+        MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::updateRrite] Unsupported Tx Pdo type for '"
                         << name_ << "'");
         reading_.addError(ErrorType::TxPdoTypeError);
     }
@@ -202,12 +202,12 @@ namespace elmo{
 
     // Print warning if drive is in Fault state.
     if (reading_.getDriveState() == DriveState::Fault) {
-      MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::updateRead] '"
+      MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::updateRead] '"
                         << name_ << "' is in drive state 'Fault'");
     }
   }
 
-  void Elmo::stageCommand(const Command& command){
+  void Maxon::stageCommand(const Command& command){
     std::lock_guard<std::recursive_mutex> lock(stagedCommandMutex_);
     stagedCommand_ = command;
     stagedCommand_.setPositionFactorRadToInteger(
@@ -232,33 +232,33 @@ namespace elmo{
       modeOfOperation_ = command.getModeOfOperation();
     }else{
       if(modeOfOperation_ != command.getModeOfOperation() && command.getModeOfOperation() != ModeOfOperationEnum::NA){
-        MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::stageCommand] Changing the mode of operation of '"
+        MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::stageCommand] Changing the mode of operation of '"
                           << name_ << "' is not allowed for the active configuration.");
       }
     }
   }
 
-  Reading Elmo::getReading() const{
+  Reading Maxon::getReading() const{
     std::lock_guard<std::recursive_mutex> lock(readingMutex_);
     return reading_;
   }
 
-  void Elmo::getReading(Reading &reading) const{
+  void Maxon::getReading(Reading &reading) const{
     std::lock_guard<std::recursive_mutex> lock(readingMutex_);
     reading = reading_;
   }
 
-  bool Elmo::loadConfigFile(const std::string &fileName){
+  bool Maxon::loadConfigFile(const std::string &fileName){
     ConfigurationParser configurationParser(fileName);
     return loadConfiguration(configurationParser.getConfiguration());
   }
 
-  bool Elmo::loadConfigNode(YAML::Node configNode){
+  bool Maxon::loadConfigNode(YAML::Node configNode){
     ConfigurationParser configurationParser(configNode);
     return loadConfiguration(configurationParser.getConfiguration());
   }
 
-  bool Elmo::loadConfiguration(const Configuration& configuration){
+  bool Maxon::loadConfiguration(const Configuration& configuration){
     bool success = true;
     reading_.configureReading(configuration);
 
@@ -274,22 +274,22 @@ namespace elmo{
     return success;
   }
 
-  Configuration Elmo::getConfiguration() const{
+  Configuration Maxon::getConfiguration() const{
     return configuration_;
   }
 
-  bool Elmo::getStatuswordViaSdo(Statusword &statusword){
+  bool Maxon::getStatuswordViaSdo(Statusword &statusword){
     uint16_t statuswordValue = 0;
     bool success = sendSdoRead(OD_INDEX_STATUSWORD, 0, false, statuswordValue);
     statusword.setFromRawStatusword(statuswordValue);
     return success;
   }
 
-  bool Elmo::setControlwordViaSdo(Controlword &controlword){
+  bool Maxon::setControlwordViaSdo(Controlword &controlword){
     return sendSdoWrite(OD_INDEX_CONTROLWORD, 0, false, controlword.getRawControlword());
   }
 
-  bool Elmo::setDriveStateViaSdo(const DriveState &driveState){
+  bool Maxon::setDriveStateViaSdo(const DriveState &driveState){
     bool success = true;
     Statusword currentStatusword;
     success &= getStatuswordViaSdo(currentStatusword);
@@ -322,7 +322,7 @@ namespace elmo{
             success &= stateTransitionViaSdo(StateTransition::_15);
             break;
           default:
-            MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::setDriveStateViaSdo] State Transition not implemented");
+            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::setDriveStateViaSdo] State Transition not implemented");
             addErrorToReading(ErrorType::SdoStateTransitionError);
             success = false;
         }
@@ -351,7 +351,7 @@ namespace elmo{
             success &= stateTransitionViaSdo(StateTransition::_2);
             break;
           default:
-            MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::setDriveStateViaSdo] State Transition not implemented");
+            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::setDriveStateViaSdo] State Transition not implemented");
             addErrorToReading(ErrorType::SdoStateTransitionError);
             success = false;
         }
@@ -383,7 +383,7 @@ namespace elmo{
             success &= stateTransitionViaSdo(StateTransition::_3);
             break;
           default:
-            MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::setDriveStateViaSdo] State Transition not implemented");
+            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::setDriveStateViaSdo] State Transition not implemented");
             addErrorToReading(ErrorType::SdoStateTransitionError);
             success = false;
         }
@@ -419,7 +419,7 @@ namespace elmo{
             success &= stateTransitionViaSdo(StateTransition::_4);
             break;
           default:
-            MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::setDriveStateViaSdo] State Transition not implemented");
+            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::setDriveStateViaSdo] State Transition not implemented");
             addErrorToReading(ErrorType::SdoStateTransitionError);
             success = false;
         }
@@ -456,21 +456,21 @@ namespace elmo{
             success &= stateTransitionViaSdo(StateTransition::_11);
             break;
           default:
-            MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::setDriveStateViaSdo] State Transition not implemented");
+            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::setDriveStateViaSdo] State Transition not implemented");
             addErrorToReading(ErrorType::SdoStateTransitionError);
             success = false;
         }
         break;
 
       default:
-        MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::setDriveStateViaSdo] State Transition not implemented");
+        MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::setDriveStateViaSdo] State Transition not implemented");
         addErrorToReading(ErrorType::SdoStateTransitionError);
         success = false;
     }
     return success;
   }
 
-  bool Elmo::stateTransitionViaSdo(const StateTransition& stateTransition){
+  bool Maxon::stateTransitionViaSdo(const StateTransition& stateTransition){
     Controlword controlword;
     switch (stateTransition) {
       case StateTransition::_2:
@@ -522,13 +522,13 @@ namespace elmo{
         return setControlwordViaSdo(controlword);
         break;
       default:
-        MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::stateTransitionViaSdo] State Transition not implemented");
+        MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::stateTransitionViaSdo] State Transition not implemented");
         addErrorToReading(ErrorType::SdoStateTransitionError);
         return false;
     }
   }
 
-  bool Elmo::setDriveStateViaPdo(const DriveState &driveState, const bool waitForState){
+  bool Maxon::setDriveStateViaPdo(const DriveState &driveState, const bool waitForState){
     bool success = false;
     /*
     ** locking the mutex_
@@ -594,7 +594,7 @@ namespace elmo{
     return success;
   }
 
-  bool Elmo::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum){
+  bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum){
     bool rxSuccess = true;
     switch (rxPdoTypeEnum) {
       case RxPdoTypeEnum::RxPdoStandard:
@@ -620,12 +620,12 @@ namespace elmo{
         break;
 
       case RxPdoTypeEnum::NA:
-        MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::mapPdos] Cannot map RxPdoTypeEnum::NA, PdoType not configured properly");
+        MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::mapPdos] Cannot map RxPdoTypeEnum::NA, PdoType not configured properly");
         addErrorToReading(ErrorType::PdoMappingError);
         rxSuccess = false;
         break;
       default:  // Non-implemented type
-        MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::mapPdos] Cannot map unimplemented RxPdo, PdoType not configured properly");
+        MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::mapPdos] Cannot map unimplemented RxPdo, PdoType not configured properly");
         addErrorToReading(ErrorType::PdoMappingError);
         rxSuccess = false;
         break;
@@ -660,19 +660,19 @@ namespace elmo{
         break;
 
       case TxPdoTypeEnum::NA:
-        MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::mapPdos] Cannot map TxPdoTypeEnum::NA, PdoType not configured properly");
+        MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::mapPdos] Cannot map TxPdoTypeEnum::NA, PdoType not configured properly");
         addErrorToReading(ErrorType::TxPdoMappingError);
         txSuccess = false;
         break;
       default:  // if any case was forgotten
-        MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::mapPdos] Cannot map undefined TxPdo, PdoType not configured properly");
+        MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::mapPdos] Cannot map undefined TxPdo, PdoType not configured properly");
         addErrorToReading(ErrorType::TxPdoMappingError);
         txSuccess = false;
         break;
     }
     return (txSuccess && rxSuccess);
   }
-  Controlword Elmo::getNextStateTransitionControlword(const DriveState& requestedDriveState,
+  Controlword Maxon::getNextStateTransitionControlword(const DriveState& requestedDriveState,
                                                       const DriveState& currentDriveState){
     Controlword controlword;
     controlword.setAllFalse();
@@ -680,7 +680,7 @@ namespace elmo{
       case DriveState::SwitchOnDisabled:
         switch (currentDriveState) {
           case DriveState::SwitchOnDisabled:
-            MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::getNextStateTransitionControlword] "
+            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                               << "drive state has already been reached for '"
                               << name_ << "'");
             addErrorToReading(ErrorType::PdoStateTransitionError);
@@ -701,7 +701,7 @@ namespace elmo{
             controlword.setStateTransition15();
             break;
           default:
-            MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::getNextStateTransitionControlword] "
+            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                               << "PDO state transition not implemented for '"
                               << name_ << "'");
             addErrorToReading(ErrorType::PdoStateTransitionError);
@@ -714,7 +714,7 @@ namespace elmo{
             controlword.setStateTransition2();
             break;
           case DriveState::ReadyToSwitchOn:
-            MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::getNextStateTransitionControlword] "
+            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                               << "drive state has already been reached for '"
                               << name_ << "'");
             addErrorToReading(ErrorType::PdoStateTransitionError);
@@ -732,7 +732,7 @@ namespace elmo{
             controlword.setStateTransition15();
             break;
           default:
-            MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::getNextStateTransitionControlword] "
+            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                               << "PDO state transition not implemented for '"
                               << name_ << "'");
             addErrorToReading(ErrorType::PdoStateTransitionError);
@@ -748,7 +748,7 @@ namespace elmo{
             controlword.setStateTransition3();
             break;
           case DriveState::SwitchedOn:
-            MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::getNextStateTransitionControlword] "
+            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                               << "drive state has already been reached for '"
                               << name_ << "'");
             addErrorToReading(ErrorType::PdoStateTransitionError);
@@ -763,7 +763,7 @@ namespace elmo{
             controlword.setStateTransition15();
             break;
           default:
-            MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::getNextStateTransitionControlword] "
+            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                               << "PDO state transition not implemented for '"
                               << name_ << "'");
             addErrorToReading(ErrorType::PdoStateTransitionError);
@@ -782,7 +782,7 @@ namespace elmo{
             controlword.setStateTransition4();
             break;
           case DriveState::OperationEnabled:
-            MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::getNextStateTransitionControlword] "
+            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                               << "drive state has already been reached for '"
                               << name_ << "'");
             addErrorToReading(ErrorType::PdoStateTransitionError);
@@ -794,7 +794,7 @@ namespace elmo{
             controlword.setStateTransition15();
             break;
           default:
-            MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::getNextStateTransitionControlword] "
+            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                               << "PDO state transition not implemented for '"
                               << name_ << "'");
             addErrorToReading(ErrorType::PdoStateTransitionError);
@@ -816,7 +816,7 @@ namespace elmo{
             controlword.setStateTransition11();
             break;
           case DriveState::QuickStopActive:
-            MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::getNextStateTransitionControlword] "
+            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                               << "drive state has already been reached for '"
                               << name_ << "'");
             addErrorToReading(ErrorType::PdoStateTransitionError);
@@ -825,7 +825,7 @@ namespace elmo{
             controlword.setStateTransition15();
             break;
           default:
-            MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::getNextStateTransitionControlword] "
+            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                               << "PDO state transition not implemented for '"
                               << name_ << "'");
             addErrorToReading(ErrorType::PdoStateTransitionError);
@@ -833,7 +833,7 @@ namespace elmo{
         break;
 
       default:
-        MELO_ERROR_STREAM("[elmo_ethercat_sdk:Elmo::getNextStateTransitionControlword] "
+        MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                           << "PDO state cannot be reached for '"
                           << name_ << "'");
         addErrorToReading(ErrorType::PdoStateTransitionError);
@@ -842,21 +842,21 @@ namespace elmo{
     return controlword;
   }
 
-  void Elmo::autoConfigurePdoSizes(){
+  void Maxon::autoConfigurePdoSizes(){
     auto pdoSizes = bus_->getHardwarePdoSizes(static_cast<uint16_t>(address_));
     pdoInfo_.rxPdoSize_ = pdoSizes.first;
     pdoInfo_.txPdoSize_ = pdoSizes.second;
   }
 
-  uint16_t Elmo::getTxPdoSize(){
+  uint16_t Maxon::getTxPdoSize(){
     return pdoInfo_.txPdoSize_;
   }
 
-  uint16_t Elmo::getRxPdoSize(){
+  uint16_t Maxon::getRxPdoSize(){
     return pdoInfo_.rxPdoSize_;
   }
 
-  void Elmo::engagePdoStateMachine(){
+  void Maxon::engagePdoStateMachine(){
     // locking the mutex
     std::lock_guard<std::recursive_mutex> lock(mutex_);
 
@@ -891,8 +891,8 @@ namespace elmo{
 
   }
 
-  void Elmo::addErrorToReading(const ErrorType& errorType){
+  void Maxon::addErrorToReading(const ErrorType& errorType){
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     reading_.addError(errorType);
   }
-} // namespace elmo
+} // namespace maxon

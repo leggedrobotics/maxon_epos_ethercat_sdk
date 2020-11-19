@@ -3,19 +3,19 @@
 ** Jonas Junger, Johannes Pankert, Fabio Dubois, Lennart Nachtigall,
 ** Markus Staeuble
 **
-** This file is part of the elmo_ethercat_sdk.
-** The elmo_ethercat_sdk is free software: you can redistribute it and/or modify
+** This file is part of the maxon_ethercat_sdk.
+** The maxon_ethercat_sdk is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation, either version 3 of the License, or
 ** (at your option) any later version.
 **
-** The elmo_ethercat_sdk is distributed in the hope that it will be useful,
+** The maxon_ethercat_sdk is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 **
 ** You should have received a copy of the GNU General Public License
-** along with the elmo_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
+** along with the maxon_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -25,9 +25,9 @@
 #include <iostream>
 #include <string>
 
-#include "elmo_ethercat_sdk/DriveState.hpp"
+#include "maxon_ethercat_sdk/DriveState.hpp"
 
-namespace elmo {
+namespace maxon {
 
 class Statusword {
  private:
@@ -39,9 +39,11 @@ class Statusword {
   bool quickStop_{false};            // bit 5
   bool switchOnDisabled_{false};     // bit 6
   bool warning_{false};              // bit 7
+  bool remote_{false};               // bit 9
   bool targetReached_{false};        // bit 10
   bool internalLimitActive_{false};  // bit 11
-  bool followingError_{false};       // bit 13, CSV mode
+  bool followingError_{false};       // bit 13, CSV & PPM mode
+  // bool homingError_{false};          // bit 13, HMM mode
 
   // the raw statusword
   uint16_t rawStatusword_{0};
@@ -53,4 +55,4 @@ class Statusword {
   std::string getDriveStateString() const;
 };
 
-}  // namespace elmo
+}  // namespace maxon

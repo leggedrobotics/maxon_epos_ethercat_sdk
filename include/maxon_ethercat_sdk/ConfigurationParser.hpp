@@ -3,19 +3,19 @@
 ** Jonas Junger, Johannes Pankert, Fabio Dubois, Lennart Nachtigall,
 ** Markus Staeuble
 **
-** This file is part of the elmo_ethercat_sdk.
-** The elmo_ethercat_sdk is free software: you can redistribute it and/or modify
+** This file is part of the maxon_ethercat_sdk.
+** The maxon_ethercat_sdk is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation, either version 3 of the License, or
 ** (at your option) any later version.
 **
-** The elmo_ethercat_sdk is distributed in the hope that it will be useful,
+** The maxon_ethercat_sdk is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 **
 ** You should have received a copy of the GNU General Public License
-** along with the elmo_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
+** along with the maxon_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -24,9 +24,9 @@
 #include <string>
 #include <yaml-cpp/yaml.h>
 
-#include "elmo_ethercat_sdk/Configuration.hpp"
+#include "maxon_ethercat_sdk/Configuration.hpp"
 
-namespace elmo {
+namespace maxon {
 
 /*!
  * @brief	Read configuration data from a yaml file
@@ -59,7 +59,7 @@ class ConfigurationParser {
    * The Configuration object is filled according to the specified configuration
    * file. Any missing parameters will be automatically filled with well tested
    * default values.
-   * @return	A configured elmo::ethercat::Configuration object
+   * @return	A configured maxon::ethercat::Configuration object
    */
   Configuration getConfiguration() const;
 
@@ -75,4 +75,4 @@ class ConfigurationParser {
   Configuration configuration_;
 };
 
-}  // namespace elmo
+}  // namespace maxon

@@ -2,22 +2,22 @@
 # Jonas Junger, Johannes Pankert, Fabio Dubois, Lennart Nachtigall,
 # Markus Staeuble
 #
-# This file is part of the elmo_ethercat_sdk.
-# The elmo_ethercat_sdk is free software: you can redistribute it and/or modify
+# This file is part of the maxon_ethercat_sdk.
+# The maxon_ethercat_sdk is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# The elmo_ethercat_sdk is distributed in the hope that it will be useful,
+# The maxon_ethercat_sdk is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with the elmo_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
+# along with the maxon_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
 
 cmake_minimum_required(VERSION 2.8.3)
-project(elmo_ethercat_sdk)
+project(maxon_ethercat_sdk)
 
 ## Set the C++ standard.
 set(CMAKE_CXX_STANDARD 14)
@@ -64,7 +64,7 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME}
-  src/${PROJECT_NAME}/Elmo.cpp
+  src/${PROJECT_NAME}/Maxon.cpp
   src/${PROJECT_NAME}/Configuration.cpp
   src/${PROJECT_NAME}/ConfigurationParser.cpp
   src/${PROJECT_NAME}/Reading.cpp

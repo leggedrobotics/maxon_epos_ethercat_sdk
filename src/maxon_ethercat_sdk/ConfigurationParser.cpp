@@ -3,26 +3,26 @@
 ** Jonas Junger, Johannes Pankert, Fabio Dubois, Lennart Nachtigall,
 ** Markus Staeuble
 **
-** This file is part of the elmo_ethercat_sdk.
-** The elmo_ethercat_sdk is free software: you can redistribute it and/or modify
+** This file is part of the maxon_ethercat_sdk.
+** The maxon_ethercat_sdk is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation, either version 3 of the License, or
 ** (at your option) any later version.
 **
-** The elmo_ethercat_sdk is distributed in the hope that it will be useful,
+** The maxon_ethercat_sdk is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 **
 ** You should have received a copy of the GNU General Public License
-** along with the elmo_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
+** along with the maxon_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <cstdint>
 
-#include "elmo_ethercat_sdk/ConfigurationParser.hpp"
+#include "maxon_ethercat_sdk/ConfigurationParser.hpp"
 
-namespace elmo {
+namespace maxon {
 
 /*!
  * Function template for convenience
@@ -34,7 +34,7 @@ namespace elmo {
 template <typename T>
 bool getValueFromFile(YAML::Node& yamlNode, const std::string& varName, T& var) {
   if (!yamlNode[varName].IsDefined()) {
-    MELO_WARN_STREAM("[elmo_ethercat_sdk:ConfigurationParser::parseConfiguration]: field '"
+    MELO_WARN_STREAM("[maxon_ethercat_sdk:ConfigurationParser::parseConfiguration]: field '"
                      << varName << "' is missing. Default value will be used.");
     return false;
   }
@@ -43,7 +43,7 @@ bool getValueFromFile(YAML::Node& yamlNode, const std::string& varName, T& var) 
     var = tmpVar;
     return true;
   } catch (...) {
-    MELO_ERROR_STREAM("[elmo_ethercat_sdk:ConfigurationParser::getValueFromFile] Error while parsing value \""
+    MELO_ERROR_STREAM("[maxon_ethercat_sdk:ConfigurationParser::getValueFromFile] Error while parsing value \""
                       << varName << "\", default values will be used");
     return false;
   }
@@ -57,7 +57,7 @@ bool getValueFromFile(YAML::Node& yamlNode, const std::string& varName, T& var) 
  */
 bool getRxPdoFromFile(YAML::Node& yamlNode, const std::string& varName, RxPdoTypeEnum& rxPdo) {
   if (!yamlNode[varName].IsDefined()) {
-    MELO_WARN_STREAM("[elmo_ethercat_sdk:ConfigurationParser::parseConfiguration]: field '"
+    MELO_WARN_STREAM("[maxon_ethercat_sdk:ConfigurationParser::parseConfiguration]: field '"
                      << varName << "' is missing. Default value will be used.");
     return false;
   }
@@ -74,11 +74,11 @@ bool getRxPdoFromFile(YAML::Node& yamlNode, const std::string& varName, RxPdoTyp
       rxPdo = RxPdoTypeEnum::RxPdoCST;
       return true;
     } else {
-      MELO_ERROR_STREAM("[elmo_ethercat_sdk:ConfigurationParser::getRxPdoFromFile] Unsupported Rx PDO Type");
+      MELO_ERROR_STREAM("[maxon_ethercat_sdk:ConfigurationParser::getRxPdoFromFile] Unsupported Rx PDO Type");
       return false;
     }
   } catch (...) {
-    MELO_ERROR_STREAM("[elmo_ethercat_sdk:ConfigurationParser::getRxPdoFromFile] Error while parsing value \""
+    MELO_ERROR_STREAM("[maxon_ethercat_sdk:ConfigurationParser::getRxPdoFromFile] Error while parsing value \""
                       << varName << "\", default values will be used");
     return false;
   }
@@ -93,7 +93,7 @@ bool getRxPdoFromFile(YAML::Node& yamlNode, const std::string& varName, RxPdoTyp
  */
 bool getTxPdoFromFile(YAML::Node& yamlNode, const std::string& varName, TxPdoTypeEnum& txPdo) {
   if (!yamlNode[varName].IsDefined()) {
-    MELO_WARN_STREAM("[elmo_ethercat_sdk:ConfigurationParser::parseConfiguration]: field '"
+    MELO_WARN_STREAM("[maxon_ethercat_sdk:ConfigurationParser::parseConfiguration]: field '"
                      << varName << "' is missing. Default value will be used.");
     return false;
   }
@@ -110,12 +110,12 @@ bool getTxPdoFromFile(YAML::Node& yamlNode, const std::string& varName, TxPdoTyp
       txPdo = TxPdoTypeEnum::TxPdoStandard;
       return true;
     } else {
-      MELO_ERROR_STREAM("[elmo_ethercat_sdk:ConfigurationParser::getTxPdoFromFile] Unsupported Tx PDO Type");
+      MELO_ERROR_STREAM("[maxon_ethercat_sdk:ConfigurationParser::getTxPdoFromFile] Unsupported Tx PDO Type");
       return false;
     }
 
   } catch (...) {
-    MELO_ERROR_STREAM("[elmo_ethercat_sdk:ConfigurationParser::getTxPdoFromFile] Error while parsing value \""
+    MELO_ERROR_STREAM("[maxon_ethercat_sdk:ConfigurationParser::getTxPdoFromFile] Error while parsing value \""
                       << varName << "\", default values will be used");
     return false;
   }
@@ -130,7 +130,7 @@ bool getTxPdoFromFile(YAML::Node& yamlNode, const std::string& varName, TxPdoTyp
  */
 bool getModeFromFile(YAML::Node& yamlNode, const std::string& varName, ModeOfOperationEnum& mode) {
   if (!yamlNode[varName].IsDefined()) {
-    MELO_WARN_STREAM("[elmo_ethercat_sdk:ConfigurationParser::parseConfiguration]: field '"
+    MELO_WARN_STREAM("[maxon_ethercat_sdk:ConfigurationParser::parseConfiguration]: field '"
                      << varName << "' is missing. Default value will be used.");
     return false;
   }
@@ -159,11 +159,11 @@ bool getModeFromFile(YAML::Node& yamlNode, const std::string& varName, ModeOfOpe
       mode = ModeOfOperationEnum::CyclicSynchronousTorqueMode;
       return true;
     } else {
-      MELO_ERROR_STREAM("[elmo_ethercat_sdk:ConfigurationParser::getModeFromFile] Unsupported Mode Of Operation");
+      MELO_ERROR_STREAM("[maxon_ethercat_sdk:ConfigurationParser::getModeFromFile] Unsupported Mode Of Operation");
       return false;
     }
   } catch (...) {
-    MELO_ERROR_STREAM("[elmo_ethercat_sdk:ConfigurationParser::getModeFromFile] Error while parsing value \""
+    MELO_ERROR_STREAM("[maxon_ethercat_sdk:ConfigurationParser::getModeFromFile] Error while parsing value \""
                       << varName << "\", default values will be used");
     return false;
   }
@@ -174,7 +174,7 @@ ConfigurationParser::ConfigurationParser(const std::string& filename) {
   try{
     configNode = YAML::LoadFile(filename);
   }catch(...){
-    MELO_FATAL_STREAM("[elmo_ethercat_sdk:ConfigurationParser::ConfigurationParser] Loading YAML configuration file '"
+    MELO_FATAL_STREAM("[maxon_ethercat_sdk:ConfigurationParser::ConfigurationParser] Loading YAML configuration file '"
                       << filename << "' failed.");
   }
   parseConfiguration(configNode);
@@ -185,43 +185,43 @@ ConfigurationParser::ConfigurationParser(YAML::Node configNode) {
 }
 
 void ConfigurationParser::parseConfiguration(YAML::Node configNode) {
-  if (configNode["Elmo"].IsDefined()) {
-    /// A new node for the ElmoEthercat class
-    YAML::Node elmoNode = configNode["Elmo"];
+  if (configNode["Maxon"].IsDefined()) {
+    /// A new node for the MaxonEthercat class
+    YAML::Node maxonNode = configNode["Maxon"];
 
     unsigned int configRunSdoVerifyTimeout;
-    if (getValueFromFile(elmoNode, "config_run_sdo_verify_timeout", configRunSdoVerifyTimeout)) {
+    if (getValueFromFile(maxonNode, "config_run_sdo_verify_timeout", configRunSdoVerifyTimeout)) {
       configuration_.configRunSdoVerifyTimeout = configRunSdoVerifyTimeout;
     }
 
     bool printDebugMessages;
-    if (getValueFromFile(elmoNode, "print_debug_messages", printDebugMessages)) {
+    if (getValueFromFile(maxonNode, "print_debug_messages", printDebugMessages)) {
       configuration_.printDebugMessages = printDebugMessages ;
     }
 
     bool useRawCommands;
-    if (getValueFromFile(elmoNode, "use_raw_commands", useRawCommands)) {
+    if (getValueFromFile(maxonNode, "use_raw_commands", useRawCommands)) {
       configuration_.useRawCommands = useRawCommands ;
     }
 
     unsigned int driveStateChangeMinTimeout;
-    if (getValueFromFile(elmoNode, "drive_state_change_min_timeout", driveStateChangeMinTimeout)) {
+    if (getValueFromFile(maxonNode, "drive_state_change_min_timeout", driveStateChangeMinTimeout)) {
       configuration_.driveStateChangeMinTimeout = driveStateChangeMinTimeout ;
     }
 
     unsigned int minNumberOfSuccessfulTargetStateReadings;
-    if (getValueFromFile(elmoNode, "min_number_of_successful_target_state_readings",
+    if (getValueFromFile(maxonNode, "min_number_of_successful_target_state_readings",
                          minNumberOfSuccessfulTargetStateReadings)) {
       configuration_.minNumberOfSuccessfulTargetStateReadings = minNumberOfSuccessfulTargetStateReadings ;
     }
 
     unsigned int driveStateChangeMaxTimeout;
-    if (getValueFromFile(elmoNode, "drive_state_change_max_timeout", driveStateChangeMaxTimeout)) {
+    if (getValueFromFile(maxonNode, "drive_state_change_max_timeout", driveStateChangeMaxTimeout)) {
       configuration_.driveStateChangeMaxTimeout = driveStateChangeMaxTimeout ;
     }
   }
 
-  /// The configuration options for the elmo::ethercat::Reading class
+  /// The configuration options for the maxon::ethercat::Reading class
   if (configNode["Reading"].IsDefined()) {
     YAML::Node readingNode = configNode["Reading"];
 
@@ -246,7 +246,7 @@ void ConfigurationParser::parseConfiguration(YAML::Node configNode) {
     }
   }
 
-  /// The configuration options for the Elmo servo drive ("hardware")
+  /// The configuration options for the Maxon servo drive ("hardware")
   if (configNode["Hardware"].IsDefined()) {
     YAML::Node hardwareNode = configNode["Hardware"];
 
@@ -301,4 +301,4 @@ Configuration ConfigurationParser::getConfiguration() const {
   return configuration_;
 }
 
-}  // namespace elmo
+}  // namespace maxon

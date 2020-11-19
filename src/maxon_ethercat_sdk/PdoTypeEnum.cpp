@@ -3,32 +3,32 @@
 ** Jonas Junger, Johannes Pankert, Fabio Dubois, Lennart Nachtigall,
 ** Markus Staeuble
 **
-** This file is part of the elmo_ethercat_sdk.
-** The elmo_ethercat_sdk is free software: you can redistribute it and/or modify
+** This file is part of the maxon_ethercat_sdk.
+** The maxon_ethercat_sdk is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation, either version 3 of the License, or
 ** (at your option) any later version.
 **
-** The elmo_ethercat_sdk is distributed in the hope that it will be useful,
+** The maxon_ethercat_sdk is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 **
 ** You should have received a copy of the GNU General Public License
-** along with the elmo_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
+** along with the maxon_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "elmo_ethercat_sdk/PdoTypeEnum.hpp"
+#include "maxon_ethercat_sdk/PdoTypeEnum.hpp"
 
-std::ostream& operator<<(std::ostream& os, const elmo::TxPdoTypeEnum& txPdoTypeEnum){
+std::ostream& operator<<(std::ostream& os, const maxon::TxPdoTypeEnum& txPdoTypeEnum){
     switch(txPdoTypeEnum){
-        case elmo::TxPdoTypeEnum::NA:
+        case maxon::TxPdoTypeEnum::NA:
             os << "NA";
             break;
-        case elmo::TxPdoTypeEnum::TxPdoStandard:
+        case maxon::TxPdoTypeEnum::TxPdoStandard:
             os << "TxPdoStandard";
             break;
-        case elmo::TxPdoTypeEnum::TxPdoCST:
+        case maxon::TxPdoTypeEnum::TxPdoCST:
             os << "TxPdoCST";
             break;
         default:
@@ -36,15 +36,15 @@ std::ostream& operator<<(std::ostream& os, const elmo::TxPdoTypeEnum& txPdoTypeE
     }
     return os;
 }
-std::ostream& operator<<(std::ostream& os, const elmo::RxPdoTypeEnum& rxPdoTypeEnum){
+std::ostream& operator<<(std::ostream& os, const maxon::RxPdoTypeEnum& rxPdoTypeEnum){
     switch(rxPdoTypeEnum){
-        case elmo::RxPdoTypeEnum::NA:
+        case maxon::RxPdoTypeEnum::NA:
             os << "NA";
             break;
-        case elmo::RxPdoTypeEnum::RxPdoStandard:
+        case maxon::RxPdoTypeEnum::RxPdoStandard:
             os << "RxPdoStandard";
             break;
-        case elmo::RxPdoTypeEnum::RxPdoCST:
+        case maxon::RxPdoTypeEnum::RxPdoCST:
             os << "RxPdoCST";
             break;
         default:

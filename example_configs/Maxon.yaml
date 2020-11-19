@@ -1,5 +1,5 @@
-# Example config file for Elmo Drives
-Elmo:
+# Example config file for Maxon Drives
+Maxon:
   config_run_sdo_verify_timeout:                  50000
   print_debug_messages:                           true
   use_raw_commands:                               false

@@ -3,24 +3,24 @@
 ** Jonas Junger, Johannes Pankert, Fabio Dubois, Lennart Nachtigall,
 ** Markus Staeuble
 **
-** This file is part of the elmo_ethercat_sdk.
-** The elmo_ethercat_sdk is free software: you can redistribute it and/or modify
+** This file is part of the maxon_ethercat_sdk.
+** The maxon_ethercat_sdk is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation, either version 3 of the License, or
 ** (at your option) any later version.
 **
-** The elmo_ethercat_sdk is distributed in the hope that it will be useful,
+** The maxon_ethercat_sdk is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 **
 ** You should have received a copy of the GNU General Public License
-** along with the elmo_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
+** along with the maxon_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "elmo_ethercat_sdk/Statusword.hpp"
+#include "maxon_ethercat_sdk/Statusword.hpp"
 
-namespace elmo {
+namespace maxon {
 
 std::ostream& operator<<(std::ostream& os, const Statusword& statusword) {
   using std::setfill;
@@ -87,9 +87,11 @@ void Statusword::setFromRawStatusword(uint16_t status) {
   quickStop_ = static_cast<bool>(status & 1 << (5));
   switchOnDisabled_ = static_cast<bool>(status & 1 << (6));
   warning_ = static_cast<bool>(status & 1 << (7));
+  remote_ = static_cast<bool>(status & 1 << (9));
   targetReached_ = static_cast<bool>(status & 1 << (10));
   internalLimitActive_ = static_cast<bool>(status & 1 << (11));
   followingError_ = static_cast<bool>(status & 1 << (13));
+  // homingError_ = static_cast<bool>(status & 1 << (13));
 
   rawStatusword_ = status;
 }
@@ -98,21 +100,21 @@ DriveState Statusword::getDriveState() const {
   DriveState driveState = DriveState::NA;
 
   // MAN-G-DS402 manual page 47
-  if ((rawStatusword_ & 0b0000000001001111) == 0b0000000000000000) {
+  if ((rawStatusword_ & 0b0000000001101111) == 0b0000000000000000) {
     driveState = DriveState::NotReadyToSwitchOn;
-  } else if ((rawStatusword_ & 0b0000000001001111) == 0b0000000001000000) {
+  } else if ((rawStatusword_ & 0b0000000001101111) == 0b0000000000100000) {
     driveState = DriveState::SwitchOnDisabled;
-  } else if ((rawStatusword_ & 0b0000000001101111) == 0b0000000000100001) {
+  } else if ((rawStatusword_ & 0b0000000001101111) == 0b0000000000010001) {
     driveState = DriveState::ReadyToSwitchOn;
-  } else if ((rawStatusword_ & 0b0000000001101111) == 0b0000000000100011) {
+  } else if ((rawStatusword_ & 0b0000000001101111) == 0b0000000000010011) {
     driveState = DriveState::SwitchedOn;
-  } else if ((rawStatusword_ & 0b0000000001101111) == 0b0000000000100111) {
+  } else if ((rawStatusword_ & 0b0000000001101111) == 0b0000000000010111) {
     driveState = DriveState::OperationEnabled;
   } else if ((rawStatusword_ & 0b0000000001101111) == 0b0000000000000111) {
     driveState = DriveState::QuickStopActive;
-  } else if ((rawStatusword_ & 0b0000000001001111) == 0b0000000000001111) {
+  } else if ((rawStatusword_ & 0b0000000001101111) == 0b0000000000001111) {
     driveState = DriveState::FaultReactionActive;
-  } else if ((rawStatusword_ & 0b0000000001001111) == 0b0000000000001000) {
+  } else if ((rawStatusword_ & 0b0000000001101111) == 0b0000000000001000) {
     driveState = DriveState::Fault;
   }
 
@@ -148,4 +150,4 @@ std::string Statusword::getDriveStateString() const {
   }
 }
 
-}  // namespace elmo
+}  // namespace maxon

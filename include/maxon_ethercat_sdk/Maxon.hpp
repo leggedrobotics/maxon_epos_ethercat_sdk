@@ -3,27 +3,27 @@
 ** Jonas Junger, Johannes Pankert, Fabio Dubois, Lennart Nachtigall,
 ** Markus Staeuble
 **
-** This file is part of the elmo_ethercat_sdk.
-** The elmo_ethercat_sdk is free software: you can redistribute it and/or modify
+** This file is part of the maxon_ethercat_sdk.
+** The maxon_ethercat_sdk is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation, either version 3 of the License, or
 ** (at your option) any later version.
 **
-** The elmo_ethercat_sdk is distributed in the hope that it will be useful,
+** The maxon_ethercat_sdk is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 **
 ** You should have received a copy of the GNU General Public License
-** along with the elmo_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
+** along with the maxon_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #pragma once
 
-#include "elmo_ethercat_sdk/Command.hpp"
-#include"elmo_ethercat_sdk/DriveState.hpp"
-#include "elmo_ethercat_sdk/Reading.hpp"
-#include "elmo_ethercat_sdk/Controlword.hpp"
+#include "maxon_ethercat_sdk/Command.hpp"
+#include"maxon_ethercat_sdk/DriveState.hpp"
+#include "maxon_ethercat_sdk/Reading.hpp"
+#include "maxon_ethercat_sdk/Controlword.hpp"
 
 #include <ethercat_sdk_master/EthercatDevice.hpp>
 
@@ -35,16 +35,16 @@
 #include <cstdint>
 #include <chrono>
 
-namespace elmo {
-  class Elmo : public ecat_master::EthercatDevice{
+namespace maxon {
+  class Maxon : public ecat_master::EthercatDevice{
     public:
-      typedef std::shared_ptr<Elmo> SharedPtr;
+      typedef std::shared_ptr<Maxon> SharedPtr;
 
-      // create Elmo Drive from setup file
+      // create Maxon Drive from setup file
       static SharedPtr deviceFromFile(const std::string& configFile, const std::string& name, const uint32_t address);
       // constructor
-      Elmo() = default;
-      Elmo(const std::string& name, const uint32_t address);
+      Maxon() = default;
+      Maxon(const std::string& name, const uint32_t address);
 
     // pure virtual overwrites
     public:
@@ -118,4 +118,4 @@ namespace elmo {
       mutable std::recursive_mutex mutex_; // TODO: change name!!!!
 
   };
-} // namespace elmo
+} // namespace maxon

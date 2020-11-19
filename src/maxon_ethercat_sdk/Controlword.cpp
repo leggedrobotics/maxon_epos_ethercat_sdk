@@ -3,26 +3,26 @@
 ** Jonas Junger, Johannes Pankert, Fabio Dubois, Lennart Nachtigall,
 ** Markus Staeuble
 **
-** This file is part of the elmo_ethercat_sdk.
-** The elmo_ethercat_sdk is free software: you can redistribute it and/or modify
+** This file is part of the maxon_ethercat_sdk.
+** The maxon_ethercat_sdk is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation, either version 3 of the License, or
 ** (at your option) any later version.
 **
-** The elmo_ethercat_sdk is distributed in the hope that it will be useful,
+** The maxon_ethercat_sdk is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 **
 ** You should have received a copy of the GNU General Public License
-** along with the elmo_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
+** along with the maxon_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <iomanip>
 
-#include "elmo_ethercat_sdk/Controlword.hpp"
+#include "maxon_ethercat_sdk/Controlword.hpp"
 
-namespace elmo {
+namespace maxon {
 
 std::ostream& operator<<(std::ostream& os, const Controlword& controlword) {
   using std::setfill;
@@ -69,7 +69,10 @@ std::ostream& operator<<(std::ostream& os, const Controlword& controlword) {
      << "| " << setw(6) << controlword.faultReset_ << "|" << setw(6) << " all"
      << "|\n"
      << setw(25) << setfill(' ') << "| halt_:"
-     << "| " << setw(6) << controlword.halt_ << "|" << setw(6) << " all"
+     << "| " << setw(6) << controlword.halt_ << "|" << setw(6) << " all "
+     << "|\n"
+     << setw(25) << setfill(' ') << "| endless movement_:"
+     << "| " << setw(6) << controlword.endlessMovement_ << "|" << setw(6) << "  pp"
      << "|\n"
      <<
 
@@ -179,10 +182,11 @@ void Controlword::setAllFalse() {
   relative_ = false;
   faultReset_ = false;
   halt_ = false;
+  endlessMovement_ = false;
 }
 
 void Controlword::setInit() {
   setStateTransition2();
 }
 
-}  // namespace elmo
+}  // namespace maxon
