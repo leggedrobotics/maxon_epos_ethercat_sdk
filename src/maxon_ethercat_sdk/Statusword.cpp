@@ -102,19 +102,19 @@ DriveState Statusword::getDriveState() const {
   // MAN-G-DS402 manual page 47
   if ((rawStatusword_ & 0b0000000001101111) == 0b0000000000000000) {
     driveState = DriveState::NotReadyToSwitchOn;
-  } else if ((rawStatusword_ & 0b0000000001101111) == 0b0000000000100000) {
+  } else if ((rawStatusword_ & 0b0000000001101111) == 0b00000000001000000) {
     driveState = DriveState::SwitchOnDisabled;
-  } else if ((rawStatusword_ & 0b0000000001101111) == 0b0000000000010001) {
+  } else if ((rawStatusword_ & 0b0000000001101111) == 0b00000000000100001) {
     driveState = DriveState::ReadyToSwitchOn;
-  } else if ((rawStatusword_ & 0b0000000001101111) == 0b0000000000010011) {
+  } else if ((rawStatusword_ & 0b0000000001101111) == 0b00000000000100011) {
     driveState = DriveState::SwitchedOn;
-  } else if ((rawStatusword_ & 0b0000000001101111) == 0b0000000000010111) {
+  } else if ((rawStatusword_ & 0b0000000001101111) == 0b00000000000100111) {
     driveState = DriveState::OperationEnabled;
-  } else if ((rawStatusword_ & 0b0000000001101111) == 0b0000000000000111) {
+  } else if ((rawStatusword_ & 0b0000000001101111) == 0b00000000000000111) {
     driveState = DriveState::QuickStopActive;
-  } else if ((rawStatusword_ & 0b0000000001101111) == 0b0000000000001111) {
+  } else if ((rawStatusword_ & 0b0000000001101111) == 0b00000000000001111) {
     driveState = DriveState::FaultReactionActive;
-  } else if ((rawStatusword_ & 0b0000000001101111) == 0b0000000000001000) {
+  } else if ((rawStatusword_ & 0b0000000001101111) == 0b00000000000001000) {
     driveState = DriveState::Fault;
   }
 
