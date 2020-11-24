@@ -3,26 +3,26 @@
 ** Jonas Junger, Johannes Pankert, Fabio Dubois, Lennart Nachtigall,
 ** Markus Staeuble
 **
-** This file is part of the maxon_ethercat_sdk.
-** The maxon_ethercat_sdk is free software: you can redistribute it and/or modify
+** This file is part of the maxon_epos_ethercat_sdk.
+** The maxon_epos_ethercat_sdk is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation, either version 3 of the License, or
 ** (at your option) any later version.
 **
-** The maxon_ethercat_sdk is distributed in the hope that it will be useful,
+** The maxon_epos_ethercat_sdk is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 **
 ** You should have received a copy of the GNU General Public License
-** along with the maxon_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
+** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "maxon_ethercat_sdk/Maxon.hpp"
-#include "maxon_ethercat_sdk/ConfigurationParser.hpp"
-#include "maxon_ethercat_sdk/ObjectDictionary.hpp"
-#include "maxon_ethercat_sdk/RxPdo.hpp"
-#include "maxon_ethercat_sdk/TxPdo.hpp"
+#include "maxon_epos_ethercat_sdk/Maxon.hpp"
+#include "maxon_epos_ethercat_sdk/ConfigurationParser.hpp"
+#include "maxon_epos_ethercat_sdk/ObjectDictionary.hpp"
+#include "maxon_epos_ethercat_sdk/RxPdo.hpp"
+#include "maxon_epos_ethercat_sdk/TxPdo.hpp"
 
 #include <cmath>
 #include <thread>
@@ -97,7 +97,7 @@ namespace maxon{
     // success &= sdoVerifyWrite(OD_INDEX_MAX_CURRENT, 0, false, maxCurrent);
 
     if(!success){
-      MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::preStartupOnlineConfiguration] hardware configuration of '"
+      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::preStartupOnlineConfiguration] hardware configuration of '"
                         << name_ <<"' not successful!");
       addErrorToReading(ErrorType::ConfigurationError);
     }
@@ -117,7 +117,7 @@ namespace maxon{
     */
     if (modeOfOperation_ == ModeOfOperationEnum::NA) {
       reading_.addError(ErrorType::ModeOfOperationError);
-      MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::updateWrite] Mode of operation for '"
+      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::updateWrite] Mode of operation for '"
                         << name_ << "' has not been set.");
       return;
     }
@@ -154,7 +154,7 @@ namespace maxon{
       } break;
 
       default:
-        MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::updateWrite] Unsupported Rx Pdo type for '"
+        MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::updateWrite] Unsupported Rx Pdo type for '"
                         << name_ << "'");
         addErrorToReading(ErrorType::RxPdoTypeError);
     }
@@ -190,7 +190,7 @@ namespace maxon{
       } break;
 
       default:
-        MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::updateRrite] Unsupported Tx Pdo type for '"
+        MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::updateRrite] Unsupported Tx Pdo type for '"
                         << name_ << "'");
         reading_.addError(ErrorType::TxPdoTypeError);
     }
@@ -202,7 +202,7 @@ namespace maxon{
 
     // Print warning if drive is in Fault state.
     if (reading_.getDriveState() == DriveState::Fault) {
-      MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::updateRead] '"
+      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::updateRead] '"
                         << name_ << "' is in drive state 'Fault'");
     }
   }
@@ -232,7 +232,7 @@ namespace maxon{
       modeOfOperation_ = command.getModeOfOperation();
     }else{
       if(modeOfOperation_ != command.getModeOfOperation() && command.getModeOfOperation() != ModeOfOperationEnum::NA){
-        MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::stageCommand] Changing the mode of operation of '"
+        MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::stageCommand] Changing the mode of operation of '"
                           << name_ << "' is not allowed for the active configuration.");
       }
     }
@@ -322,7 +322,7 @@ namespace maxon{
             success &= stateTransitionViaSdo(StateTransition::_15);
             break;
           default:
-            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::setDriveStateViaSdo] State Transition not implemented");
+            MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::setDriveStateViaSdo] State Transition not implemented");
             addErrorToReading(ErrorType::SdoStateTransitionError);
             success = false;
         }
@@ -351,7 +351,7 @@ namespace maxon{
             success &= stateTransitionViaSdo(StateTransition::_2);
             break;
           default:
-            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::setDriveStateViaSdo] State Transition not implemented");
+            MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::setDriveStateViaSdo] State Transition not implemented");
             addErrorToReading(ErrorType::SdoStateTransitionError);
             success = false;
         }
@@ -383,7 +383,7 @@ namespace maxon{
             success &= stateTransitionViaSdo(StateTransition::_3);
             break;
           default:
-            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::setDriveStateViaSdo] State Transition not implemented");
+            MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::setDriveStateViaSdo] State Transition not implemented");
             addErrorToReading(ErrorType::SdoStateTransitionError);
             success = false;
         }
@@ -419,7 +419,7 @@ namespace maxon{
             success &= stateTransitionViaSdo(StateTransition::_4);
             break;
           default:
-            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::setDriveStateViaSdo] State Transition not implemented");
+            MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::setDriveStateViaSdo] State Transition not implemented");
             addErrorToReading(ErrorType::SdoStateTransitionError);
             success = false;
         }
@@ -456,14 +456,14 @@ namespace maxon{
             success &= stateTransitionViaSdo(StateTransition::_11);
             break;
           default:
-            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::setDriveStateViaSdo] State Transition not implemented");
+            MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::setDriveStateViaSdo] State Transition not implemented");
             addErrorToReading(ErrorType::SdoStateTransitionError);
             success = false;
         }
         break;
 
       default:
-        MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::setDriveStateViaSdo] State Transition not implemented");
+        MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::setDriveStateViaSdo] State Transition not implemented");
         addErrorToReading(ErrorType::SdoStateTransitionError);
         success = false;
     }
@@ -522,7 +522,7 @@ namespace maxon{
         return setControlwordViaSdo(controlword);
         break;
       default:
-        MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::stateTransitionViaSdo] State Transition not implemented");
+        MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::stateTransitionViaSdo] State Transition not implemented");
         addErrorToReading(ErrorType::SdoStateTransitionError);
         return false;
     }
@@ -620,12 +620,12 @@ namespace maxon{
         break;
 
       case RxPdoTypeEnum::NA:
-        MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::mapPdos] Cannot map RxPdoTypeEnum::NA, PdoType not configured properly");
+        MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::mapPdos] Cannot map RxPdoTypeEnum::NA, PdoType not configured properly");
         addErrorToReading(ErrorType::PdoMappingError);
         rxSuccess = false;
         break;
       default:  // Non-implemented type
-        MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::mapPdos] Cannot map unimplemented RxPdo, PdoType not configured properly");
+        MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::mapPdos] Cannot map unimplemented RxPdo, PdoType not configured properly");
         addErrorToReading(ErrorType::PdoMappingError);
         rxSuccess = false;
         break;
@@ -660,12 +660,12 @@ namespace maxon{
         break;
 
       case TxPdoTypeEnum::NA:
-        MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::mapPdos] Cannot map TxPdoTypeEnum::NA, PdoType not configured properly");
+        MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::mapPdos] Cannot map TxPdoTypeEnum::NA, PdoType not configured properly");
         addErrorToReading(ErrorType::TxPdoMappingError);
         txSuccess = false;
         break;
       default:  // if any case was forgotten
-        MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::mapPdos] Cannot map undefined TxPdo, PdoType not configured properly");
+        MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::mapPdos] Cannot map undefined TxPdo, PdoType not configured properly");
         addErrorToReading(ErrorType::TxPdoMappingError);
         txSuccess = false;
         break;
@@ -680,7 +680,7 @@ namespace maxon{
       case DriveState::SwitchOnDisabled:
         switch (currentDriveState) {
           case DriveState::SwitchOnDisabled:
-            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
+            MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                               << "drive state has already been reached for '"
                               << name_ << "'");
             addErrorToReading(ErrorType::PdoStateTransitionError);
@@ -701,7 +701,7 @@ namespace maxon{
             controlword.setStateTransition15();
             break;
           default:
-            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
+            MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                               << "PDO state transition not implemented for '"
                               << name_ << "'");
             addErrorToReading(ErrorType::PdoStateTransitionError);
@@ -714,7 +714,7 @@ namespace maxon{
             controlword.setStateTransition2();
             break;
           case DriveState::ReadyToSwitchOn:
-            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
+            MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                               << "drive state has already been reached for '"
                               << name_ << "'");
             addErrorToReading(ErrorType::PdoStateTransitionError);
@@ -732,7 +732,7 @@ namespace maxon{
             controlword.setStateTransition15();
             break;
           default:
-            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
+            MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                               << "PDO state transition not implemented for '"
                               << name_ << "'");
             addErrorToReading(ErrorType::PdoStateTransitionError);
@@ -748,7 +748,7 @@ namespace maxon{
             controlword.setStateTransition3();
             break;
           case DriveState::SwitchedOn:
-            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
+            MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                               << "drive state has already been reached for '"
                               << name_ << "'");
             addErrorToReading(ErrorType::PdoStateTransitionError);
@@ -763,7 +763,7 @@ namespace maxon{
             controlword.setStateTransition15();
             break;
           default:
-            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
+            MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                               << "PDO state transition not implemented for '"
                               << name_ << "'");
             addErrorToReading(ErrorType::PdoStateTransitionError);
@@ -782,7 +782,7 @@ namespace maxon{
             controlword.setStateTransition4();
             break;
           case DriveState::OperationEnabled:
-            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
+            MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                               << "drive state has already been reached for '"
                               << name_ << "'");
             addErrorToReading(ErrorType::PdoStateTransitionError);
@@ -794,7 +794,7 @@ namespace maxon{
             controlword.setStateTransition15();
             break;
           default:
-            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
+            MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                               << "PDO state transition not implemented for '"
                               << name_ << "'");
             addErrorToReading(ErrorType::PdoStateTransitionError);
@@ -816,7 +816,7 @@ namespace maxon{
             controlword.setStateTransition11();
             break;
           case DriveState::QuickStopActive:
-            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
+            MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                               << "drive state has already been reached for '"
                               << name_ << "'");
             addErrorToReading(ErrorType::PdoStateTransitionError);
@@ -825,7 +825,7 @@ namespace maxon{
             controlword.setStateTransition15();
             break;
           default:
-            MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
+            MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                               << "PDO state transition not implemented for '"
                               << name_ << "'");
             addErrorToReading(ErrorType::PdoStateTransitionError);
@@ -833,7 +833,7 @@ namespace maxon{
         break;
 
       default:
-        MELO_ERROR_STREAM("[maxon_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
+        MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
                           << "PDO state cannot be reached for '"
                           << name_ << "'");
         addErrorToReading(ErrorType::PdoStateTransitionError);

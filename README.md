@@ -5,7 +5,7 @@ This is a C++ library providing a high-level interface for controlling [Maxon](h
 
 The lower level EtherCAT communication is handled by the [soem_interface](https://github.com/leggedrobotics/soem_interface) library.
 
-The maxon_ethercat_sdk is developed on Ubuntu 18.04 LTS with [ROS Melodic](https://wiki.ros.org/melodic).
+The maxon_epos_ethercat_sdk is developed on Ubuntu 18.04 LTS with [ROS Melodic](https://wiki.ros.org/melodic).
 
 The source code is released under the GPLv3 license.
 A copy of the license is available in the *COPYING* file.
@@ -42,7 +42,7 @@ To build the library from source, clone the latest version from this repository 
 	git clone https://github.com/leggedrobotics/soem_interface.git
     git clone https://github.com/leggedrobotics/ethercat_sdk_master.git
     git clone https://github.com/leggedrobotics/message_logger.git
-    git clone https://github.com/leggedrobotics/maxon_ethercat_sdk.git
+    git clone https://github.com/leggedrobotics/maxon_epos_ethercat_sdk.git
 	cd ../
 	catkin build maxon_ethercat 
 
