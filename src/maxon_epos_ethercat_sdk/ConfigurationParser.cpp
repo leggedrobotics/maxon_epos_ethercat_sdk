@@ -290,6 +290,11 @@ void ConfigurationParser::parseConfiguration(YAML::Node configNode) {
       configuration_.motorRatedCurrentA = motorRatedCurrentA ;
     }
 
+    double motorRatedTorqueNm;
+    if (getValueFromFile(hardwareNode, "motor_rated_torque", motorRatedTorqueNm)) {
+      configuration_.motorRatedTorqueNm = motorRatedTorqueNm ;
+    }
+
     bool useMultipleModeOfOperations;
     if (getValueFromFile(hardwareNode, "use_multiple_modes_of_operation", useMultipleModeOfOperations)) {
       configuration_.useMultipleModeOfOperations = useMultipleModeOfOperations ;

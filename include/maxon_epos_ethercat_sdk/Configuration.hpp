@@ -49,6 +49,7 @@ class Configuration {
   double gearRatio{1};
   double motorConstant{1};
   double motorRatedCurrentA{0};
+  double motorRatedTorqueNm{0};
   double maxCurrentA{0};
   bool useMultipleModeOfOperations{false};
 

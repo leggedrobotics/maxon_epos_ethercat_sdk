@@ -102,6 +102,9 @@ uint16_t Controlword::getRawControlword() {
   if (halt_) {
     rawControlword |= (1 << 8);
   }
+  if (endlessMovement_) {
+    rawControlword |= (1 << 15);
+  }
 
   return rawControlword;
 }
