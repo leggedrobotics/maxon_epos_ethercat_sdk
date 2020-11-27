@@ -48,81 +48,104 @@ struct Controlword {
 
   /*!
    * State transition 2
-   * SWITCH ON DISABLED -> READY TO SWITCH ON
    * This corresponds to a "shutdown" Controlword
    */
   void setStateTransition2();
 
   /*!
    * State transition 3
-   * READY TO SWITCH ON -> SWITCHED ON
    * This corresponds to a "switch on" Controlword
+   * Initialize current sensor. Current offset calibration.
    */
   void setStateTransition3();
 
   /*!
    * State transition 4
-   * SWITCHED ON -> ENABLE OPERATION
+   * This corresponds to a "enable operation" Controlword
+   * Enable drive function (enable current controller and, if needed, position or velocity controller)
    */
   void setStateTransition4();
 
   /*!
    * State transition 5
-   * OPERATION ENABLED -> SWITCHED ON
    * This corresponds to a "disable operation" Controlword
+   * Stop movement according to "Disable operation option code". Disable drive function.
    */
   void setStateTransition5();
 
   /*!
    * State transition 6
-   * SWITCHED ON -> READY TO SWITCH ON
+   * This corresponds to a "shutdown" Controlword
+   * Disable power section
    */
   void setStateTransition6();
 
   /*!
    * State transition 7
-   * READY TO SWITCH ON -> SWITCH ON DISABLED
+   * This corresponds to a "quick stop" or "disable voltage" Controlword
    */
   void setStateTransition7();
 
   /*!
    * State transition 8
-   * OPERATION ENABLED -> READY TO SWITCH ON
+   * This corresponds to a "shutdown" Controlword
+   * Stop movement according to "Shutdown option code". Disable drive function and power section.
    */
   void setStateTransition8();
 
   /*!
    * State transition 9
-   * OPERATION ENABLED -> SWITCH ON DISABLED
-   * This resets the maxon to the same state as on hardware startup
-   * 0x0000
+   * This corresponds to a "disable voltage" Controlword
+   * Stop movement according to "Shutdown option code". Disable drive function and power section.
    */
   void setStateTransition9();
 
   /*!
    * State transition 10
-   * SWITCHED ON -> SWITCH ON DISABLED
-   * This Statusword is 0x0000
+   * This corresponds to a "quick stop" or "disable voltage" Controlword
    */
   void setStateTransition10();
 
   /*!
    * State transition 11
-   * OPERATION ENABLED -> QUICK STOP ACTIVE
+   * This corresponds to a "quick stop" Controlword
+   * Stop movement according to "Quick stop option code"
    */
   void setStateTransition11();
 
   /*!
    * State transition 12
-   * QUICK STOP ACTIVE -> SWITCH ON DISABLED
+   * This corresponds to a "disable voltage" Controlword
+   * Disable drive function and power section
    */
   void setStateTransition12();
 
   /*!
+   * State transition 13
+   * A fault has occurred
+   * Start fault reaction
+   */
+  void setStateTransition13();
+
+  /*!
+   * State transition 14
+   * The fault reaction is completed
+   * Disable drive function and power section
+   */
+  void setStateTransition14();
+
+  /*!
    * State transition 15
-   * FAULT -> SWITCH ON DISABLED
+   * This corresponds to a "fault reset" Controlword
+   * Reset fault condition if no fault is present
    */
   void setStateTransition15();
+
+  /*!
+   * State transition 16
+   * This corresponds to a "enable operation" Controlword
+   */
+  void setStateTransition16();
 
   /*!
    * Sets all bools of this struct to false

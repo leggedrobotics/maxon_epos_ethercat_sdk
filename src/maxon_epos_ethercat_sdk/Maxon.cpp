@@ -96,10 +96,9 @@ bool Maxon::startup() {
   autoConfigurePdoSizes();
 
   // write the motor rated current / torque to the drives
-  // uint32_t motorRatedCurrent =
-  //     static_cast<uint32_t>(round(1000.0 * configuration_.motorRatedCurrentA));
-  // success &= sdoVerifyWrite(OD_INDEX_MOTOR_RATED_CURRENT, 0, false,
-  // motorRatedCurrent);
+  uint32_t nominalCurrent =
+      static_cast<uint32_t>(round(1000.0 * configuration_.nominalCurrentA));
+  success &= sdoVerifyWrite(OD_INDEX_MOTOR_DATA, 0x01, false, nominalCurrent);
   
   // uint32_t motorRatedTorque;
   // motorRatedTorque = static_cast<uint32_t>(round(1000000.0 * configuration_.motorRatedTorqueNm));
@@ -237,7 +236,7 @@ void Maxon::stageCommand(const Command& command) {
       static_cast<double>(configuration_.positionEncoderResolution) /
       (2.0 * M_PI));
 
-  double currentFactorAToInt = 1000.0 / configuration_.motorRatedCurrentA;
+  double currentFactorAToInt = 1000.0 / configuration_.nominalCurrentA;
   stagedCommand_.setCurrentFactorAToInteger(currentFactorAToInt);
   stagedCommand_.setTorqueFactorNmToInteger(currentFactorAToInt /
                                             configuration_.motorConstant /

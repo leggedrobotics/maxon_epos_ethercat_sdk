@@ -143,9 +143,6 @@ bool getModeFromFile(YAML::Node& yamlNode, const std::string& varName, ModeOfOpe
     } else if (str == "ProfiledVelocityMode") {
       mode = ModeOfOperationEnum::ProfiledVelocityMode;
       return true;
-    } else if (str == "ProfiledTorqueMode") {
-      mode = ModeOfOperationEnum::ProfiledTorqueMode;
-      return true;
     } else if (str == "HomingMode") {
       mode = ModeOfOperationEnum::HomingMode;
       return true;
@@ -285,9 +282,9 @@ void ConfigurationParser::parseConfiguration(YAML::Node configNode) {
       configuration_.maxCurrentA = maxCurrentA ;
     }
 
-    double motorRatedCurrentA;
-    if (getValueFromFile(hardwareNode, "motor_rated_current", motorRatedCurrentA)) {
-      configuration_.motorRatedCurrentA = motorRatedCurrentA ;
+    double nominalCurrentA;
+    if (getValueFromFile(hardwareNode, "nominal_current", nominalCurrentA)) {
+      configuration_.nominalCurrentA = nominalCurrentA ;
     }
 
     double motorRatedTorqueNm;

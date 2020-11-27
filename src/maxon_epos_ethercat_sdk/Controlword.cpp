@@ -174,6 +174,14 @@ void Controlword::setStateTransition15() {
   faultReset_ = true;
 }
 
+void Controlword::setStateTransition16() {
+  setAllFalse();
+  switchOn_ = true;
+  enableVoltage_ = true;
+  quickStop_ = true;
+  enableOperation_ = true;
+}
+
 void Controlword::setAllFalse() {
   switchOn_ = false;
   enableVoltage_ = false;

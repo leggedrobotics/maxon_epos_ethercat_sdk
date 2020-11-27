@@ -267,7 +267,7 @@ void Reading::configureReading(const Configuration& configuration) {
 
   velocityFactorIntegerPerSecToRadPerSec_ = (2.0 * M_PI) / static_cast<double>(configuration.positionEncoderResolution);
 
-  double currentFactor = configuration.motorRatedCurrentA / 1000.0;
+  double currentFactor = configuration.nominalCurrentA / 1000.0;
 
   currentFactorIntegerToAmp_ = currentFactor;
 

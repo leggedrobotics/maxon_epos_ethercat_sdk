@@ -30,8 +30,6 @@ std::string modeOfOperationString(ModeOfOperationEnum modeOfOperation_) {
       return "Profiled Position Mode";
     case ModeOfOperationEnum::ProfiledVelocityMode:
       return "Profiled Velocity Mode";
-    case ModeOfOperationEnum::ProfiledTorqueMode:
-      return "Profiled Torque Mode";
     case ModeOfOperationEnum::HomingMode:
       return "Homing Mode";
     case ModeOfOperationEnum::CyclicSynchronousPositionMode:
