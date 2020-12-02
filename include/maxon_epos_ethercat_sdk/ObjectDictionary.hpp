@@ -16,7 +16,7 @@
 **
 ** You should have received a copy of the GNU General Public License
 ** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 
 #include <cstdint>
 #include <vector>
@@ -26,6 +26,8 @@
 
 // #define OD_INDEX_EXTRA_STATUS (0x2085) //?
 // #define OD_INDEX_STO_STATUS (0x2086) //?
+#define OD_INDEX_ERROR_REGISTER (0x1001)
+#define OD_INDEX_ERROR_HISTORY (0x1003)
 #define OD_INDEX_5VDC_SUPPLY (0x2200)
 // #define OD_INDEX_TEMPERATURE (0x22A3) //?
 //#define OD_INDEX_ELMO_COMMAND_TODO                (0x3000)
@@ -41,13 +43,12 @@
 #define OD_INDEX_MODES_OF_OPERATION (0x6060)
 #define OD_INDEX_MODES_OF_OPERATION_DISPLAY (0x6061)
 #define OD_INDEX_POSITION_ACTUAL (0x6064)
-#define OD_INDEX_SENSOR_SELECTION_CODE (0x301A) //?
+#define OD_INDEX_SENSOR_SSI (0x3012)
+#define OD_INDEX_HALL_SENSOR (0x301A)
 #define OD_INDEX_VELOCITY_ACTUAL (0x606C)
 #define OD_INDEX_TARGET_TORQUE (0x6071)
 // #define OD_INDEX_MAX_TORQUE (0x6072) //?
-// #define OD_INDEX_MAX_CURRENT (0x6073) //?
 // #define OD_INDEX_TORQUE_DEMAND (0x6074) //?
-// #define OD_INDEX_MOTOR_RATED_CURRENT (0x6075) //!
 #define OD_INDEX_MOTOR_RATED_TORQUE (0x6076)
 #define OD_INDEX_TORQUE_ACTUAL (0x6077)
 #define OD_INDEX_CURRENT_ACTUAL (0x30D1)

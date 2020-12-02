@@ -90,7 +90,8 @@ namespace maxon {
     // Errors
     protected:
       void addErrorToReading(const ErrorType& errorType);
-
+    // public:
+    //   void printErrorCode();
 
 
     protected:

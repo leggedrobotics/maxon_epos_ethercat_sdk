@@ -16,15 +16,16 @@
 **
 ** You should have received a copy of the GNU General Public License
 ** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 
 #include <iomanip>
 
 #include "maxon_epos_ethercat_sdk/Controlword.hpp"
 
-namespace maxon {
-
-std::ostream& operator<<(std::ostream& os, const Controlword& controlword) {
+namespace maxon
+{
+std::ostream& operator<<(std::ostream& os, const Controlword& controlword)
+{
   using std::setfill;
   using std::setw;
 
@@ -69,10 +70,11 @@ std::ostream& operator<<(std::ostream& os, const Controlword& controlword) {
      << "| " << setw(6) << controlword.faultReset_ << "|" << setw(6) << " all"
      << "|\n"
      << setw(25) << setfill(' ') << "| halt_:"
-     << "| " << setw(6) << controlword.halt_ << "|" << setw(6) << " all "
-     << "|\n"
-     << setw(25) << setfill(' ') << "| endless movement_:"
-     << "| " << setw(6) << controlword.endlessMovement_ << "|" << setw(6) << "  pp"
+     << "| " << setw(6) << controlword.halt_ << "|" << setw(6)
+     << " all "
+     //  << "|\n"
+     //  << setw(25) << setfill(' ') << "| endless movement_:"
+     //  << "| " << setw(6) << controlword.endlessMovement_ << "|" << setw(6) << "  pp"
      << "|\n"
      <<
 
@@ -81,48 +83,58 @@ std::ostream& operator<<(std::ostream& os, const Controlword& controlword) {
   return os;
 }
 
-uint16_t Controlword::getRawControlword() {
+uint16_t Controlword::getRawControlword()
+{
   uint16_t rawControlword = 0;
 
-  if (switchOn_) {
+  if (switchOn_)
+  {
     rawControlword |= (1 << 0);
   }
-  if (enableVoltage_) {
+  if (enableVoltage_)
+  {
     rawControlword |= (1 << 1);
   }
-  if (quickStop_) {
+  if (quickStop_)
+  {
     rawControlword |= (1 << 2);
   }
-  if (enableOperation_) {
+  if (enableOperation_)
+  {
     rawControlword |= (1 << 3);
   }
-  if (faultReset_) {
+  if (faultReset_)
+  {
     rawControlword |= (1 << 7);
   }
-  if (halt_) {
+  if (halt_)
+  {
     rawControlword |= (1 << 8);
   }
-  if (endlessMovement_) {
-    rawControlword |= (1 << 15);
-  }
+  // if (endlessMovement_) {
+  //   rawControlword |= (1 << 15);
+  // }
 
   return rawControlword;
 }
 
-void Controlword::setStateTransition2() {
+void Controlword::setStateTransition2()
+{
   setAllFalse();
   enableVoltage_ = true;
   quickStop_ = true;
 }
 
-void Controlword::setStateTransition3() {
+void Controlword::setStateTransition3()
+{
   setAllFalse();
   switchOn_ = true;
   enableVoltage_ = true;
   quickStop_ = true;
 }
 
-void Controlword::setStateTransition4() {
+void Controlword::setStateTransition4()
+{
   setAllFalse();
   switchOn_ = true;
   enableVoltage_ = true;
@@ -130,51 +142,61 @@ void Controlword::setStateTransition4() {
   enableOperation_ = true;
 }
 
-void Controlword::setStateTransition5() {
+void Controlword::setStateTransition5()
+{
   setAllFalse();
   switchOn_ = true;
   enableVoltage_ = true;
   quickStop_ = true;
 }
 
-void Controlword::setStateTransition6() {
+void Controlword::setStateTransition6()
+{
   setAllFalse();
   enableVoltage_ = true;
   quickStop_ = true;
 }
 
-void Controlword::setStateTransition7() {
+void Controlword::setStateTransition7()
+{
   setAllFalse();
 }
 
-void Controlword::setStateTransition8() {
+void Controlword::setStateTransition8()
+{
   setAllFalse();
   enableVoltage_ = true;
   quickStop_ = true;
 }
 
-void Controlword::setStateTransition9() {
+void Controlword::setStateTransition9()
+{
   setAllFalse();
 }
 
-void Controlword::setStateTransition10() {
+void Controlword::setStateTransition10()
+{
   setAllFalse();
 }
 
-void Controlword::setStateTransition11() {
+void Controlword::setStateTransition11()
+{
   setAllFalse();
   enableVoltage_ = true;
 }
-void Controlword::setStateTransition12() {
+void Controlword::setStateTransition12()
+{
   setAllFalse();
 }
 
-void Controlword::setStateTransition15() {
+void Controlword::setStateTransition15()
+{
   setAllFalse();
   faultReset_ = true;
 }
 
-void Controlword::setStateTransition16() {
+void Controlword::setStateTransition16()
+{
   setAllFalse();
   switchOn_ = true;
   enableVoltage_ = true;
@@ -182,7 +204,8 @@ void Controlword::setStateTransition16() {
   enableOperation_ = true;
 }
 
-void Controlword::setAllFalse() {
+void Controlword::setAllFalse()
+{
   switchOn_ = false;
   enableVoltage_ = false;
   quickStop_ = false;
@@ -193,10 +216,11 @@ void Controlword::setAllFalse() {
   relative_ = false;
   faultReset_ = false;
   halt_ = false;
-  endlessMovement_ = false;
+  // endlessMovement_ = false;
 }
 
-void Controlword::setInit() {
+void Controlword::setInit()
+{
   setStateTransition2();
 }
 
