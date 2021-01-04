@@ -4,19 +4,22 @@
 ** Markus Staeuble
 **
 ** This file is part of the maxon_epos_ethercat_sdk.
-** The maxon_epos_ethercat_sdk is free software: you can redistribute it and/or modify
+** The maxon_epos_ethercat_sdk is free software: you can redistribute it and/or
+*modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation, either version 3 of the License, or
 ** (at your option) any later version.
 **
-** The maxon_epos_ethercat_sdk is distributed in the hope that it will be useful,
+** The maxon_epos_ethercat_sdk is distributed in the hope that it will be
+*useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 **
 ** You should have received a copy of the GNU General Public License
-** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
- */
+** along with the maxon_epos_ethercat_sdk. If not, see
+*<https://www.gnu.org/licenses/>.
+*/
 
 #pragma once
 
@@ -28,8 +31,8 @@
 #include <string>
 
 #include "maxon_epos_ethercat_sdk/Configuration.hpp"
-#include "maxon_epos_ethercat_sdk/Error.hpp"
 #include "maxon_epos_ethercat_sdk/DriveState.hpp"
+#include "maxon_epos_ethercat_sdk/Error.hpp"
 #include "maxon_epos_ethercat_sdk/Statusword.hpp"
 
 namespace maxon {
@@ -48,7 +51,7 @@ using FaultPair = std::pair<uint16_t, ReadingTimePoint>;
 using ErrorTimePairDeque = std::deque<std::pair<ErrorType, double>>;
 using FaultTimePairDeque = std::deque<std::pair<uint16_t, double>>;
 
-class Reading{
+class Reading {
  public:
   /*!
    * raw get methods
@@ -88,6 +91,8 @@ class Reading{
 
   void setActualVelocity(int32_t actualVelocity);
 
+  void setDemandVelocity(int32_t demandVelocity);
+
   void setStatusword(uint16_t statusword);
 
   void setAnalogInput(int16_t analogInput);
@@ -106,11 +111,11 @@ class Reading{
 
   void setTorqueFactorIntegerToNm(double torqueFactor);
 
-
  protected:
   int32_t actualPosition_{0};
   int32_t digitalInputs_{0};
   int32_t actualVelocity_{0};
+  int32_t demandVelocity_{0};
   uint16_t statusword_{0};
   int16_t analogInput_{0};
   int16_t actualCurrent_{0};
@@ -122,6 +127,7 @@ class Reading{
   double torqueFactorIntegerToNm_{1};
 
   ReadingTimePoint lastReadingTimePoint_;
+
  public:
   /*!
    * returns the age of the last added error in microseconds
@@ -188,15 +194,17 @@ class Reading{
 
   /*!
    * The configuration constructor
-   * This is called for readings generated inside of the maxon_epos_ethercat_sdk.
+   * This is called for readings generated inside of the
+   * maxon_epos_ethercat_sdk.
    * @param errorStorageCapacity	the number of errors that are stored
    * @param faultStorageCapacity	the number of faults that are stored
-   * @param forceAppendEqualError	true if a new errer shall be appended even
-   * though it is equal to the last one
-   * @param forceAppendEqualFault	true if a new fault shall be appended even
-   * though it is equal to the last one
+   * @param forceAppendEqualError	true if a new errer shall be appended
+   * even though it is equal to the last one
+   * @param forceAppendEqualFault	true if a new fault shall be appended
+   * even though it is equal to the last one
    */
-  Reading(unsigned int errorStorageCapacity, unsigned int faultStorageCapacity, bool forceAppendEqualError, bool forceAppendEqualFault);
+  Reading(unsigned int errorStorageCapacity, unsigned int faultStorageCapacity,
+          bool forceAppendEqualError, bool forceAppendEqualFault);
 
  private:
   std::deque<ErrorPair> errors_;

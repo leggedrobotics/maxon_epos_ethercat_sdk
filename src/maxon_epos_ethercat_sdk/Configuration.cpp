@@ -4,23 +4,26 @@
 ** Markus Staeuble
 **
 ** This file is part of the maxon_epos_ethercat_sdk.
-** The maxon_epos_ethercat_sdk is free software: you can redistribute it and/or modify
+** The maxon_epos_ethercat_sdk is free software: you can redistribute it and/or
+*modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation, either version 3 of the License, or
 ** (at your option) any later version.
 **
-** The maxon_epos_ethercat_sdk is distributed in the hope that it will be useful,
+** The maxon_epos_ethercat_sdk is distributed in the hope that it will be
+*useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 **
 ** You should have received a copy of the GNU General Public License
-** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
- */
-
-#include <iomanip>
+** along with the maxon_epos_ethercat_sdk. If not, see
+*<https://www.gnu.org/licenses/>.
+*/
 
 #include "maxon_epos_ethercat_sdk/Configuration.hpp"
+
+#include <iomanip>
 
 namespace maxon {
 
@@ -51,6 +54,8 @@ std::string rxPdoString(RxPdoTypeEnum rxPdo) {
       return "Rx PDO Standard";
     case RxPdoTypeEnum::RxPdoCST:
       return "Rx PDO CST";
+    case RxPdoTypeEnum::RxPdoPVM:
+      return "Rx PDO CST";
     default:
       return "Unsupported Type";
   }
@@ -62,6 +67,8 @@ std::string txPdoString(TxPdoTypeEnum txPdo) {
       return "NA";
     case TxPdoTypeEnum::TxPdoCST:
       return "Tx PDO CST";
+    case TxPdoTypeEnum::TxPdoPVM:
+      return "Tx PDO PVM";
     case TxPdoTypeEnum::TxPdoStandard:
       return "Tx PDO Standard";
     default:
@@ -70,7 +77,8 @@ std::string txPdoString(TxPdoTypeEnum txPdo) {
 }
 
 std::ostream& operator<<(std::ostream& os, const Configuration& configuration) {
-  std::string modeOfOperation_ = modeOfOperationString(configuration.modeOfOperationEnum);
+  std::string modeOfOperation_ =
+      modeOfOperationString(configuration.modeOfOperationEnum);
   std::string rxPdo = rxPdoString(configuration.rxPdoTypeEnum);
   std::string txPdo = txPdoString(configuration.txPdoTypeEnum);
 
@@ -82,7 +90,8 @@ std::ostream& operator<<(std::ostream& os, const Configuration& configuration) {
   len2 = len2 >= tmp3 ? len2 : tmp3;
   len2++;
 
-  os << std::boolalpha << std::left << std::setw(43) << std::setfill('-') << "|" << std::setw(len2 + 2) << "-"
+  os << std::boolalpha << std::left << std::setw(43) << std::setfill('-') << "|"
+     << std::setw(len2 + 2) << "-"
      << "|\n"
      << std::setfill(' ') << std::setw(43 + len2 + 2) << "| Configuration"
      << "|\n"
@@ -95,15 +104,19 @@ std::ostream& operator<<(std::ostream& os, const Configuration& configuration) {
      << std::setw(43) << "| Tx PDO Type:"
      << "| " << std::setw(len2) << txPdo << "|\n"
      << std::setw(43) << "| Config Run SDO verify timeout:"
-     << "| " << std::setw(len2) << configuration.configRunSdoVerifyTimeout << "|\n"
+     << "| " << std::setw(len2) << configuration.configRunSdoVerifyTimeout
+     << "|\n"
      << std::setw(43) << "| Print Debug Messages:"
      << "| " << std::setw(len2) << configuration.printDebugMessages << "|\n"
      << std::setw(43) << "| Drive State Change Min Timeout:"
-     << "| " << std::setw(len2) << configuration.driveStateChangeMinTimeout << "|\n"
+     << "| " << std::setw(len2) << configuration.driveStateChangeMinTimeout
+     << "|\n"
      << std::setw(43) << "| Drive State Change Max Timeout:"
-     << "| " << std::setw(len2) << configuration.driveStateChangeMaxTimeout << "|\n"
+     << "| " << std::setw(len2) << configuration.driveStateChangeMaxTimeout
+     << "|\n"
      << std::setw(43) << "| Min Successful Target State Readings:"
-     << "| " << std::setw(len2) << configuration.minNumberOfSuccessfulTargetStateReadings << "|\n"
+     << "| " << std::setw(len2)
+     << configuration.minNumberOfSuccessfulTargetStateReadings << "|\n"
      << std::setw(43) << "| Force Append Equal Error:"
      << "| " << std::setw(len2) << configuration.forceAppendEqualError << "|\n"
      << std::setw(43) << "| Force Append Equal Fault:"

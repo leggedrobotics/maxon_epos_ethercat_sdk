@@ -4,18 +4,21 @@
 ** Markus Staeuble
 **
 ** This file is part of the maxon_epos_ethercat_sdk.
-** The maxon_epos_ethercat_sdk is free software: you can redistribute it and/or modify
+** The maxon_epos_ethercat_sdk is free software: you can redistribute it and/or
+*modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation, either version 3 of the License, or
 ** (at your option) any later version.
 **
-** The maxon_epos_ethercat_sdk is distributed in the hope that it will be useful,
+** The maxon_epos_ethercat_sdk is distributed in the hope that it will be
+*useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 **
 ** You should have received a copy of the GNU General Public License
-** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
+** along with the maxon_epos_ethercat_sdk. If not, see
+*<https://www.gnu.org/licenses/>.
 */
 
 #include <cstdint>
@@ -23,6 +26,16 @@
 
 #define OD_INDEX_RX_PDO_ASSIGNMENT uint16_t(0x1c12)
 #define OD_INDEX_TX_PDO_ASSIGNMENT uint16_t(0x1c13)
+
+#define OD_INDEX_TX_PDO_MAPPING_1 uint16_t(0x1A00)
+#define OD_INDEX_TX_PDO_MAPPING_2 uint16_t(0x1A01)
+#define OD_INDEX_TX_PDO_MAPPING_3 uint16_t(0x1A02)
+#define OD_INDEX_TX_PDO_MAPPING_4 uint16_t(0x1A03)
+
+#define OD_INDEX_RX_PDO_MAPPING_1 uint16_t(0x1600)
+#define OD_INDEX_RX_PDO_MAPPING_2 uint16_t(0x1601)
+#define OD_INDEX_RX_PDO_MAPPING_3 uint16_t(0x1602)
+#define OD_INDEX_RX_PDO_MAPPING_4 uint16_t(0x1603)
 
 // #define OD_INDEX_EXTRA_STATUS (0x2085) //?
 // #define OD_INDEX_STO_STATUS (0x2086) //?
@@ -43,6 +56,7 @@
 #define OD_INDEX_MODES_OF_OPERATION (0x6060)
 #define OD_INDEX_MODES_OF_OPERATION_DISPLAY (0x6061)
 #define OD_INDEX_POSITION_ACTUAL (0x6064)
+#define OD_INDEX_VELOCITY_DEMAND (0x606B)
 #define OD_INDEX_SENSOR_SSI (0x3012)
 #define OD_INDEX_HALL_SENSOR (0x301A)
 #define OD_INDEX_VELOCITY_ACTUAL (0x606C)

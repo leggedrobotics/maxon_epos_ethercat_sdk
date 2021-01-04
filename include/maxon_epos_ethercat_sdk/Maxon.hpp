@@ -16,107 +16,113 @@
 **
 ** You should have received a copy of the GNU General Public License
 ** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 
 #pragma once
 
-#include "maxon_epos_ethercat_sdk/Command.hpp"
-#include"maxon_epos_ethercat_sdk/DriveState.hpp"
-#include "maxon_epos_ethercat_sdk/Reading.hpp"
-#include "maxon_epos_ethercat_sdk/Controlword.hpp"
-
-#include <ethercat_sdk_master/EthercatDevice.hpp>
-
 #include <yaml-cpp/yaml.h>
 
-#include <mutex>
 #include <atomic>
-#include <string>
-#include <cstdint>
 #include <chrono>
+#include <cstdint>
+#include <ethercat_sdk_master/EthercatDevice.hpp>
+#include <mutex>
+#include <string>
 
-namespace maxon {
-  class Maxon : public ecat_master::EthercatDevice{
-    public:
-      typedef std::shared_ptr<Maxon> SharedPtr;
+#include "maxon_epos_ethercat_sdk/Command.hpp"
+#include "maxon_epos_ethercat_sdk/Controlword.hpp"
+#include "maxon_epos_ethercat_sdk/DriveState.hpp"
+#include "maxon_epos_ethercat_sdk/Reading.hpp"
 
-      // create Maxon Drive from setup file
-      static SharedPtr deviceFromFile(const std::string& configFile, const std::string& name, const uint32_t address);
-      // constructor
-      Maxon() = default;
-      Maxon(const std::string& name, const uint32_t address);
+namespace maxon
+{
+class Maxon : public ecat_master::EthercatDevice
+{
+public:
+  typedef std::shared_ptr<Maxon> SharedPtr;
 
-    // pure virtual overwrites
-    public:
-      bool startup() override;
-      void shutdown() override;
-      void updateWrite() override;
-      void updateRead() override;
-      PdoInfo getCurrentPdoInfo() const override { return pdoInfo_; }
+  // create Maxon Drive from setup file
+  static SharedPtr deviceFromFile(const std::string& configFile, const std::string& name, const uint32_t address);
+  // constructor
+  Maxon() = default;
+  Maxon(const std::string& name, const uint32_t address);
 
-    public:
-      void stageCommand(const Command& command);
-      Reading getReading() const;
-      void getReading(Reading& reading) const;
+  // pure virtual overwrites
+public:
+  bool startup() override;
+  void shutdown() override;
+  void updateWrite() override;
+  void updateRead() override;
+  PdoInfo getCurrentPdoInfo() const override
+  {
+    return pdoInfo_;
+  }
 
-      bool loadConfigFile(const std::string& fileName);
-      bool loadConfigNode(YAML::Node configNode);
-      bool loadConfiguration(const Configuration& configuration);
-      Configuration getConfiguration() const;
+public:
+  void stageCommand(const Command& command);
+  Reading getReading() const;
+  void getReading(Reading& reading) const;
 
-    //SDO
-    public:
-      bool getStatuswordViaSdo(Statusword& statusword);
-      bool setControlwordViaSdo(Controlword& controlword);
-      bool setDriveStateViaSdo(const DriveState& driveState);
-    protected:
-      bool stateTransitionViaSdo(const StateTransition& stateTransition);
+  bool loadConfigFile(const std::string& fileName);
+  bool loadConfigNode(YAML::Node configNode);
+  bool loadConfiguration(const Configuration& configuration);
+  Configuration getConfiguration() const;
 
-    // PDO
-    public:
-      bool setDriveStateViaPdo(const DriveState& driveState, const bool waitForState);
-      bool lastPdoStateChangeSuccessful() const { return stateChangeSuccessful_; }
+  // SDO
+public:
+  bool getStatuswordViaSdo(Statusword& statusword);
+  bool setControlwordViaSdo(Controlword& controlword);
+  bool setDriveStateViaSdo(const DriveState& driveState);
 
-    protected:
-      void engagePdoStateMachine();
-      bool mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum);
-      Controlword getNextStateTransitionControlword(const DriveState& requestedDriveState,
-                                                    const DriveState& currentDriveState);
-      void autoConfigurePdoSizes();
+protected:
+  bool stateTransitionViaSdo(const StateTransition& stateTransition);
 
-      uint16_t getTxPdoSize();
-      uint16_t getRxPdoSize();
+  // PDO
+public:
+  bool setDriveStateViaPdo(const DriveState& driveState, const bool waitForState);
+  bool lastPdoStateChangeSuccessful() const
+  {
+    return stateChangeSuccessful_;
+  }
 
-    // Errors
-    protected:
-      void addErrorToReading(const ErrorType& errorType);
-    // public:
-    //   void printErrorCode();
+protected:
+  void engagePdoStateMachine();
+  bool mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum);
+  Controlword getNextStateTransitionControlword(const DriveState& requestedDriveState,
+                                                const DriveState& currentDriveState);
+  void autoConfigurePdoSizes();
 
+  uint16_t getTxPdoSize();
+  uint16_t getRxPdoSize();
 
-    protected:
-      Command stagedCommand_;
-      Reading reading_;
-      Configuration configuration_;
-      Controlword controlword_;
-      PdoInfo pdoInfo_;
-      bool hasRead_{false};
-      bool conductStateChange_{false};
-      DriveState targetDriveState_{DriveState::NA};
-      std::chrono::time_point<std::chrono::steady_clock> driveStateChangeTimePoint_;
-      uint16_t numberOfSuccessfulTargetStateReadings_{0};
-      std::atomic<bool> stateChangeSuccessful_{false};
+  // Errors
+protected:
+  void addErrorToReading(const ErrorType& errorType);
 
+public:
+  void printErrorCode();
 
-    // Configurable parameters
-    protected:
-      bool allowModeChange_{false};
-      ModeOfOperationEnum modeOfOperation_{ModeOfOperationEnum::NA};
+protected:
+  Command stagedCommand_;
+  Reading reading_;
+  Configuration configuration_;
+  Controlword controlword_;
+  PdoInfo pdoInfo_;
+  bool hasRead_{ false };
+  bool conductStateChange_{ false };
+  DriveState targetDriveState_{ DriveState::NA };
+  std::chrono::time_point<std::chrono::steady_clock> driveStateChangeTimePoint_;
+  uint16_t numberOfSuccessfulTargetStateReadings_{ 0 };
+  std::atomic<bool> stateChangeSuccessful_{ false };
 
-    protected:
-      mutable std::recursive_mutex stagedCommandMutex_; //TODO required?
-      mutable std::recursive_mutex readingMutex_; //TODO required?
-      mutable std::recursive_mutex mutex_; // TODO: change name!!!!
+  // Configurable parameters
+protected:
+  bool allowModeChange_{ false };
+  ModeOfOperationEnum modeOfOperation_{ ModeOfOperationEnum::NA };
 
-  };
-} // namespace maxon
+protected:
+  mutable std::recursive_mutex stagedCommandMutex_;  // TODO required?
+  mutable std::recursive_mutex readingMutex_;        // TODO required?
+  mutable std::recursive_mutex mutex_;               // TODO: change name!!!!
+};
+}  // namespace maxon

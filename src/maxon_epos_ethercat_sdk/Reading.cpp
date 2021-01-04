@@ -4,33 +4,39 @@
 ** Markus Staeuble
 **
 ** This file is part of the maxon_epos_ethercat_sdk.
-** The maxon_epos_ethercat_sdk is free software: you can redistribute it and/or modify
+** The maxon_epos_ethercat_sdk is free software: you can redistribute it and/or
+*modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation, either version 3 of the License, or
 ** (at your option) any later version.
 **
-** The maxon_epos_ethercat_sdk is distributed in the hope that it will be useful,
+** The maxon_epos_ethercat_sdk is distributed in the hope that it will be
+*useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 **
 ** You should have received a copy of the GNU General Public License
-** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
- */
+** along with the maxon_epos_ethercat_sdk. If not, see
+*<https://www.gnu.org/licenses/>.
+*/
 
 #define _USE_MATH_DEFINES  // for M_PI
-#include <cmath>
-
 #include "maxon_epos_ethercat_sdk/Reading.hpp"
+
+#include <cmath>
 
 std::ostream& operator<<(std::ostream& os, const maxon::Reading& reading) {
   // TODO(duboisf) make table, remove statusword
-  os << std::left << std::setw(30) << "Actual Position:" << reading.getActualPosition() << "\n"
-     << std::setw(30) << "Actual Velocity:" << reading.getActualVelocity() << "\n"
+  os << std::left << std::setw(30)
+     << "Actual Position:" << reading.getActualPosition() << "\n"
+     << std::setw(30) << "Actual Velocity:" << reading.getActualVelocity()
+     << "\n"
      << std::setw(30) << "Actual Torque:" << reading.getActualTorque() << "\n"
      << std::setw(30) << "Analog input" << reading.getAnalogInput() << "\n"
      << std::setw(30) << "Actual Current:" << reading.getActualCurrent() << "\n"
-     << std::setw(30) << "Digital Inputs:" << reading.getDigitalInputString() << "\n"
+     << std::setw(30) << "Digital Inputs:" << reading.getDigitalInputString()
+     << "\n"
      << std::setw(30) << "Bus Voltage:" << reading.getBusVoltage() << "\n"
      << std::setw(30) << "\nStatusword:"
      << "\n"
@@ -38,7 +44,7 @@ std::ostream& operator<<(std::ostream& os, const maxon::Reading& reading) {
   return os;
 }
 
-namespace maxon{
+namespace maxon {
 
 std::string Reading::getDigitalInputString() const {
   std::string binString;
@@ -68,24 +74,12 @@ double Reading::getAgeOfLastReadingInMicroseconds() const {
 /*!
  * Raw get methods
  */
-int32_t Reading::getActualPositionRaw() const {
-  return actualPosition_;
-}
-int32_t Reading::getActualVelocityRaw() const {
-  return actualVelocity_;
-}
-uint16_t Reading::getRawStatusword() const {
-  return statusword_;
-}
-int16_t Reading::getActualCurrentRaw() const {
-  return actualCurrent_;
-}
-uint16_t Reading::getAnalogInputRaw() const {
-  return analogInput_;
-}
-uint32_t Reading::getBusVoltageRaw() const {
-  return busVoltage_;
-}
+int32_t Reading::getActualPositionRaw() const { return actualPosition_; }
+int32_t Reading::getActualVelocityRaw() const { return actualVelocity_; }
+uint16_t Reading::getRawStatusword() const { return statusword_; }
+int16_t Reading::getActualCurrentRaw() const { return actualCurrent_; }
+uint16_t Reading::getAnalogInputRaw() const { return analogInput_; }
+uint32_t Reading::getBusVoltageRaw() const { return busVoltage_; }
 
 /*!
  * User unit get methods
@@ -94,7 +88,8 @@ double Reading::getActualPosition() const {
   return static_cast<double>(actualPosition_) * positionFactorIntegerToRad_;
 }
 double Reading::getActualVelocity() const {
-  return static_cast<double>(actualVelocity_) * velocityFactorIntegerPerSecToRadPerSec_;
+  return static_cast<double>(actualVelocity_) *
+         velocityFactorIntegerPerSecToRadPerSec_;
 }
 double Reading::getActualCurrent() const {
   return static_cast<double>(actualCurrent_) * currentFactorIntegerToAmp_;
@@ -109,9 +104,7 @@ double Reading::getAnalogInput() const {
 /*!
  * Other readings
  */
-int32_t Reading::getDigitalInputs() const {
-  return digitalInputs_;
-}
+int32_t Reading::getDigitalInputs() const { return digitalInputs_; }
 Statusword Reading::getStatusword() const {
   Statusword statusword;
   statusword.setFromRawStatusword(statusword_);
@@ -133,9 +126,10 @@ void Reading::setDigitalInputs(int32_t digitalInputs) {
 void Reading::setActualVelocity(int32_t actualVelocity) {
   actualVelocity_ = actualVelocity;
 }
-void Reading::setStatusword(uint16_t statusword) {
-  statusword_ = statusword;
+void Reading::setDemandVelocity(int32_t demandVelocity) {
+  demandVelocity_ = demandVelocity;
 }
+void Reading::setStatusword(uint16_t statusword) { statusword_ = statusword; }
 
 void Reading::setAnalogInput(int16_t analogInput) {
   analogInput_ = analogInput;
@@ -143,12 +137,8 @@ void Reading::setAnalogInput(int16_t analogInput) {
 void Reading::setActualCurrent(int16_t actualCurrent) {
   actualCurrent_ = actualCurrent;
 }
-void Reading::setBusVoltage(uint32_t busVoltage) {
-  busVoltage_ = busVoltage;
-}
-void Reading::setTimePointNow() {
-  lastReadingTimePoint_ = ReadingClock::now();
-}
+void Reading::setBusVoltage(uint32_t busVoltage) { busVoltage_ = busVoltage; }
+void Reading::setTimePointNow() { lastReadingTimePoint_ = ReadingClock::now(); }
 
 void Reading::setPositionFactorIntegerToRad(double positionFactor) {
   positionFactorIntegerToRad_ = positionFactor;
@@ -162,7 +152,6 @@ void Reading::setCurrentFactorIntegerToAmp(double currentFactor) {
 void Reading::setTorqueFactorIntegerToNm(double torqueFactor) {
   torqueFactorIntegerToNm_ = torqueFactor;
 }
-
 
 double Reading::getAgeOfLastErrorInMicroseconds() const {
   ReadingDuration errorDuration = ReadingClock::now() - lastError_.second;
@@ -263,15 +252,20 @@ void Reading::configureReading(const Configuration& configuration) {
   forceAppendEqualError_ = configuration.forceAppendEqualError;
   forceAppendEqualFault_ = configuration.forceAppendEqualFault;
 
-  positionFactorIntegerToRad_ = (2.0 * M_PI) / static_cast<double>(configuration.positionEncoderResolution);
+  positionFactorIntegerToRad_ =
+      (2.0 * M_PI) /
+      static_cast<double>(configuration.positionEncoderResolution);
 
-  velocityFactorIntegerPerSecToRadPerSec_ = (2.0 * M_PI) / static_cast<double>(configuration.positionEncoderResolution);
+  velocityFactorIntegerPerSecToRadPerSec_ =
+      (2.0 * M_PI) /
+      static_cast<double>(configuration.positionEncoderResolution);
 
   double currentFactor = configuration.nominalCurrentA / 1000.0;
 
   currentFactorIntegerToAmp_ = currentFactor;
 
-  torqueFactorIntegerToNm_ = currentFactor * configuration.motorConstant * configuration.gearRatio;
+  torqueFactorIntegerToNm_ =
+      currentFactor * configuration.motorConstant * configuration.gearRatio;
 }
 
 }  // namespace maxon

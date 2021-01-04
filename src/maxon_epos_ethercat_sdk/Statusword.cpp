@@ -16,18 +16,20 @@
 **
 ** You should have received a copy of the GNU General Public License
 ** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 
 #include "maxon_epos_ethercat_sdk/Statusword.hpp"
 
-namespace maxon {
-
-std::ostream& operator<<(std::ostream& os, const Statusword& statusword) {
+namespace maxon
+{
+std::ostream& operator<<(std::ostream& os, const Statusword& statusword)
+{
   using std::setfill;
   using std::setw;
   std::string driveStateString = statusword.getDriveStateString();
   int gapSize2 = driveStateString.size() + 1;
-  if (gapSize2 < 6) {
+  if (gapSize2 < 6)
+  {
     gapSize2 = 6;
   }
   os << std::left << std::boolalpha << setw(gapSize2 + 27) << setfill('-') << "|"
@@ -78,7 +80,8 @@ std::ostream& operator<<(std::ostream& os, const Statusword& statusword) {
   return os;
 }
 
-void Statusword::setFromRawStatusword(uint16_t status) {
+void Statusword::setFromRawStatusword(uint16_t status)
+{
   readyToSwitchOn_ = static_cast<bool>(status & 1 << (0));
   switchedOn_ = static_cast<bool>(status & 1 << (1));
   operationEnabled_ = static_cast<bool>(status & 1 << (2));
@@ -96,33 +99,51 @@ void Statusword::setFromRawStatusword(uint16_t status) {
   rawStatusword_ = status;
 }
 
-DriveState Statusword::getDriveState() const {
+DriveState Statusword::getDriveState() const
+{
   DriveState driveState = DriveState::NA;
 
   // MAN-G-DS402 manual page 47
-  if ((rawStatusword_ & 0b0000000001101111) == 0b0000000000000000) {
+  if ((rawStatusword_ & 0b0000000001101111) == 0b0000000000000000)
+  {
     driveState = DriveState::NotReadyToSwitchOn;
-  } else if ((rawStatusword_ & 0b0000000001101111) == 0b00000000001000000) {
+  }
+  else if ((rawStatusword_ & 0b0000000001101111) == 0b00000000001000000)
+  {
     driveState = DriveState::SwitchOnDisabled;
-  } else if ((rawStatusword_ & 0b0000000001101111) == 0b00000000000100001) {
+  }
+  else if ((rawStatusword_ & 0b0000000001101111) == 0b00000000000100001)
+  {
     driveState = DriveState::ReadyToSwitchOn;
-  } else if ((rawStatusword_ & 0b0000000001101111) == 0b00000000000100011) {
+  }
+  else if ((rawStatusword_ & 0b0000000001101111) == 0b00000000000100011)
+  {
     driveState = DriveState::SwitchedOn;
-  } else if ((rawStatusword_ & 0b0000000001101111) == 0b00000000000100111) {
+  }
+  else if ((rawStatusword_ & 0b0000000001101111) == 0b00000000000100111)
+  {
     driveState = DriveState::OperationEnabled;
-  } else if ((rawStatusword_ & 0b0000000001101111) == 0b00000000000000111) {
+  }
+  else if ((rawStatusword_ & 0b0000000001101111) == 0b00000000000000111)
+  {
     driveState = DriveState::QuickStopActive;
-  } else if ((rawStatusword_ & 0b0000000001101111) == 0b00000000000001111) {
+  }
+  else if ((rawStatusword_ & 0b0000000001101111) == 0b00000000000001111)
+  {
     driveState = DriveState::FaultReactionActive;
-  } else if ((rawStatusword_ & 0b0000000001101111) == 0b00000000000001000) {
+  }
+  else if ((rawStatusword_ & 0b0000000001101111) == 0b00000000000001000)
+  {
     driveState = DriveState::Fault;
   }
 
   return driveState;
 }
-std::string Statusword::getDriveStateString() const {
+std::string Statusword::getDriveStateString() const
+{
   DriveState driveState = getDriveState();
-  switch (driveState) {
+  switch (driveState)
+  {
     case DriveState::SwitchOnDisabled:
       return "switch on disabled";
       break;

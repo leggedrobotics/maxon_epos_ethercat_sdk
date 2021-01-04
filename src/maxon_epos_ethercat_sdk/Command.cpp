@@ -4,23 +4,26 @@
 ** Markus Staeuble
 **
 ** This file is part of the maxon_epos_ethercat_sdk.
-** The maxon_epos_ethercat_sdk is free software: you can redistribute it and/or modify
+** The maxon_epos_ethercat_sdk is free software: you can redistribute it and/or
+*modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation, either version 3 of the License, or
 ** (at your option) any later version.
 **
-** The maxon_epos_ethercat_sdk is distributed in the hope that it will be useful,
+** The maxon_epos_ethercat_sdk is distributed in the hope that it will be
+*useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 **
 ** You should have received a copy of the GNU General Public License
-** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
- */
-
-#include <iomanip>
+** along with the maxon_epos_ethercat_sdk. If not, see
+*<https://www.gnu.org/licenses/>.
+*/
 
 #include "maxon_epos_ethercat_sdk/Command.hpp"
+
+#include <iomanip>
 
 namespace maxon {
 
@@ -44,7 +47,8 @@ Command::Command(const Command& other) {
   digitalOutputs_ = other.digitalOutputs_;
 
   positionFactorRadToInteger_ = other.positionFactorRadToInteger_;
-  velocityFactorRadPerSecToIntegerPerSec_ = other.velocityFactorRadPerSecToIntegerPerSec_;
+  velocityFactorRadPerSecToIntegerPerSec_ =
+      other.velocityFactorRadPerSecToIntegerPerSec_;
   torqueFactorNmToInteger_ = other.torqueFactorNmToInteger_;
   currentFactorAToInteger_ = other.currentFactorAToInteger_;
 
@@ -74,7 +78,8 @@ Command& Command::operator=(const Command& other) {
   digitalOutputs_ = other.digitalOutputs_;
 
   positionFactorRadToInteger_ = other.positionFactorRadToInteger_;
-  velocityFactorRadPerSecToIntegerPerSec_ = other.velocityFactorRadPerSecToIntegerPerSec_;
+  velocityFactorRadPerSecToIntegerPerSec_ =
+      other.velocityFactorRadPerSecToIntegerPerSec_;
   torqueFactorNmToInteger_ = other.torqueFactorNmToInteger_;
   currentFactorAToInteger_ = other.currentFactorAToInteger_;
 
@@ -86,14 +91,16 @@ Command& Command::operator=(const Command& other) {
 }
 
 std::ostream& operator<<(std::ostream& os, Command& command) {
-  os << std::left << std::setw(25) << "Target Position:" << command.targetPositionUU_ << "\n"
+  os << std::left << std::setw(25)
+     << "Target Position:" << command.targetPositionUU_ << "\n"
      << std::setw(25) << "Target Velocity:" << command.targetVelocityUU_ << "\n"
      << std::setw(25) << "Target Torque:" << command.targetTorqueUU_ << "\n"
      << std::setw(25) << "Target Current:" << command.targetCurrentUU_ << "\n"
      << std::setw(25) << "Maximum Torque:" << command.maxTorqueUU_ << "\n"
      << std::setw(25) << "Maximum Current:" << command.maxCurrentUU_ << "\n"
      << std::setw(25) << "Torque Offset:" << command.torqueOffsetUU_ << "\n"
-     << std::setw(25) << "Digital Outputs:" << command.getDigitalOutputString() << "\n"
+     << std::setw(25) << "Digital Outputs:" << command.getDigitalOutputString()
+     << "\n"
      << std::right;
 
   return os;
@@ -219,6 +226,15 @@ uint16_t Command::getMaxCurrentRaw() const {
 int16_t Command::getTorqueOffsetRaw() const {
   return torqueOffset_;
 }
+uint32_t Command::getProfileAccelRaw() const {
+  return profileAccel_;
+}
+uint32_t Command::getProfileDeccelRaw() const {
+  return profileDeccel_;
+}
+int16_t Command::getMotionProfileType() const {
+  return motionProfileType_;
+}
 
 /*
  * get methods (user units)
@@ -247,20 +263,27 @@ double Command::getTorqueOffset() const {
 
 void Command::doUnitConversion() {
   if (!useRawCommands_) {
-    targetPosition_ = static_cast<int32_t>(positionFactorRadToInteger_ * targetPositionUU_);
-    targetVelocity_ = static_cast<int32_t>(velocityFactorRadPerSecToIntegerPerSec_ * targetVelocityUU_);
-    targetTorque_ = static_cast<int16_t>(torqueFactorNmToInteger_ * targetTorqueUU_);
+    targetPosition_ =
+        static_cast<int32_t>(positionFactorRadToInteger_ * targetPositionUU_);
+    targetVelocity_ = static_cast<int32_t>(
+        velocityFactorRadPerSecToIntegerPerSec_ * targetVelocityUU_);
+    targetTorque_ =
+        static_cast<int16_t>(torqueFactorNmToInteger_ * targetTorqueUU_);
     {
       std::lock_guard<std::mutex> lockGuard(targetTorqueCommandMutex_);
       if (targetTorqueCommandUsed_) {
-        targetCurrent_ = static_cast<int16_t>(torqueFactorNmToInteger_ * targetTorqueUU_);
+        targetCurrent_ =
+            static_cast<int16_t>(torqueFactorNmToInteger_ * targetTorqueUU_);
       } else {
-        targetCurrent_ = static_cast<int16_t>(currentFactorAToInteger_ * targetCurrentUU_);
+        targetCurrent_ =
+            static_cast<int16_t>(currentFactorAToInteger_ * targetCurrentUU_);
       }
     }
     maxTorque_ = static_cast<uint16_t>(torqueFactorNmToInteger_ * maxTorqueUU_);
-    maxCurrent_ = static_cast<uint16_t>(currentFactorAToInteger_ * maxCurrentUU_);
-    torqueOffset_ = static_cast<int16_t>(torqueFactorNmToInteger_ * torqueOffsetUU_);
+    maxCurrent_ =
+        static_cast<uint16_t>(currentFactorAToInteger_ * maxCurrentUU_);
+    torqueOffset_ =
+        static_cast<int16_t>(torqueFactorNmToInteger_ * torqueOffsetUU_);
   }
 }
 

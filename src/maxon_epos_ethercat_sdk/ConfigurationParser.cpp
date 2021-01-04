@@ -4,26 +4,28 @@
 ** Markus Staeuble
 **
 ** This file is part of the maxon_epos_ethercat_sdk.
-** The maxon_epos_ethercat_sdk is free software: you can redistribute it and/or modify
+** The maxon_epos_ethercat_sdk is free software: you can redistribute it and/or
+*modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation, either version 3 of the License, or
 ** (at your option) any later version.
 **
-** The maxon_epos_ethercat_sdk is distributed in the hope that it will be useful,
+** The maxon_epos_ethercat_sdk is distributed in the hope that it will be
+*useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 **
 ** You should have received a copy of the GNU General Public License
-** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
+** along with the maxon_epos_ethercat_sdk. If not, see
+*<https://www.gnu.org/licenses/>.
 */
-
-#include <cstdint>
 
 #include "maxon_epos_ethercat_sdk/ConfigurationParser.hpp"
 
-namespace maxon
-{
+#include <cstdint>
+
+namespace maxon {
 /*!
  * Function template for convenience
  * @param[in] yamlNode	the current node containing the requested variable
@@ -32,24 +34,24 @@ namespace maxon
  * @return	true on success
  */
 template <typename T>
-bool getValueFromFile(YAML::Node& yamlNode, const std::string& varName, T& var)
-{
-  if (!yamlNode[varName].IsDefined())
-  {
-    MELO_WARN_STREAM("[maxon_epos_ethercat_sdk:ConfigurationParser::parseConfiguration]: field '"
-                     << varName << "' is missing. Default value will be used.");
+bool getValueFromFile(YAML::Node& yamlNode, const std::string& varName,
+                      T& var) {
+  if (!yamlNode[varName].IsDefined()) {
+    MELO_WARN_STREAM(
+        "[maxon_epos_ethercat_sdk:ConfigurationParser::parseConfiguration]: "
+        "field '"
+        << varName << "' is missing. Default value will be used.");
     return false;
   }
-  try
-  {
+  try {
     T tmpVar = yamlNode[varName].as<T>();
     var = tmpVar;
     return true;
-  }
-  catch (...)
-  {
-    MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:ConfigurationParser::getValueFromFile] Error while parsing value \""
-                      << varName << "\", default values will be used");
+  } catch (...) {
+    MELO_ERROR_STREAM(
+        "[maxon_epos_ethercat_sdk:ConfigurationParser::getValueFromFile] Error "
+        "while parsing value \""
+        << varName << "\", default values will be used");
     return false;
   }
 }
@@ -60,43 +62,41 @@ bool getValueFromFile(YAML::Node& yamlNode, const std::string& varName, T& var)
  * @param [out] rxPdo	The read Rx PDO type
  * @return	true on success
  */
-bool getRxPdoFromFile(YAML::Node& yamlNode, const std::string& varName, RxPdoTypeEnum& rxPdo)
-{
-  if (!yamlNode[varName].IsDefined())
-  {
-    MELO_WARN_STREAM("[maxon_epos_ethercat_sdk:ConfigurationParser::parseConfiguration]: field '"
-                     << varName << "' is missing. Default value will be used.");
+bool getRxPdoFromFile(YAML::Node& yamlNode, const std::string& varName,
+                      RxPdoTypeEnum& rxPdo) {
+  if (!yamlNode[varName].IsDefined()) {
+    MELO_WARN_STREAM(
+        "[maxon_epos_ethercat_sdk:ConfigurationParser::parseConfiguration]: "
+        "field '"
+        << varName << "' is missing. Default value will be used.");
     return false;
   }
-  try
-  {
+  try {
     std::string str = yamlNode[varName].as<std::string>();
     /// no switch statements with std::string possible
-    if (str == "NA")
-    {
+    if (str == "NA") {
       rxPdo = RxPdoTypeEnum::NA;
       return true;
-    }
-    else if (str == "RxPdoStandard")
-    {
+    } else if (str == "RxPdoStandard") {
       rxPdo = RxPdoTypeEnum::RxPdoStandard;
       return true;
-    }
-    else if (str == "RxPdoCST")
-    {
+    } else if (str == "RxPdoCST") {
       rxPdo = RxPdoTypeEnum::RxPdoCST;
       return true;
-    }
-    else
-    {
-      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:ConfigurationParser::getRxPdoFromFile] Unsupported Rx PDO Type");
+    } else if (str == "RxPdoPVM") {
+      rxPdo = RxPdoTypeEnum::RxPdoPVM;
+      return true;
+    } else {
+      MELO_ERROR_STREAM(
+          "[maxon_epos_ethercat_sdk:ConfigurationParser::getRxPdoFromFile] "
+          "Unsupported Rx PDO Type");
       return false;
     }
-  }
-  catch (...)
-  {
-    MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:ConfigurationParser::getRxPdoFromFile] Error while parsing value \""
-                      << varName << "\", default values will be used");
+  } catch (...) {
+    MELO_ERROR_STREAM(
+        "[maxon_epos_ethercat_sdk:ConfigurationParser::getRxPdoFromFile] Error "
+        "while parsing value \""
+        << varName << "\", default values will be used");
     return false;
   }
 }
@@ -108,43 +108,41 @@ bool getRxPdoFromFile(YAML::Node& yamlNode, const std::string& varName, RxPdoTyp
  * @param [out] txPdo	The read Tx PDO type
  * @return	true on success
  */
-bool getTxPdoFromFile(YAML::Node& yamlNode, const std::string& varName, TxPdoTypeEnum& txPdo)
-{
-  if (!yamlNode[varName].IsDefined())
-  {
-    MELO_WARN_STREAM("[maxon_epos_ethercat_sdk:ConfigurationParser::parseConfiguration]: field '"
-                     << varName << "' is missing. Default value will be used.");
+bool getTxPdoFromFile(YAML::Node& yamlNode, const std::string& varName,
+                      TxPdoTypeEnum& txPdo) {
+  if (!yamlNode[varName].IsDefined()) {
+    MELO_WARN_STREAM(
+        "[maxon_epos_ethercat_sdk:ConfigurationParser::parseConfiguration]: "
+        "field '"
+        << varName << "' is missing. Default value will be used.");
     return false;
   }
-  try
-  {
+  try {
     std::string str = yamlNode[varName].as<std::string>();
     /// no switch statements with std::string
-    if (str == "NA")
-    {
+    if (str == "NA") {
       txPdo = TxPdoTypeEnum::NA;
       return true;
-    }
-    else if (str == "TxPdoCST")
-    {
+    } else if (str == "TxPdoCST") {
       txPdo = TxPdoTypeEnum::TxPdoCST;
       return true;
-    }
-    else if (str == "TxPdoStandard")
-    {
+    } else if (str == "TxPdoPVM") {
+      txPdo = TxPdoTypeEnum::TxPdoPVM;
+      return true;
+    } else if (str == "TxPdoStandard") {
       txPdo = TxPdoTypeEnum::TxPdoStandard;
       return true;
-    }
-    else
-    {
-      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:ConfigurationParser::getTxPdoFromFile] Unsupported Tx PDO Type");
+    } else {
+      MELO_ERROR_STREAM(
+          "[maxon_epos_ethercat_sdk:ConfigurationParser::getTxPdoFromFile] "
+          "Unsupported Tx PDO Type");
       return false;
     }
-  }
-  catch (...)
-  {
-    MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:ConfigurationParser::getTxPdoFromFile] Error while parsing value \""
-                      << varName << "\", default values will be used");
+  } catch (...) {
+    MELO_ERROR_STREAM(
+        "[maxon_epos_ethercat_sdk:ConfigurationParser::getTxPdoFromFile] Error "
+        "while parsing value \""
+        << varName << "\", default values will be used");
     return false;
   }
 }
@@ -156,226 +154,201 @@ bool getTxPdoFromFile(YAML::Node& yamlNode, const std::string& varName, TxPdoTyp
  * @param [out] mode	The read mode of operation
  * @return	true on success
  */
-bool getModeFromFile(YAML::Node& yamlNode, const std::string& varName, ModeOfOperationEnum& mode)
-{
-  if (!yamlNode[varName].IsDefined())
-  {
-    MELO_WARN_STREAM("[maxon_epos_ethercat_sdk:ConfigurationParser::parseConfiguration]: field '"
-                     << varName << "' is missing. Default value will be used.");
+bool getModeFromFile(YAML::Node& yamlNode, const std::string& varName,
+                     ModeOfOperationEnum& mode) {
+  if (!yamlNode[varName].IsDefined()) {
+    MELO_WARN_STREAM(
+        "[maxon_epos_ethercat_sdk:ConfigurationParser::parseConfiguration]: "
+        "field '"
+        << varName << "' is missing. Default value will be used.");
     return false;
   }
-  try
-  {
+  try {
     std::string str = yamlNode[varName].as<std::string>();
     /// no switch statements with std::string
-    if (str == "ProfiledPositionMode")
-    {
+    if (str == "ProfiledPositionMode") {
       mode = ModeOfOperationEnum::ProfiledPositionMode;
       return true;
-    }
-    else if (str == "ProfiledVelocityMode")
-    {
+    } else if (str == "ProfiledVelocityMode") {
       mode = ModeOfOperationEnum::ProfiledVelocityMode;
       return true;
-    }
-    else if (str == "HomingMode")
-    {
+    } else if (str == "HomingMode") {
       mode = ModeOfOperationEnum::HomingMode;
       return true;
-    }
-    else if (str == "CyclicSynchronousPositionMode")
-    {
+    } else if (str == "CyclicSynchronousPositionMode") {
       mode = ModeOfOperationEnum::CyclicSynchronousPositionMode;
       return true;
-    }
-    else if (str == "CyclicSynchronousVelocityMode")
-    {
+    } else if (str == "CyclicSynchronousVelocityMode") {
       mode = ModeOfOperationEnum::CyclicSynchronousVelocityMode;
       return true;
-    }
-    else if (str == "CyclicSynchronousTorqueMode")
-    {
+    } else if (str == "CyclicSynchronousTorqueMode") {
       mode = ModeOfOperationEnum::CyclicSynchronousTorqueMode;
       return true;
-    }
-    else
-    {
-      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:ConfigurationParser::getModeFromFile] Unsupported Mode Of Operation");
+    } else {
+      MELO_ERROR_STREAM(
+          "[maxon_epos_ethercat_sdk:ConfigurationParser::getModeFromFile] "
+          "Unsupported Mode Of Operation");
       return false;
     }
-  }
-  catch (...)
-  {
-    MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:ConfigurationParser::getModeFromFile] Error while parsing value \""
-                      << varName << "\", default values will be used");
+  } catch (...) {
+    MELO_ERROR_STREAM(
+        "[maxon_epos_ethercat_sdk:ConfigurationParser::getModeFromFile] Error "
+        "while parsing value \""
+        << varName << "\", default values will be used");
     return false;
   }
 }
 
-ConfigurationParser::ConfigurationParser(const std::string& filename)
-{
+ConfigurationParser::ConfigurationParser(const std::string& filename) {
   YAML::Node configNode;
-  try
-  {
+  try {
     configNode = YAML::LoadFile(filename);
-  }
-  catch (...)
-  {
+  } catch (...) {
     MELO_FATAL_STREAM(
-        "[maxon_epos_ethercat_sdk:ConfigurationParser::ConfigurationParser] Loading YAML configuration file '"
+        "[maxon_epos_ethercat_sdk:ConfigurationParser::ConfigurationParser] "
+        "Loading YAML configuration file '"
         << filename << "' failed.");
   }
   parseConfiguration(configNode);
 }
 
-ConfigurationParser::ConfigurationParser(YAML::Node configNode)
-{
+ConfigurationParser::ConfigurationParser(YAML::Node configNode) {
   parseConfiguration(configNode);
 }
 
-void ConfigurationParser::parseConfiguration(YAML::Node configNode)
-{
-  if (configNode["Maxon"].IsDefined())
-  {
+void ConfigurationParser::parseConfiguration(YAML::Node configNode) {
+  if (configNode["Maxon"].IsDefined()) {
     /// A new node for the MaxonEthercat class
     YAML::Node maxonNode = configNode["Maxon"];
 
     unsigned int configRunSdoVerifyTimeout;
-    if (getValueFromFile(maxonNode, "config_run_sdo_verify_timeout", configRunSdoVerifyTimeout))
-    {
+    if (getValueFromFile(maxonNode, "config_run_sdo_verify_timeout",
+                         configRunSdoVerifyTimeout)) {
       configuration_.configRunSdoVerifyTimeout = configRunSdoVerifyTimeout;
     }
 
     bool printDebugMessages;
-    if (getValueFromFile(maxonNode, "print_debug_messages", printDebugMessages))
-    {
+    if (getValueFromFile(maxonNode, "print_debug_messages",
+                         printDebugMessages)) {
       configuration_.printDebugMessages = printDebugMessages;
     }
 
     bool useRawCommands;
-    if (getValueFromFile(maxonNode, "use_raw_commands", useRawCommands))
-    {
+    if (getValueFromFile(maxonNode, "use_raw_commands", useRawCommands)) {
       configuration_.useRawCommands = useRawCommands;
     }
 
     unsigned int driveStateChangeMinTimeout;
-    if (getValueFromFile(maxonNode, "drive_state_change_min_timeout", driveStateChangeMinTimeout))
-    {
+    if (getValueFromFile(maxonNode, "drive_state_change_min_timeout",
+                         driveStateChangeMinTimeout)) {
       configuration_.driveStateChangeMinTimeout = driveStateChangeMinTimeout;
     }
 
     unsigned int minNumberOfSuccessfulTargetStateReadings;
-    if (getValueFromFile(maxonNode, "min_number_of_successful_target_state_readings",
-                         minNumberOfSuccessfulTargetStateReadings))
-    {
-      configuration_.minNumberOfSuccessfulTargetStateReadings = minNumberOfSuccessfulTargetStateReadings;
+    if (getValueFromFile(maxonNode,
+                         "min_number_of_successful_target_state_readings",
+                         minNumberOfSuccessfulTargetStateReadings)) {
+      configuration_.minNumberOfSuccessfulTargetStateReadings =
+          minNumberOfSuccessfulTargetStateReadings;
     }
 
     unsigned int driveStateChangeMaxTimeout;
-    if (getValueFromFile(maxonNode, "drive_state_change_max_timeout", driveStateChangeMaxTimeout))
-    {
+    if (getValueFromFile(maxonNode, "drive_state_change_max_timeout",
+                         driveStateChangeMaxTimeout)) {
       configuration_.driveStateChangeMaxTimeout = driveStateChangeMaxTimeout;
     }
   }
 
   /// The configuration options for the maxon::ethercat::Reading class
-  if (configNode["Reading"].IsDefined())
-  {
+  if (configNode["Reading"].IsDefined()) {
     YAML::Node readingNode = configNode["Reading"];
 
     bool forceAppendEqualError;
-    if (getValueFromFile(readingNode, "force_append_equal_error", forceAppendEqualError))
-    {
+    if (getValueFromFile(readingNode, "force_append_equal_error",
+                         forceAppendEqualError)) {
       configuration_.forceAppendEqualError = forceAppendEqualError;
     }
 
     bool forceAppendEqualFault;
-    if (getValueFromFile(readingNode, "force_append_equal_fault", forceAppendEqualFault))
-    {
+    if (getValueFromFile(readingNode, "force_append_equal_fault",
+                         forceAppendEqualFault)) {
       configuration_.forceAppendEqualFault = forceAppendEqualFault;
     }
 
     unsigned int errorStorageCapacity;
-    if (getValueFromFile(readingNode, "error_storage_capacity", errorStorageCapacity))
-    {
+    if (getValueFromFile(readingNode, "error_storage_capacity",
+                         errorStorageCapacity)) {
       configuration_.errorStorageCapacity = errorStorageCapacity;
     }
 
     unsigned int faultStorageCapacity;
-    if (getValueFromFile(readingNode, "fault_storage_capacity", faultStorageCapacity))
-    {
+    if (getValueFromFile(readingNode, "fault_storage_capacity",
+                         faultStorageCapacity)) {
       configuration_.faultStorageCapacity = faultStorageCapacity;
     }
   }
 
   /// The configuration options for the Maxon servo drive ("hardware")
-  if (configNode["Hardware"].IsDefined())
-  {
+  if (configNode["Hardware"].IsDefined()) {
     YAML::Node hardwareNode = configNode["Hardware"];
 
     RxPdoTypeEnum rxPdo;
-    if (getRxPdoFromFile(hardwareNode, "rx_pdo_type", rxPdo))
-    {
+    if (getRxPdoFromFile(hardwareNode, "rx_pdo_type", rxPdo)) {
       configuration_.rxPdoTypeEnum = rxPdo;
     }
 
     TxPdoTypeEnum txPdo;
-    if (getTxPdoFromFile(hardwareNode, "tx_pdo_type", txPdo))
-    {
+    if (getTxPdoFromFile(hardwareNode, "tx_pdo_type", txPdo)) {
       configuration_.txPdoTypeEnum = txPdo;
     }
 
     ModeOfOperationEnum modeOfOperation_;
-    if (getModeFromFile(hardwareNode, "mode_of_operation", modeOfOperation_))
-    {
+    if (getModeFromFile(hardwareNode, "mode_of_operation", modeOfOperation_)) {
       configuration_.modeOfOperationEnum = modeOfOperation_;
     }
 
     int32_t positionEncoderResolution;
-    if (getValueFromFile(hardwareNode, "position_encoder_resolution", positionEncoderResolution))
-    {
+    if (getValueFromFile(hardwareNode, "position_encoder_resolution",
+                         positionEncoderResolution)) {
       configuration_.positionEncoderResolution = positionEncoderResolution;
     }
 
     std::pair<float, float> gearRatio;
-    if (getValueFromFile(hardwareNode, "gear_ratio", gearRatio))
-    {
-      configuration_.gearRatio = static_cast<double>(gearRatio.first) / static_cast<double>(gearRatio.second);
+    if (getValueFromFile(hardwareNode, "gear_ratio", gearRatio)) {
+      configuration_.gearRatio = static_cast<double>(gearRatio.first) /
+                                 static_cast<double>(gearRatio.second);
     }
 
     double motorConstant;
-    if (getValueFromFile(hardwareNode, "motor_constant", motorConstant))
-    {
+    if (getValueFromFile(hardwareNode, "motor_constant", motorConstant)) {
       configuration_.motorConstant = motorConstant;
     }
 
     double maxCurrentA;
-    if (getValueFromFile(hardwareNode, "max_current", maxCurrentA))
-    {
+    if (getValueFromFile(hardwareNode, "max_current", maxCurrentA)) {
       configuration_.maxCurrentA = maxCurrentA;
     }
 
     double nominalCurrentA;
-    if (getValueFromFile(hardwareNode, "nominal_current", nominalCurrentA))
-    {
+    if (getValueFromFile(hardwareNode, "nominal_current", nominalCurrentA)) {
       configuration_.nominalCurrentA = nominalCurrentA;
     }
 
     // double motorRatedTorqueNm;
-    // if (getValueFromFile(hardwareNode, "motor_rated_torque", motorRatedTorqueNm)) {
+    // if (getValueFromFile(hardwareNode, "motor_rated_torque",
+    // motorRatedTorqueNm)) {
     //   configuration_.motorRatedTorqueNm = motorRatedTorqueNm ;
     // }
 
     bool useMultipleModeOfOperations;
-    if (getValueFromFile(hardwareNode, "use_multiple_modes_of_operation", useMultipleModeOfOperations))
-    {
+    if (getValueFromFile(hardwareNode, "use_multiple_modes_of_operation",
+                         useMultipleModeOfOperations)) {
       configuration_.useMultipleModeOfOperations = useMultipleModeOfOperations;
     }
   }
 }
 
-Configuration ConfigurationParser::getConfiguration() const
-{
+Configuration ConfigurationParser::getConfiguration() const {
   return configuration_;
 }
 

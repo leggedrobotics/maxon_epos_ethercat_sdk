@@ -4,19 +4,22 @@
 ** Markus Staeuble
 **
 ** This file is part of the maxon_epos_ethercat_sdk.
-** The maxon_epos_ethercat_sdk is free software: you can redistribute it and/or modify
+** The maxon_epos_ethercat_sdk is free software: you can redistribute it and/or
+*modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation, either version 3 of the License, or
 ** (at your option) any later version.
 **
-** The maxon_epos_ethercat_sdk is distributed in the hope that it will be useful,
+** The maxon_epos_ethercat_sdk is distributed in the hope that it will be
+*useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 **
 ** You should have received a copy of the GNU General Public License
-** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
- */
+** along with the maxon_epos_ethercat_sdk. If not, see
+*<https://www.gnu.org/licenses/>.
+*/
 
 #pragma once
 
@@ -74,6 +77,9 @@ class Command {
   uint16_t getMaxTorqueRaw() const;
   uint16_t getMaxCurrentRaw() const;
   int16_t getTorqueOffsetRaw() const;
+  uint32_t getProfileAccelRaw() const;
+  uint32_t getProfileDeccelRaw() const;
+  int16_t getMotionProfileType() const;
 
   /// get (user units)
   double getTargetPosition() const;
@@ -122,6 +128,9 @@ class Command {
   uint16_t maxTorque_{0};
   uint16_t maxCurrent_{0};
   int16_t torqueOffset_{0};
+  uint32_t profileAccel_{0};
+  uint32_t profileDeccel_{0};
+  int16_t motionProfileType_{0};
 
   std::mutex targetTorqueCommandMutex_;
 
