@@ -112,16 +112,58 @@ bool Maxon::startup() {
   // To be on the safe side: set currect PDO sizes
   autoConfigurePdoSizes();
 
-  // write the motor rated current / torque to the drives
-  uint32_t nominalCurrent =
-      static_cast<uint32_t>(round(1000.0 * configuration_.nominalCurrentA));
-  success &= sdoVerifyWrite(OD_INDEX_MOTOR_DATA, 0x01, false, nominalCurrent);
+  // write the configuration parameters
+  switch (configuration_.modeOfOperationEnum) {
+    case ModeOfOperationEnum::ProfiledVelocityMode:
 
-  // uint32_t motorRatedTorque;
-  // motorRatedTorque = static_cast<uint32_t>(round(1000000.0 *
-  // configuration_.motorRatedTorqueNm)); success &=
-  //     sdoVerifyWrite(OD_INDEX_MOTOR_RATED_TORQUE, 0x00, false,
-  //     motorRatedTorque);
+      success &= sdoVerifyWrite(OD_INDEX_MAX_PROFILE_VELOCITY, 0x00, false,
+                                configuration_.maxProfileVelocity);
+
+      uint32_t maxMotorSpeed = static_cast<uint32_t>(
+          configuration_.workVoltage * configuration_.motorConstant /
+          configuration_.polePairs);
+      success &=
+          sdoVerifyWrite(OD_INDEX_MAX_MOTOR_SPEED, 0x00, false, maxMotorSpeed);
+
+      uint32_t maxGearSpeed =
+          static_cast<uint32_t>(maxMotorSpeed / configuration_.gearRatio);
+      success &= sdoVerifyWrite(OD_INDEX_GEAR_DATA, 0x03, false, maxGearSpeed);
+
+      success &= sdoVerifyWrite(OD_INDEX_SOFTWARE_POSITION_LIMIT, 0x01, false,
+                                configuration_.minPosition);
+
+      success &= sdoVerifyWrite(OD_INDEX_SOFTWARE_POSITION_LIMIT, 0x02, false,
+                                configuration_.maxPosition);
+      break;
+    case ModeOfOperationEnum::CyclicSynchronousTorqueMode:
+      uint32_t nominalCurrent =
+          static_cast<uint32_t>(round(1000.0 * configuration_.nominalCurrentA));
+      success &=
+          sdoVerifyWrite(OD_INDEX_MOTOR_DATA, 0x01, false, nominalCurrent);
+
+      uint32_t torqueConstant =
+          static_cast<uint32_t>(1000000.0 * configuration_.torqueConstantNmA);
+      success &=
+          sdoVerifyWrite(OD_INDEX_MOTOR_DATA, 0x05, false, torqueConstant);
+
+      uint32_t maxMotorSpeed = static_cast<uint32_t>(
+          configuration_.workVoltage * configuration_.motorConstant /
+          configuration_.polePairs);
+      success &=
+          sdoVerifyWrite(OD_INDEX_MAX_MOTOR_SPEED, 0x00, false, maxMotorSpeed);
+
+      uint32_t maxGearSpeed =
+          static_cast<uint32_t>(maxMotorSpeed / configuration_.gearRatio);
+      success &= sdoVerifyWrite(OD_INDEX_GEAR_DATA, 0x03, false, maxGearSpeed);
+
+      success &= sdoVerifyWrite(OD_INDEX_SOFTWARE_POSITION_LIMIT, 0x01, false,
+                                configuration_.minPosition);
+
+      success &= sdoVerifyWrite(OD_INDEX_SOFTWARE_POSITION_LIMIT, 0x02, false,
+                                configuration_.maxPosition);
+    default:
+      break;
+  }
 
   // Write maximum current to drive
   uint32_t maxCurrent =
@@ -135,6 +177,7 @@ bool Maxon::startup() {
         << name_ << "' not successful!");
     addErrorToReading(ErrorType::ConfigurationError);
   }
+  MELO_INFO_STREAM("Hardware configuration suceeded. success = " << success);
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
   return success;
 }
@@ -740,7 +783,7 @@ bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum) {
 
       // Write objects...
       objectIndex =
-          (OD_INDEX_TARGET_TORQUE << 16) | (0x00 << 8) | sizeof(int16_t);
+          (OD_INDEX_TARGET_TORQUE << 16) | (0x00 << 8) | sizeof(int16_t) * 8;
       rxSuccess &=
           sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x01, false, objectIndex,
                          configuration_.configRunSdoVerifyTimeout);
@@ -748,7 +791,7 @@ bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum) {
           std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       objectIndex =
-          (OD_INDEX_OFFSET_TORQUE << 16) | (0x00 << 8) | sizeof(int16_t);
+          (OD_INDEX_OFFSET_TORQUE << 16) | (0x00 << 8) | sizeof(int16_t) * 8;
       rxSuccess &=
           sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x02, false, objectIndex,
                          configuration_.configRunSdoVerifyTimeout);
@@ -800,7 +843,7 @@ bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum) {
 
       // Write objects...
       objectIndex =
-          (OD_INDEX_CONTROLWORD << 16) | (0x00 << 8) | sizeof(int16_t);
+          (OD_INDEX_CONTROLWORD << 16) | (0x00 << 8) | sizeof(int16_t) * 8;
       rxSuccess &=
           sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x01, false, objectIndex,
                          configuration_.configRunSdoVerifyTimeout);
@@ -808,7 +851,7 @@ bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum) {
           std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       objectIndex =
-          (OD_INDEX_TARGET_VELOCITY << 16) | (0x00 << 8) | sizeof(int32_t);
+          (OD_INDEX_TARGET_VELOCITY << 16) | (0x00 << 8) | sizeof(int32_t) * 8;
       rxSuccess &=
           sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x02, false, objectIndex,
                          configuration_.configRunSdoVerifyTimeout);
@@ -816,7 +859,7 @@ bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum) {
           std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       objectIndex = (OD_INDEX_PROFILE_ACCELERATION << 16) | (0x00 << 8) |
-                    sizeof(uint32_t);
+                    sizeof(uint32_t) * 8;
       rxSuccess &=
           sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x03, false, objectIndex,
                          configuration_.configRunSdoVerifyTimeout);
@@ -824,15 +867,15 @@ bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum) {
           std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       objectIndex = (OD_INDEX_PROFILE_DECELERATION << 16) | (0x00 << 8) |
-                    sizeof(uint32_t);
+                    sizeof(uint32_t) * 8;
       rxSuccess &=
           sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x04, false, objectIndex,
                          configuration_.configRunSdoVerifyTimeout);
       std::this_thread::sleep_for(
           std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
-      objectIndex =
-          (OD_INDEX_MOTION_PROFILE_TYPE << 16) | (0x00 << 8) | sizeof(int16_t);
+      objectIndex = (OD_INDEX_MOTION_PROFILE_TYPE << 16) | (0x00 << 8) |
+                    sizeof(int16_t) * 8;
       rxSuccess &=
           sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x05, false, objectIndex,
                          configuration_.configRunSdoVerifyTimeout);
@@ -911,7 +954,7 @@ bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum) {
 
     case TxPdoTypeEnum::TxPdoCST:
       MELO_INFO_STREAM("[maxon_epos_ethercat_sdk:Maxon::mapPdos] Tx Pdo: "
-                       << "Cyclic Synchronous Troque Mode");
+                       << "Cyclic Synchronous Torque Mode");
 
       // Disable PDO
       txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x00, false,
@@ -938,7 +981,7 @@ bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum) {
 
       // Write objects...
       objectIndex =
-          (OD_INDEX_POSITION_ACTUAL << 16) | (0x00 << 8) | sizeof(int32_t);
+          (OD_INDEX_POSITION_ACTUAL << 16) | (0x00 << 8) | sizeof(int32_t) * 8;
       txSuccess &=
           sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x01, false, objectIndex,
                          configuration_.configRunSdoVerifyTimeout);
@@ -947,7 +990,7 @@ bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum) {
           std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       objectIndex =
-          (OD_INDEX_TORQUE_ACTUAL << 16) | (0x00 << 8) | sizeof(int16_t);
+          (OD_INDEX_TORQUE_ACTUAL << 16) | (0x00 << 8) | sizeof(int16_t) * 8;
       txSuccess &=
           sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x02, false, objectIndex,
                          configuration_.configRunSdoVerifyTimeout);
@@ -956,7 +999,7 @@ bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum) {
           std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       objectIndex =
-          (OD_INDEX_VELOCITY_ACTUAL << 16) | (0x00 << 8) | sizeof(int32_t);
+          (OD_INDEX_VELOCITY_ACTUAL << 16) | (0x00 << 8) | sizeof(int32_t) * 8;
       txSuccess &=
           sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x03, false, objectIndex,
                          configuration_.configRunSdoVerifyTimeout);
@@ -1011,7 +1054,7 @@ bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum) {
 
       // Write objects...
       objectIndex =
-          (OD_INDEX_VELOCITY_DEMAND << 16) | (0x00 << 8) | sizeof(int32_t);
+          (OD_INDEX_VELOCITY_DEMAND << 16) | (0x00 << 8) | sizeof(int32_t) * 8;
       txSuccess &=
           sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x01, false, objectIndex,
                          configuration_.configRunSdoVerifyTimeout);
@@ -1020,7 +1063,7 @@ bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum) {
           std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       objectIndex =
-          (OD_INDEX_STATUSWORD << 16) | (0x00 << 8) | sizeof(uint16_t);
+          (OD_INDEX_STATUSWORD << 16) | (0x00 << 8) | sizeof(uint16_t) * 8;
       txSuccess &=
           sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x02, false, objectIndex,
                          configuration_.configRunSdoVerifyTimeout);
@@ -1097,7 +1140,9 @@ Controlword Maxon::getNextStateTransitionControlword(
           MELO_ERROR_STREAM(
               "[maxon_epos_ethercat_sdk:Maxon::"
               "getNextStateTransitionControlword] "
-              << "PDO state transition not implemented for '" << name_ << "'");
+              << "PDO state transition not implemented for '" << name_ << "'\n"
+              << "Current: " << currentDriveState << "\n"
+              << "Requested: " << requestedDriveState);
           addErrorToReading(ErrorType::PdoStateTransitionError);
       }
       break;
@@ -1130,7 +1175,9 @@ Controlword Maxon::getNextStateTransitionControlword(
           MELO_ERROR_STREAM(
               "[maxon_epos_ethercat_sdk:Maxon::"
               "getNextStateTransitionControlword] "
-              << "PDO state transition not implemented for '" << name_ << "'");
+              << "PDO state transition not implemented for '" << name_ << "'\n"
+              << "Current: " << currentDriveState << "\n"
+              << "Requested: " << requestedDriveState);
           addErrorToReading(ErrorType::PdoStateTransitionError);
       }
       break;
@@ -1163,7 +1210,9 @@ Controlword Maxon::getNextStateTransitionControlword(
           MELO_ERROR_STREAM(
               "[maxon_epos_ethercat_sdk:Maxon::"
               "getNextStateTransitionControlword] "
-              << "PDO state transition not implemented for '" << name_ << "'");
+              << "PDO state transition not implemented for '" << name_ << "'\n"
+              << "Current: " << currentDriveState << "\n"
+              << "Requested: " << requestedDriveState);
           addErrorToReading(ErrorType::PdoStateTransitionError);
       }
       break;
@@ -1196,7 +1245,9 @@ Controlword Maxon::getNextStateTransitionControlword(
           MELO_ERROR_STREAM(
               "[maxon_epos_ethercat_sdk:Maxon::"
               "getNextStateTransitionControlword] "
-              << "PDO state transition not implemented for '" << name_ << "'");
+              << "PDO state transition not implemented for '" << name_ << "'\n"
+              << "Current: " << currentDriveState << "\n"
+              << "Requested: " << requestedDriveState);
           addErrorToReading(ErrorType::PdoStateTransitionError);
       }
       break;
@@ -1229,21 +1280,14 @@ Controlword Maxon::getNextStateTransitionControlword(
           MELO_ERROR_STREAM(
               "[maxon_epos_ethercat_sdk:Maxon::"
               "getNextStateTransitionControlword] "
-              << "PDO state transition not implemented for '" << name_ << "'");
+              << "PDO state transition not implemented for '" << name_ << "'\n"
+              << "Current: " << currentDriveState << "\n"
+              << "Requested: " << requestedDriveState);
           addErrorToReading(ErrorType::PdoStateTransitionError);
       }
       break;
 
     default:
-      uint16_t errorcode = 0;
-      bool error_read_success =
-          sendSdoRead(OD_INDEX_ERROR_CODE, 0x00, false, errorcode);
-      if (error_read_success) {
-        MELO_ERROR_STREAM(
-            "[maxon_epos_ethercat_sdk:Maxon::getNextStateTransitionControlword]"
-            " "
-            << "Error code: " << std::hex << errorcode);
-      }
       MELO_ERROR_STREAM(
           "[maxon_epos_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
           << "PDO state cannot be reached for '" << name_ << "'");
@@ -1322,6 +1366,27 @@ void Maxon::printErrorCode() {
     MELO_ERROR_STREAM(
         "[maxon_epos_ethercat_sdk:Maxon::printErrorCode] read error code "
         "uncessuful.")
+  }
+}
+
+void Maxon::printDiagnosis() {
+  uint8_t newestIdx = 0;
+  bool newMsgAvailable = false;
+  std::array<uint, 4> diagnosisMsg;
+  sendSdoRead(OD_INDEX_DIAGNOSIS, 0x04, false, newMsgAvailable);
+  if (newMsgAvailable) {
+    sendSdoRead(OD_INDEX_DIAGNOSIS, 0x02, false, newestIdx);
+    sendSdoRead(OD_INDEX_DIAGNOSIS, newestIdx, false, diagnosisMsg);
+    MELO_INFO(
+        "[maxon_epos_ethercat_sdk:Maxon::printDiagnosis] Latest diagnostic "
+        "message: ");
+    for (const auto& s : diagnosisMsg) {
+      MELO_INFO_STREAM(std::hex << s);
+    }
+  } else {
+    MELO_INFO(
+        "[maxon_epos_ethercat_sdk:Maxon::printDiagnosis] "
+        "No diagnostic message available.");
   }
 }
 }  // namespace maxon

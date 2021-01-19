@@ -4,19 +4,22 @@
 ** Markus Staeuble
 **
 ** This file is part of the maxon_epos_ethercat_sdk.
-** The maxon_epos_ethercat_sdk is free software: you can redistribute it and/or modify
+** The maxon_epos_ethercat_sdk is free software: you can redistribute it and/or
+*modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation, either version 3 of the License, or
 ** (at your option) any later version.
 **
-** The maxon_epos_ethercat_sdk is distributed in the hope that it will be useful,
+** The maxon_epos_ethercat_sdk is distributed in the hope that it will be
+*useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 **
 ** You should have received a copy of the GNU General Public License
-** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
- */
+** along with the maxon_epos_ethercat_sdk. If not, see
+*<https://www.gnu.org/licenses/>.
+*/
 
 #pragma once
 
@@ -30,7 +33,6 @@
 namespace maxon {
 
 class Configuration {
-
  public:
   ModeOfOperationEnum modeOfOperationEnum{ModeOfOperationEnum::NA};
   RxPdoTypeEnum rxPdoTypeEnum{RxPdoTypeEnum::NA};
@@ -48,14 +50,22 @@ class Configuration {
   bool useRawCommands{false};
   double gearRatio{1};
   double motorConstant{1};
+  double workVoltage{48.0};
+  double speedConstant{0};
+  double polePairs{11};
   double nominalCurrentA{0};
+  double torqueConstantNmA{0};
   double motorRatedTorqueNm{0};
   double maxCurrentA{0};
+  int32_t minPosition{0};
+  int32_t maxPosition{0};
+  uint32_t maxProfileVelocity{0};
   bool useMultipleModeOfOperations{false};
 
  public:
   // stream operator
-  friend std::ostream& operator<<(std::ostream& os, const Configuration& configuration);
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const Configuration& configuration);
 };
 
 }  // namespace maxon

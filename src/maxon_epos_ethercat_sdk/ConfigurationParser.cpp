@@ -324,6 +324,21 @@ void ConfigurationParser::parseConfiguration(YAML::Node configNode) {
       configuration_.motorConstant = motorConstant;
     }
 
+    double workVoltage;
+    if (getValueFromFile(hardwareNode, "working_voltage", workVoltage)) {
+      configuration_.workVoltage = workVoltage;
+    }
+
+    double speedConstant;
+    if (getValueFromFile(hardwareNode, "speed_constant", speedConstant)) {
+      configuration_.speedConstant = speedConstant;
+    }
+
+    double polePairs;
+    if (getValueFromFile(hardwareNode, "pole_pairs", polePairs)) {
+      configuration_.polePairs = polePairs;
+    }
+
     double maxCurrentA;
     if (getValueFromFile(hardwareNode, "max_current", maxCurrentA)) {
       configuration_.maxCurrentA = maxCurrentA;
@@ -332,6 +347,27 @@ void ConfigurationParser::parseConfiguration(YAML::Node configNode) {
     double nominalCurrentA;
     if (getValueFromFile(hardwareNode, "nominal_current", nominalCurrentA)) {
       configuration_.nominalCurrentA = nominalCurrentA;
+    }
+
+    double torqueConstantNmA;
+    if (getValueFromFile(hardwareNode, "torque_constant", torqueConstantNmA)) {
+      configuration_.torqueConstantNmA = torqueConstantNmA;
+    }
+
+    int32_t minPosition;
+    if (getValueFromFile(hardwareNode, "min_position", minPosition)) {
+      configuration_.minPosition = minPosition;
+    }
+
+    int32_t maxPosition;
+    if (getValueFromFile(hardwareNode, "max_position", maxPosition)) {
+      configuration_.maxPosition = maxPosition;
+    }
+
+    uint32_t maxProfileVelocity;
+    if (getValueFromFile(hardwareNode, "max_profile_velocity",
+                         maxProfileVelocity)) {
+      configuration_.maxProfileVelocity = maxProfileVelocity;
     }
 
     // double motorRatedTorqueNm;
