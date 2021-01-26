@@ -26,13 +26,20 @@
 #include <cstdint>
 #include <ostream>
 
-namespace maxon {
-
+namespace maxon
+{
 // different RxPdo Types
-enum class RxPdoTypeEnum : int8_t { NA = 0, RxPdoStandard, RxPdoCST, RxPdoPVM };
+enum class RxPdoTypeEnum : int8_t
+{
+  NA = 0,
+  RxPdoStandard,
+  RxPdoCST,
+  RxPdoPVM
+};
 
 // different TxPdo Types
-enum class TxPdoTypeEnum : int8_t {
+enum class TxPdoTypeEnum : int8_t
+{
   NA = -128,
   TxPdoStandard,
   TxPdoCST,
@@ -41,7 +48,5 @@ enum class TxPdoTypeEnum : int8_t {
 
 }  // namespace maxon
 
-std::ostream& operator<<(std::ostream& os,
-                         const maxon::TxPdoTypeEnum& txPdoTypeEnum);
-std::ostream& operator<<(std::ostream& os,
-                         const maxon::RxPdoTypeEnum& rxPdoTypeEnum);
+std::ostream& operator<<(std::ostream& os, const maxon::TxPdoTypeEnum& txPdoTypeEnum);
+std::ostream& operator<<(std::ostream& os, const maxon::RxPdoTypeEnum& rxPdoTypeEnum);

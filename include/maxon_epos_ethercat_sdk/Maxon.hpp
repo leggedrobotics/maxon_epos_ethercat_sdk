@@ -37,37 +37,38 @@
 #include "maxon_epos_ethercat_sdk/DriveState.hpp"
 #include "maxon_epos_ethercat_sdk/Reading.hpp"
 
-namespace maxon {
-class Maxon : public ecat_master::EthercatDevice {
- public:
+namespace maxon
+{
+class Maxon : public ecat_master::EthercatDevice
+{
+public:
   typedef std::shared_ptr<Maxon> SharedPtr;
 
   // create Maxon Drive from setup file
-  static SharedPtr deviceFromFile(const std::string& configFile,
-                                  const std::string& name,
-                                  const uint32_t address);
+  static SharedPtr deviceFromFile(const std::string& configFile, const std::string& name, const uint32_t address);
   // constructor
   Maxon() = default;
   Maxon(const std::string& name, const uint32_t address);
 
   // pure virtual overwrites
- public:
+public:
   bool startup() override;
   void shutdown() override;
   void updateWrite() override;
   void updateRead() override;
-  bool putIntoOperation() {
+  bool putIntoOperation()
+  {
     bool success;
     bus_->setState(EC_STATE_OPERATIONAL, getAddress());
-    success =
-        bus_->waitForState(EC_STATE_OPERATIONAL, getAddress(), 1000, 0.001);
+    success = bus_->waitForState(EC_STATE_OPERATIONAL, getAddress(), 1000, 0.001);
     return success;
   }
-  PdoInfo getCurrentPdoInfo() const override {
+  PdoInfo getCurrentPdoInfo() const override
+  {
     return pdoInfo_;
   }
 
- public:
+public:
   void stageCommand(const Command& command);
   Reading getReading() const;
   void getReading(Reading& reading) const;
@@ -78,60 +79,60 @@ class Maxon : public ecat_master::EthercatDevice {
   Configuration getConfiguration() const;
 
   // SDO
- public:
+public:
   bool getStatuswordViaSdo(Statusword& statusword);
   bool setControlwordViaSdo(Controlword& controlword);
   bool setDriveStateViaSdo(const DriveState& driveState);
 
- protected:
+protected:
   bool stateTransitionViaSdo(const StateTransition& stateTransition);
 
   // PDO
- public:
-  bool setDriveStateViaPdo(const DriveState& driveState,
-                           const bool waitForState);
-  bool lastPdoStateChangeSuccessful() const {
+public:
+  bool setDriveStateViaPdo(const DriveState& driveState, const bool waitForState);
+  bool lastPdoStateChangeSuccessful() const
+  {
     return stateChangeSuccessful_;
   }
 
- protected:
+protected:
   void engagePdoStateMachine();
   bool mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum);
-  Controlword getNextStateTransitionControlword(
-      const DriveState& requestedDriveState,
-      const DriveState& currentDriveState);
+  bool configParam(ModeOfOperationEnum modeOfOperationEnum);
+  Controlword getNextStateTransitionControlword(const DriveState& requestedDriveState,
+                                                const DriveState& currentDriveState);
   void autoConfigurePdoSizes();
 
   uint16_t getTxPdoSize();
   uint16_t getRxPdoSize();
 
   // Errors
- protected:
+protected:
   void addErrorToReading(const ErrorType& errorType);
 
- public:
+public:
   void printErrorCode();
   void printDiagnosis();
 
- protected:
+protected:
   Command stagedCommand_;
   Reading reading_;
   Configuration configuration_;
   Controlword controlword_;
   PdoInfo pdoInfo_;
-  bool hasRead_{false};
-  bool conductStateChange_{false};
-  DriveState targetDriveState_{DriveState::NA};
+  bool hasRead_{ false };
+  bool conductStateChange_{ false };
+  DriveState targetDriveState_{ DriveState::NA };
   std::chrono::time_point<std::chrono::steady_clock> driveStateChangeTimePoint_;
-  uint16_t numberOfSuccessfulTargetStateReadings_{0};
-  std::atomic<bool> stateChangeSuccessful_{false};
+  uint16_t numberOfSuccessfulTargetStateReadings_{ 0 };
+  std::atomic<bool> stateChangeSuccessful_{ false };
 
   // Configurable parameters
- protected:
-  bool allowModeChange_{false};
-  ModeOfOperationEnum modeOfOperation_{ModeOfOperationEnum::NA};
+protected:
+  bool allowModeChange_{ false };
+  ModeOfOperationEnum modeOfOperation_{ ModeOfOperationEnum::NA };
 
- protected:
+protected:
   mutable std::recursive_mutex stagedCommandMutex_;  // TODO required?
   mutable std::recursive_mutex readingMutex_;        // TODO required?
   mutable std::recursive_mutex mutex_;               // TODO: change name!!!!

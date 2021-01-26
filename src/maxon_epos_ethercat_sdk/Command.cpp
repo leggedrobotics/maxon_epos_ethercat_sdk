@@ -21,13 +21,14 @@
 *<https://www.gnu.org/licenses/>.
 */
 
-#include "maxon_epos_ethercat_sdk/Command.hpp"
-
 #include <iomanip>
 
-namespace maxon {
+#include "maxon_epos_ethercat_sdk/Command.hpp"
 
-Command::Command(const Command& other) {
+namespace maxon
+{
+Command::Command(const Command& other)
+{
   targetPositionUU_ = other.targetPositionUU_;
   targetVelocityUU_ = other.targetVelocityUU_;
   targetTorqueUU_ = other.targetTorqueUU_;
@@ -47,8 +48,7 @@ Command::Command(const Command& other) {
   digitalOutputs_ = other.digitalOutputs_;
 
   positionFactorRadToInteger_ = other.positionFactorRadToInteger_;
-  velocityFactorRadPerSecToIntegerPerSec_ =
-      other.velocityFactorRadPerSecToIntegerPerSec_;
+  velocityFactorRadPerSecToIntegerPerSec_ = other.velocityFactorRadPerSecToIntegerPerSec_;
   torqueFactorNmToInteger_ = other.torqueFactorNmToInteger_;
   currentFactorAToInteger_ = other.currentFactorAToInteger_;
 
@@ -58,7 +58,8 @@ Command::Command(const Command& other) {
   targetTorqueCommandUsed_ = other.targetTorqueCommandUsed_;
 }
 
-Command& Command::operator=(const Command& other) {
+Command& Command::operator=(const Command& other)
+{
   targetPositionUU_ = other.targetPositionUU_;
   targetVelocityUU_ = other.targetVelocityUU_;
   targetTorqueUU_ = other.targetTorqueUU_;
@@ -78,8 +79,7 @@ Command& Command::operator=(const Command& other) {
   digitalOutputs_ = other.digitalOutputs_;
 
   positionFactorRadToInteger_ = other.positionFactorRadToInteger_;
-  velocityFactorRadPerSecToIntegerPerSec_ =
-      other.velocityFactorRadPerSecToIntegerPerSec_;
+  velocityFactorRadPerSecToIntegerPerSec_ = other.velocityFactorRadPerSecToIntegerPerSec_;
   torqueFactorNmToInteger_ = other.torqueFactorNmToInteger_;
   currentFactorAToInteger_ = other.currentFactorAToInteger_;
 
@@ -90,35 +90,41 @@ Command& Command::operator=(const Command& other) {
   return *this;
 }
 
-std::ostream& operator<<(std::ostream& os, Command& command) {
-  os << std::left << std::setw(25)
-     << "Target Position:" << command.targetPositionUU_ << "\n"
+std::ostream& operator<<(std::ostream& os, Command& command)
+{
+  os << std::left << std::setw(25) << "Target Position:" << command.targetPositionUU_ << "\n"
      << std::setw(25) << "Target Velocity:" << command.targetVelocityUU_ << "\n"
      << std::setw(25) << "Target Torque:" << command.targetTorqueUU_ << "\n"
      << std::setw(25) << "Target Current:" << command.targetCurrentUU_ << "\n"
      << std::setw(25) << "Maximum Torque:" << command.maxTorqueUU_ << "\n"
      << std::setw(25) << "Maximum Current:" << command.maxCurrentUU_ << "\n"
      << std::setw(25) << "Torque Offset:" << command.torqueOffsetUU_ << "\n"
-     << std::setw(25) << "Digital Outputs:" << command.getDigitalOutputString()
-     << "\n"
+     << std::setw(25) << "Digital Outputs:" << command.getDigitalOutputString() << "\n"
      << std::right;
 
   return os;
 }
 
-uint32_t Command::getDigitalOutputs() const {
+uint32_t Command::getDigitalOutputs() const
+{
   return digitalOutputs_;
 }
 
-std::string Command::getDigitalOutputString() const {
+std::string Command::getDigitalOutputString() const
+{
   std::string outputs;
-  for (unsigned int i = 0; i < 8 * sizeof(digitalOutputs_); i++) {
-    if ((digitalOutputs_ & (1 << (sizeof(digitalOutputs_) * 8 - 1 - i))) != 0) {
+  for (unsigned int i = 0; i < 8 * sizeof(digitalOutputs_); i++)
+  {
+    if ((digitalOutputs_ & (1 << (sizeof(digitalOutputs_) * 8 - 1 - i))) != 0)
+    {
       outputs += "1";
-    } else {
+    }
+    else
+    {
       outputs += "0";
     }
-    if (((i + 1) % 8) == 0) {
+    if (((i + 1) % 8) == 0)
+    {
       outputs += " ";
     }
   }
@@ -129,166 +135,200 @@ std::string Command::getDigitalOutputString() const {
 /*!
  * Raw set methods
  */
-void Command::setTargetPositionRaw(int32_t targetPosition) {
+void Command::setTargetPositionRaw(int32_t targetPosition)
+{
   targetPosition_ = targetPosition;
 }
-void Command::setTargetVelocityRaw(int32_t targetVelocity) {
+void Command::setTargetVelocityRaw(int32_t targetVelocity)
+{
   targetVelocity_ = targetVelocity;
 }
-void Command::setTargetCurrentRaw(int16_t targetCurrent) {
+void Command::setTargetCurrentRaw(int16_t targetCurrent)
+{
   targetCurrent_ = targetCurrent;
 }
-void Command::setTorqueOffsetRaw(int16_t torqueOffset) {
+void Command::setTorqueOffsetRaw(int16_t torqueOffset)
+{
   torqueOffset_ = torqueOffset;
 }
 
 /*!
  * user unit set methods
  */
-void Command::setTargetPosition(double targetPosition) {
+void Command::setTargetPosition(double targetPosition)
+{
   targetPositionUU_ = targetPosition;
 }
-void Command::setTargetVelocity(double targetVelocity) {
+void Command::setTargetVelocity(double targetVelocity)
+{
   targetVelocityUU_ = targetVelocity;
 }
-void Command::setTargetTorque(double targetTorque) {
+void Command::setTargetTorque(double targetTorque)
+{
   // lock for thread safety
   std::lock_guard<std::mutex> lockGuard(targetTorqueCommandMutex_);
   targetTorqueUU_ = targetTorque;
   targetTorqueCommandUsed_ = true;
 }
-void Command::setTargetCurrent(double targetCurrent) {
+void Command::setTargetCurrent(double targetCurrent)
+{
   // lock for thread safety
   std::lock_guard<std::mutex> lockGuard(targetTorqueCommandMutex_);
   targetCurrentUU_ = targetCurrent;
   targetTorqueCommandUsed_ = false;
 }
-void Command::setTorqueOffset(double torqueOffset) {
+void Command::setTorqueOffset(double torqueOffset)
+{
   torqueOffsetUU_ = torqueOffset;
 }
-void Command::setMaxCurrent(double maxCurrent) {
+void Command::setMaxCurrent(double maxCurrent)
+{
   maxCurrentUU_ = maxCurrent;
 }
-void Command::setMaxTorque(double maxTorque) {
+void Command::setMaxTorque(double maxTorque)
+{
   maxTorqueUU_ = maxTorque;
 }
 
 /*!
  * factors set methods
  */
-void Command::setPositionFactorRadToInteger(double factor) {
+void Command::setPositionFactorRadToInteger(double factor)
+{
   positionFactorRadToInteger_ = factor;
 }
-void Command::setVelocityFactorRadPerSecToIntegerPerSec(double factor) {
+void Command::setVelocityFactorRadPerSecToIntegerPerSec(double factor)
+{
   velocityFactorRadPerSecToIntegerPerSec_ = factor;
 }
-void Command::setTorqueFactorNmToInteger(double factor) {
+void Command::setTorqueFactorNmToInteger(double factor)
+{
   torqueFactorNmToInteger_ = factor;
 }
-void Command::setCurrentFactorAToInteger(double factor) {
+void Command::setCurrentFactorAToInteger(double factor)
+{
   currentFactorAToInteger_ = factor;
 }
 
 /*!
  * other set methods
  */
-void Command::setDigitalOutputs(uint32_t digitalOutputs) {
+void Command::setDigitalOutputs(uint32_t digitalOutputs)
+{
   digitalOutputs_ = digitalOutputs;
 }
-void Command::setUseRawCommands(bool useRawCommands) {
+void Command::setUseRawCommands(bool useRawCommands)
+{
   useRawCommands_ = useRawCommands;
 }
-void Command::setModeOfOperation(const ModeOfOperationEnum modeOfOperation) {
+void Command::setModeOfOperation(const ModeOfOperationEnum modeOfOperation)
+{
   modeOfOperation_ = modeOfOperation;
 }
 
 /*
  * get methods (raw units)
  */
-int32_t Command::getTargetPositionRaw() const {
+int32_t Command::getTargetPositionRaw() const
+{
   return targetPosition_;
 }
-int32_t Command::getTargetVelocityRaw() const {
+int32_t Command::getTargetVelocityRaw() const
+{
   return targetVelocity_;
 }
-int16_t Command::getTargetTorqueRaw() const {
+int16_t Command::getTargetTorqueRaw() const
+{
   return targetTorque_;
 }
-int16_t Command::getTargetCurrentRaw() const {
+int16_t Command::getTargetCurrentRaw() const
+{
   return targetCurrent_;
 }
-uint16_t Command::getMaxTorqueRaw() const {
+uint16_t Command::getMaxTorqueRaw() const
+{
   return maxTorque_;
 }
-uint16_t Command::getMaxCurrentRaw() const {
+uint16_t Command::getMaxCurrentRaw() const
+{
   return maxCurrent_;
 }
-int16_t Command::getTorqueOffsetRaw() const {
+int16_t Command::getTorqueOffsetRaw() const
+{
   return torqueOffset_;
 }
-uint32_t Command::getProfileAccelRaw() const {
+uint32_t Command::getProfileAccelRaw() const
+{
   return profileAccel_;
 }
-uint32_t Command::getProfileDeccelRaw() const {
+uint32_t Command::getProfileDeccelRaw() const
+{
   return profileDeccel_;
 }
-int16_t Command::getMotionProfileType() const {
+int16_t Command::getMotionProfileType() const
+{
   return motionProfileType_;
 }
 
 /*
  * get methods (user units)
  */
-double Command::getTargetPosition() const {
+double Command::getTargetPosition() const
+{
   return targetPositionUU_;
 }
-double Command::getTargetVelocity() const {
+double Command::getTargetVelocity() const
+{
   return targetVelocityUU_;
 }
-double Command::getTargetTorque() const {
+double Command::getTargetTorque() const
+{
   return targetTorqueUU_;
 }
-double Command::getTargetCurrent() const {
+double Command::getTargetCurrent() const
+{
   return targetCurrentUU_;
 }
-double Command::getMaxTorque() const {
+double Command::getMaxTorque() const
+{
   return maxTorqueUU_;
 }
-double Command::getMaxCurrent() const {
+double Command::getMaxCurrent() const
+{
   return maxCurrentUU_;
 }
-double Command::getTorqueOffset() const {
+double Command::getTorqueOffset() const
+{
   return torqueOffsetUU_;
 }
 
-void Command::doUnitConversion() {
-  if (!useRawCommands_) {
-    targetPosition_ =
-        static_cast<int32_t>(positionFactorRadToInteger_ * targetPositionUU_);
-    targetVelocity_ = static_cast<int32_t>(
-        velocityFactorRadPerSecToIntegerPerSec_ * targetVelocityUU_);
-    targetTorque_ =
-        static_cast<int16_t>(torqueFactorNmToInteger_ * targetTorqueUU_);
+void Command::doUnitConversion()
+{
+  if (!useRawCommands_)
+  {
+    targetPosition_ = static_cast<int32_t>(positionFactorRadToInteger_ * targetPositionUU_);
+    targetVelocity_ = static_cast<int32_t>(velocityFactorRadPerSecToIntegerPerSec_ * targetVelocityUU_);
+    targetTorque_ = static_cast<int16_t>(torqueFactorNmToInteger_ * targetTorqueUU_);
     {
       std::lock_guard<std::mutex> lockGuard(targetTorqueCommandMutex_);
-      if (targetTorqueCommandUsed_) {
-        targetCurrent_ =
-            static_cast<int16_t>(torqueFactorNmToInteger_ * targetTorqueUU_);
-      } else {
-        targetCurrent_ =
-            static_cast<int16_t>(currentFactorAToInteger_ * targetCurrentUU_);
+      if (targetTorqueCommandUsed_)
+      {
+        targetCurrent_ = static_cast<int16_t>(torqueFactorNmToInteger_ * targetTorqueUU_);
+      }
+      else
+      {
+        targetCurrent_ = static_cast<int16_t>(currentFactorAToInteger_ * targetCurrentUU_);
       }
     }
     maxTorque_ = static_cast<uint16_t>(torqueFactorNmToInteger_ * maxTorqueUU_);
-    maxCurrent_ =
-        static_cast<uint16_t>(currentFactorAToInteger_ * maxCurrentUU_);
-    torqueOffset_ =
-        static_cast<int16_t>(torqueFactorNmToInteger_ * torqueOffsetUU_);
+    maxCurrent_ = static_cast<uint16_t>(currentFactorAToInteger_ * maxCurrentUU_);
+    torqueOffset_ = static_cast<int16_t>(torqueFactorNmToInteger_ * torqueOffsetUU_);
   }
 }
 
 /// other get methods
-ModeOfOperationEnum Command::getModeOfOperation() const {
+ModeOfOperationEnum Command::getModeOfOperation() const
+{
   return modeOfOperation_;
 }
 

@@ -30,12 +30,13 @@
 
 #include <cstdint>
 
-namespace maxon {
-
+namespace maxon
+{
 /*!
  * Standard Tx Pdo type
  */
-struct TxPdoStandard {
+struct TxPdoStandard
+{
   uint16_t statusword_;
 } __attribute__((packed));
 
@@ -43,13 +44,15 @@ struct TxPdoStandard {
  * CST Tx PDO type
  * Includes padding_ byte for firmware version 01.01.15.00 (october 2018)
  */
-struct TxPdoCST {
+struct TxPdoCST
+{
   int32_t actualPosition_;
   int16_t actualTorque_;
   int32_t actualVelocity_;
 } __attribute__((packed));
 
-struct TxPdoPVM {
+struct TxPdoPVM
+{
   int32_t demandVelocity_;
   uint16_t statusword_;
 } __attribute__((packed));

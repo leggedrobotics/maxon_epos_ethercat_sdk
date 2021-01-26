@@ -16,23 +16,25 @@
 **
 ** You should have received a copy of the GNU General Public License
 ** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 
 #pragma once
 
+#include <yaml-cpp/yaml.h>
+
 #include <message_logger/message_logger.hpp>
 #include <string>
-#include <yaml-cpp/yaml.h>
 
 #include "maxon_epos_ethercat_sdk/Configuration.hpp"
 
-namespace maxon {
-
+namespace maxon
+{
 /*!
  * @brief	Read configuration data from a yaml file
  */
-class ConfigurationParser {
- public:
+class ConfigurationParser
+{
+public:
   /*!
    * no default constructor
    */
@@ -63,7 +65,7 @@ class ConfigurationParser {
    */
   Configuration getConfiguration() const;
 
- private:
+private:
   /*!
    * @brief	Parse the configuration data
    * @param configNode	yaml node containing the config data

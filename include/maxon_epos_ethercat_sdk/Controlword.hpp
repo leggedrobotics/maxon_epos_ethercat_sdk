@@ -16,27 +16,28 @@
 **
 ** You should have received a copy of the GNU General Public License
 ** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 
 #pragma once
 
 #include <cstdint>
 #include <iostream>
 
-namespace maxon {
-
-struct Controlword {
-  bool switchOn_{false};              // bit 0
-  bool enableVoltage_{false};         // bit 1
-  bool quickStop_{false};             // bit 2
-  bool enableOperation_{false};       // bit 3
-  bool newSetPoint_{false};           // bit 4 profiled position mode
-  bool homingOperationStart_{false};  // bit 4 homing mode
-  bool changeSetImmediately_{false};  // bit 5 profiled position mode
-  bool relative_{false};              // bit 6 profiled position mode
-  bool faultReset_{false};            // bit 7
-  bool halt_{false};                  // bit 8
-  bool endlessMovement_{false};       // bit 15 profiled position mode
+namespace maxon
+{
+struct Controlword
+{
+  bool switchOn_{ false };              // bit 0
+  bool enableVoltage_{ false };         // bit 1
+  bool quickStop_{ false };             // bit 2
+  bool enableOperation_{ false };       // bit 3
+  bool newSetPoint_{ false };           // bit 4 profiled position mode
+  bool homingOperationStart_{ false };  // bit 4 homing mode
+  bool changeSetImmediately_{ false };  // bit 5 profiled position mode
+  bool relative_{ false };              // bit 6 profiled position mode
+  bool faultReset_{ false };            // bit 7
+  bool halt_{ false };                  // bit 8
+  bool endlessMovement_{ false };       // bit 15 profiled position mode
 
   /*!
    * get the control word as a 16 bit unsigned integer

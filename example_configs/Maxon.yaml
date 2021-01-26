@@ -21,6 +21,6 @@ Hardware:
   position_encoder_resolution: 66
   gear_ratio: [1, 1]
   motor_constant: 1.0
-  max_current: 5.0
+  max_current: 4.9
   nominal_current: 2.0
   motor_rated_torque: 0.78

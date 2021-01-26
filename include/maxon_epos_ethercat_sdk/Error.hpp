@@ -16,19 +16,20 @@
 **
 ** You should have received a copy of the GNU General Public License
 ** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 
 #pragma once
 
-namespace maxon {
-
+namespace maxon
+{
 /*!
  * An enum containing all the possible Error types.
  * Note that Errors and Faults are not the same thing.
  * Errors occur during setup, configuration and SDO reading / writing
  * Faults occur during PDO communication when the drive state jumps to "FAULT".
  */
-enum class ErrorType {
+enum class ErrorType
+{
   ConfigurationError,
   SdoWriteError,
   SdoReadError,

@@ -16,7 +16,7 @@
 **
 ** You should have received a copy of the GNU General Public License
 ** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 
 #pragma once
 
@@ -27,28 +27,29 @@
 
 #include "maxon_epos_ethercat_sdk/DriveState.hpp"
 
-namespace maxon {
-
-class Statusword {
- private:
-  bool readyToSwitchOn_{false};      // bit 0
-  bool switchedOn_{false};           // bit 1
-  bool operationEnabled_{false};     // bit 2
-  bool fault_{false};                // bit 3
-  bool voltageEnabled_{false};       // bit 4
-  bool quickStop_{false};            // bit 5
-  bool switchOnDisabled_{false};     // bit 6
-  bool warning_{false};              // bit 7
-  bool remote_{false};               // bit 9
-  bool targetReached_{false};        // bit 10
-  bool internalLimitActive_{false};  // bit 11
-  bool followingError_{false};       // bit 13, CSV & PPM mode
+namespace maxon
+{
+class Statusword
+{
+private:
+  bool readyToSwitchOn_{ false };      // bit 0
+  bool switchedOn_{ false };           // bit 1
+  bool operationEnabled_{ false };     // bit 2
+  bool fault_{ false };                // bit 3
+  bool voltageEnabled_{ false };       // bit 4
+  bool quickStop_{ false };            // bit 5
+  bool switchOnDisabled_{ false };     // bit 6
+  bool warning_{ false };              // bit 7
+  bool remote_{ false };               // bit 9
+  bool targetReached_{ false };        // bit 10
+  bool internalLimitActive_{ false };  // bit 11
+  bool followingError_{ false };       // bit 13, CSV & PPM mode
   // bool homingError_{false};          // bit 13, HMM mode
 
   // the raw statusword
-  uint16_t rawStatusword_{0};
+  uint16_t rawStatusword_{ 0 };
 
- public:
+public:
   friend std::ostream& operator<<(std::ostream& os, const Statusword& statusword);
   void setFromRawStatusword(uint16_t status);
   DriveState getDriveState() const;

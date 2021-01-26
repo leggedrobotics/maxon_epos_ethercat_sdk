@@ -35,7 +35,8 @@
 #include "maxon_epos_ethercat_sdk/Error.hpp"
 #include "maxon_epos_ethercat_sdk/Statusword.hpp"
 
-namespace maxon {
+namespace maxon
+{
 /*!
  * aliases for time_points, durations and clocks
  */
@@ -51,8 +52,9 @@ using FaultPair = std::pair<uint16_t, ReadingTimePoint>;
 using ErrorTimePairDeque = std::deque<std::pair<ErrorType, double>>;
 using FaultTimePairDeque = std::deque<std::pair<uint16_t, double>>;
 
-class Reading {
- public:
+class Reading
+{
+public:
   /*!
    * raw get methods
    */
@@ -111,24 +113,24 @@ class Reading {
 
   void setTorqueFactorIntegerToNm(double torqueFactor);
 
- protected:
-  int32_t actualPosition_{0};
-  int32_t digitalInputs_{0};
-  int32_t actualVelocity_{0};
-  int32_t demandVelocity_{0};
-  uint16_t statusword_{0};
-  int16_t analogInput_{0};
-  int16_t actualCurrent_{0};
-  uint32_t busVoltage_{0};
+protected:
+  int32_t actualPosition_{ 0 };
+  int32_t digitalInputs_{ 0 };
+  int32_t actualVelocity_{ 0 };
+  int32_t demandVelocity_{ 0 };
+  uint16_t statusword_{ 0 };
+  int16_t analogInput_{ 0 };
+  int16_t actualCurrent_{ 0 };
+  uint32_t busVoltage_{ 0 };
 
-  double positionFactorIntegerToRad_{1};
-  double velocityFactorIntegerPerSecToRadPerSec_{1};
-  double currentFactorIntegerToAmp_{1};
-  double torqueFactorIntegerToNm_{1};
+  double positionFactorIntegerToRad_{ 1 };
+  double velocityFactorIntegerPerSecToRadPerSec_{ 1 };
+  double currentFactorIntegerToAmp_{ 1 };
+  double torqueFactorIntegerToNm_{ 1 };
 
   ReadingTimePoint lastReadingTimePoint_;
 
- public:
+public:
   /*!
    * returns the age of the last added error in microseconds
    * @return	the age
@@ -203,26 +205,26 @@ class Reading {
    * @param forceAppendEqualFault	true if a new fault shall be appended
    * even though it is equal to the last one
    */
-  Reading(unsigned int errorStorageCapacity, unsigned int faultStorageCapacity,
-          bool forceAppendEqualError, bool forceAppendEqualFault);
+  Reading(unsigned int errorStorageCapacity, unsigned int faultStorageCapacity, bool forceAppendEqualError,
+          bool forceAppendEqualFault);
 
- private:
+private:
   std::deque<ErrorPair> errors_;
   std::deque<FaultPair> faults_;
 
   ErrorPair lastError_;
   FaultPair lastFault_;
 
-  mutable bool hasUnreadError_{false};
-  mutable bool hasUnreadFault_{false};
+  mutable bool hasUnreadError_{ false };
+  mutable bool hasUnreadFault_{ false };
 
   /*!
    * paramaters changeable with a Configuration object
    */
-  unsigned int errorStorageCapacity_{25};
-  unsigned int faultStorageCapacity_{25};
-  bool forceAppendEqualError_{false};
-  bool forceAppendEqualFault_{false};
+  unsigned int errorStorageCapacity_{ 25 };
+  unsigned int faultStorageCapacity_{ 25 };
+  bool forceAppendEqualError_{ false };
+  bool forceAppendEqualFault_{ false };
 };
 
 }  // namespace maxon

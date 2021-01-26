@@ -16,14 +16,15 @@
 **
 ** You should have received a copy of the GNU General Public License
 ** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 
 #pragma once
 #include <ostream>
 
-namespace maxon {
-
-enum class DriveState : uint8_t {
+namespace maxon
+{
+enum class DriveState : uint8_t
+{
   NotReadyToSwitchOn,
   SwitchOnDisabled,
   ReadyToSwitchOn,
@@ -35,7 +36,21 @@ enum class DriveState : uint8_t {
   NA
 };
 
-enum class StateTransition : uint8_t { _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _15 };
+enum class StateTransition : uint8_t
+{
+  _2,
+  _3,
+  _4,
+  _5,
+  _6,
+  _7,
+  _8,
+  _9,
+  _10,
+  _11,
+  _12,
+  _15
+};
 
 }  // namespace maxon
 

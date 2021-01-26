@@ -21,14 +21,16 @@
 *<https://www.gnu.org/licenses/>.
 */
 
-#include "maxon_epos_ethercat_sdk/Configuration.hpp"
-
 #include <iomanip>
 
-namespace maxon {
+#include "maxon_epos_ethercat_sdk/Configuration.hpp"
 
-std::string modeOfOperationString(ModeOfOperationEnum modeOfOperation_) {
-  switch (modeOfOperation_) {
+namespace maxon
+{
+std::string modeOfOperationString(ModeOfOperationEnum modeOfOperation_)
+{
+  switch (modeOfOperation_)
+  {
     case ModeOfOperationEnum::ProfiledPositionMode:
       return "Profiled Position Mode";
     case ModeOfOperationEnum::ProfiledVelocityMode:
@@ -46,8 +48,10 @@ std::string modeOfOperationString(ModeOfOperationEnum modeOfOperation_) {
   }
 }
 
-std::string rxPdoString(RxPdoTypeEnum rxPdo) {
-  switch (rxPdo) {
+std::string rxPdoString(RxPdoTypeEnum rxPdo)
+{
+  switch (rxPdo)
+  {
     case RxPdoTypeEnum::NA:
       return "NA";
     case RxPdoTypeEnum::RxPdoStandard:
@@ -61,8 +65,10 @@ std::string rxPdoString(RxPdoTypeEnum rxPdo) {
   }
 }
 
-std::string txPdoString(TxPdoTypeEnum txPdo) {
-  switch (txPdo) {
+std::string txPdoString(TxPdoTypeEnum txPdo)
+{
+  switch (txPdo)
+  {
     case TxPdoTypeEnum::NA:
       return "NA";
     case TxPdoTypeEnum::TxPdoCST:
@@ -76,9 +82,9 @@ std::string txPdoString(TxPdoTypeEnum txPdo) {
   }
 }
 
-std::ostream& operator<<(std::ostream& os, const Configuration& configuration) {
-  std::string modeOfOperation_ =
-      modeOfOperationString(configuration.modeOfOperationEnum);
+std::ostream& operator<<(std::ostream& os, const Configuration& configuration)
+{
+  std::string modeOfOperation_ = modeOfOperationString(configuration.modeOfOperationEnum);
   std::string rxPdo = rxPdoString(configuration.rxPdoTypeEnum);
   std::string txPdo = txPdoString(configuration.txPdoTypeEnum);
 
@@ -90,8 +96,7 @@ std::ostream& operator<<(std::ostream& os, const Configuration& configuration) {
   len2 = len2 >= tmp3 ? len2 : tmp3;
   len2++;
 
-  os << std::boolalpha << std::left << std::setw(43) << std::setfill('-') << "|"
-     << std::setw(len2 + 2) << "-"
+  os << std::boolalpha << std::left << std::setw(43) << std::setfill('-') << "|" << std::setw(len2 + 2) << "-"
      << "|\n"
      << std::setfill(' ') << std::setw(43 + len2 + 2) << "| Configuration"
      << "|\n"
@@ -104,19 +109,15 @@ std::ostream& operator<<(std::ostream& os, const Configuration& configuration) {
      << std::setw(43) << "| Tx PDO Type:"
      << "| " << std::setw(len2) << txPdo << "|\n"
      << std::setw(43) << "| Config Run SDO verify timeout:"
-     << "| " << std::setw(len2) << configuration.configRunSdoVerifyTimeout
-     << "|\n"
+     << "| " << std::setw(len2) << configuration.configRunSdoVerifyTimeout << "|\n"
      << std::setw(43) << "| Print Debug Messages:"
      << "| " << std::setw(len2) << configuration.printDebugMessages << "|\n"
      << std::setw(43) << "| Drive State Change Min Timeout:"
-     << "| " << std::setw(len2) << configuration.driveStateChangeMinTimeout
-     << "|\n"
+     << "| " << std::setw(len2) << configuration.driveStateChangeMinTimeout << "|\n"
      << std::setw(43) << "| Drive State Change Max Timeout:"
-     << "| " << std::setw(len2) << configuration.driveStateChangeMaxTimeout
-     << "|\n"
+     << "| " << std::setw(len2) << configuration.driveStateChangeMaxTimeout << "|\n"
      << std::setw(43) << "| Min Successful Target State Readings:"
-     << "| " << std::setw(len2)
-     << configuration.minNumberOfSuccessfulTargetStateReadings << "|\n"
+     << "| " << std::setw(len2) << configuration.minNumberOfSuccessfulTargetStateReadings << "|\n"
      << std::setw(43) << "| Force Append Equal Error:"
      << "| " << std::setw(len2) << configuration.forceAppendEqualError << "|\n"
      << std::setw(43) << "| Force Append Equal Fault:"

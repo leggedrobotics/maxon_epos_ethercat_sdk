@@ -30,10 +30,11 @@
 
 #include "maxon_epos_ethercat_sdk/ModeOfOperationEnum.hpp"
 
-namespace maxon {
-
-class Command {
- public:
+namespace maxon
+{
+class Command
+{
+public:
   Command() = default;
   Command(const Command& other);
   virtual ~Command() = default;
@@ -112,44 +113,44 @@ class Command {
   void setMaxCurrent(double maxCurrent);
   void setMaxTorque(double maxTorque);
 
- private:
-  double targetPositionUU_{0};
-  double targetVelocityUU_{0};
-  double targetTorqueUU_{0};
-  double targetCurrentUU_{0};
-  double maxTorqueUU_{0};
-  double maxCurrentUU_{0};
-  double torqueOffsetUU_{0};
+private:
+  double targetPositionUU_{ 0 };
+  double targetVelocityUU_{ 0 };
+  double targetTorqueUU_{ 0 };
+  double targetCurrentUU_{ 0 };
+  double maxTorqueUU_{ 0 };
+  double maxCurrentUU_{ 0 };
+  double torqueOffsetUU_{ 0 };
 
-  int32_t targetPosition_{0};
-  int32_t targetVelocity_{0};
-  int16_t targetTorque_{0};
-  int16_t targetCurrent_{0};
-  uint16_t maxTorque_{0};
-  uint16_t maxCurrent_{0};
-  int16_t torqueOffset_{0};
-  uint32_t profileAccel_{0};
-  uint32_t profileDeccel_{0};
-  int16_t motionProfileType_{0};
+  int32_t targetPosition_{ 0 };
+  int32_t targetVelocity_{ 0 };
+  int16_t targetTorque_{ 0 };
+  int16_t targetCurrent_{ 0 };
+  uint16_t maxTorque_{ 0 };
+  uint16_t maxCurrent_{ 0 };
+  int16_t torqueOffset_{ 0 };
+  uint32_t profileAccel_{ 0 };
+  uint32_t profileDeccel_{ 0 };
+  int16_t motionProfileType_{ 0 };
 
   std::mutex targetTorqueCommandMutex_;
 
-  uint32_t digitalOutputs_{0};
+  uint32_t digitalOutputs_{ 0 };
 
-  double positionFactorRadToInteger_{1};
-  double velocityFactorRadPerSecToIntegerPerSec_{1};
-  double torqueFactorNmToInteger_{1};
-  double currentFactorAToInteger_{1};
+  double positionFactorRadToInteger_{ 1 };
+  double velocityFactorRadPerSecToIntegerPerSec_{ 1 };
+  double torqueFactorNmToInteger_{ 1 };
+  double currentFactorAToInteger_{ 1 };
 
-  ModeOfOperationEnum modeOfOperation_{ModeOfOperationEnum::NA};
+  ModeOfOperationEnum modeOfOperation_{ ModeOfOperationEnum::NA };
 
   /*!
    * set this to true if raw commands have been used and therefore no unit
    * conversion should be done
    */
-  bool useRawCommands_{false};
+  bool useRawCommands_{ false };
 
-  bool targetTorqueCommandUsed_{false};
+  bool targetTorqueCommandUsed_{ false };
 };
 
 }  // namespace maxon

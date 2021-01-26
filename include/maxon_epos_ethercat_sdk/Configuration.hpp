@@ -30,42 +30,44 @@
 #include "maxon_epos_ethercat_sdk/ModeOfOperationEnum.hpp"
 #include "maxon_epos_ethercat_sdk/PdoTypeEnum.hpp"
 
-namespace maxon {
+namespace maxon
+{
+class Configuration
+{
+public:
+  ModeOfOperationEnum modeOfOperationEnum{ ModeOfOperationEnum::NA };
+  RxPdoTypeEnum rxPdoTypeEnum{ RxPdoTypeEnum::NA };
+  TxPdoTypeEnum txPdoTypeEnum{ TxPdoTypeEnum::NA };
+  unsigned int configRunSdoVerifyTimeout{ 20000 };
+  bool printDebugMessages{ true };
+  unsigned int driveStateChangeMinTimeout{ 20000 };
+  unsigned int minNumberOfSuccessfulTargetStateReadings{ 10 };
+  unsigned int driveStateChangeMaxTimeout{ 300000 };
+  bool forceAppendEqualError{ true };
+  bool forceAppendEqualFault{ false };
+  unsigned int errorStorageCapacity{ 100 };
+  unsigned int faultStorageCapacity{ 100 };
+  int32_t positionEncoderResolution{ 1 };
+  bool useRawCommands{ false };
+  double gearRatio{ 1 };
+  double motorConstant{ 1 };
+  double workVoltage{ 48.0 };
+  double speedConstant{ 0 };
+  double polePairs{ 11 };
+  double nominalCurrentA{ 0 };
+  double torqueConstantNmA{ 0 };
+  double motorRatedTorqueNm{ 0 };
+  double maxCurrentA{ 0 };
+  int32_t minPosition{ 0 };
+  int32_t maxPosition{ 0 };
+  uint32_t maxProfileVelocity{ 0 };
+  bool useMultipleModeOfOperations{ false };
+  uint32_t quickStopDecel{ 10000 };
+  uint32_t profileDecel{ 10000 };
 
-class Configuration {
- public:
-  ModeOfOperationEnum modeOfOperationEnum{ModeOfOperationEnum::NA};
-  RxPdoTypeEnum rxPdoTypeEnum{RxPdoTypeEnum::NA};
-  TxPdoTypeEnum txPdoTypeEnum{TxPdoTypeEnum::NA};
-  unsigned int configRunSdoVerifyTimeout{20000};
-  bool printDebugMessages{true};
-  unsigned int driveStateChangeMinTimeout{20000};
-  unsigned int minNumberOfSuccessfulTargetStateReadings{10};
-  unsigned int driveStateChangeMaxTimeout{300000};
-  bool forceAppendEqualError{true};
-  bool forceAppendEqualFault{false};
-  unsigned int errorStorageCapacity{100};
-  unsigned int faultStorageCapacity{100};
-  int32_t positionEncoderResolution{1};
-  bool useRawCommands{false};
-  double gearRatio{1};
-  double motorConstant{1};
-  double workVoltage{48.0};
-  double speedConstant{0};
-  double polePairs{11};
-  double nominalCurrentA{0};
-  double torqueConstantNmA{0};
-  double motorRatedTorqueNm{0};
-  double maxCurrentA{0};
-  int32_t minPosition{0};
-  int32_t maxPosition{0};
-  uint32_t maxProfileVelocity{0};
-  bool useMultipleModeOfOperations{false};
-
- public:
+public:
   // stream operator
-  friend std::ostream& operator<<(std::ostream& os,
-                                  const Configuration& configuration);
+  friend std::ostream& operator<<(std::ostream& os, const Configuration& configuration);
 };
 
 }  // namespace maxon

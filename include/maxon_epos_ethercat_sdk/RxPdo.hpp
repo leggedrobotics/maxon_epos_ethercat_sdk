@@ -30,13 +30,14 @@
 
 #include <cstdint>
 
-namespace maxon {
-
+namespace maxon
+{
 /*!
  * Standard Rx PDO type.
  * Includes a padding_ byte for firmware version 01.01.15.00 (october 2018)
  */
-struct RxPdoStandard {
+struct RxPdoStandard
+{
   uint16_t controlWord_;
   int8_t modeOfOperation_;
 } __attribute__((packed));
@@ -45,12 +46,14 @@ struct RxPdoStandard {
  * CST Rx PDO type.
  * Includes a padding_ byte for firmware version 01.01.15.00 (october 2018)
  */
-struct RxPdoCST {
+struct RxPdoCST
+{
   int16_t targetTorque_;
   int16_t torqueOffset_;
 } __attribute__((packed));
 
-struct RxPdoPVM {
+struct RxPdoPVM
+{
   uint16_t controlWord_;
   int32_t targetVelocity_;
   uint32_t profileAccel_;

@@ -23,9 +23,10 @@
 
 #include "maxon_epos_ethercat_sdk/PdoTypeEnum.hpp"
 
-std::ostream& operator<<(std::ostream& os,
-                         const maxon::TxPdoTypeEnum& txPdoTypeEnum) {
-  switch (txPdoTypeEnum) {
+std::ostream& operator<<(std::ostream& os, const maxon::TxPdoTypeEnum& txPdoTypeEnum)
+{
+  switch (txPdoTypeEnum)
+  {
     case maxon::TxPdoTypeEnum::NA:
       os << "NA";
       break;
@@ -40,9 +41,10 @@ std::ostream& operator<<(std::ostream& os,
   }
   return os;
 }
-std::ostream& operator<<(std::ostream& os,
-                         const maxon::RxPdoTypeEnum& rxPdoTypeEnum) {
-  switch (rxPdoTypeEnum) {
+std::ostream& operator<<(std::ostream& os, const maxon::RxPdoTypeEnum& rxPdoTypeEnum)
+{
+  switch (rxPdoTypeEnum)
+  {
     case maxon::RxPdoTypeEnum::NA:
       os << "NA";
       break;

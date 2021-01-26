@@ -21,51 +21,58 @@
 *<https://www.gnu.org/licenses/>.
 */
 
-#include "maxon_epos_ethercat_sdk/Maxon.hpp"
-
 #include <chrono>
 #include <cmath>
 #include <thread>
 
 #include "maxon_epos_ethercat_sdk/ConfigurationParser.hpp"
+#include "maxon_epos_ethercat_sdk/Maxon.hpp"
 #include "maxon_epos_ethercat_sdk/ObjectDictionary.hpp"
 #include "maxon_epos_ethercat_sdk/RxPdo.hpp"
 #include "maxon_epos_ethercat_sdk/TxPdo.hpp"
 
-namespace maxon {
-std::string binstring(uint16_t var) {
+namespace maxon
+{
+std::string binstring(uint16_t var)
+{
   std::string s = "0000000000000000";
-  for (int i = 0; i < 16; i++) {
-    if (var & (1 << (15 - i))) {
+  for (int i = 0; i < 16; i++)
+  {
+    if (var & (1 << (15 - i)))
+    {
       s[i] = '1';
     }
   }
   return s;
 }
-std::string binstring(int8_t var) {
+std::string binstring(int8_t var)
+{
   std::string s = "00000000";
-  for (int i = 0; i < 8; i++) {
-    if (var & (1 << (7 - i))) {
+  for (int i = 0; i < 8; i++)
+  {
+    if (var & (1 << (7 - i)))
+    {
       s[i] = '1';
     }
   }
   return s;
 }
 
-Maxon::SharedPtr Maxon::deviceFromFile(const std::string& configFile,
-                                       const std::string& name,
-                                       const uint32_t address) {
+Maxon::SharedPtr Maxon::deviceFromFile(const std::string& configFile, const std::string& name, const uint32_t address)
+{
   auto maxon = std::make_shared<Maxon>(name, address);
   maxon->loadConfigFile(configFile);
   return maxon;
 }
 
-Maxon::Maxon(const std::string& name, const uint32_t address) {
+Maxon::Maxon(const std::string& name, const uint32_t address)
+{
   address_ = address;
   name_ = name;
 }
 
-bool Maxon::startup() {
+bool Maxon::startup()
+{
   bool success = true;
   success &= bus_->waitForState(EC_STATE_PRE_OP, address_, 50, 0.05);
   bus_->syncDistributedClock0(address_, true, timeStep_, timeStep_ / 2.f);
@@ -73,108 +80,49 @@ bool Maxon::startup() {
 
   // use hardware motor rated current value if necessary
   // TODO test
-  if (configuration_.nominalCurrentA == 0.0) {
+  if (configuration_.nominalCurrentA == 0.0)
+  {
     uint32_t nominalCurrent;
     success &= sendSdoRead(OD_INDEX_MOTOR_DATA, 0x02, false, nominalCurrent);
     // update the configuration to accomodate the new motor
     // rated current value
-    configuration_.nominalCurrentA =
-        static_cast<double>(nominalCurrent) / 1000.0;
+    configuration_.nominalCurrentA = static_cast<double>(nominalCurrent) / 1000.0;
     // update the reading_ object to ensure correct unit conversion
     reading_.configureReading(configuration_);
   }
   // success &= setDriveStateViaSdo(DriveState::ReadyToSwitchOn);
 
+  uint32_t current_P_gain;
+
   // PDO mapping
-  success &=
-      mapPdos(configuration_.rxPdoTypeEnum, configuration_.txPdoTypeEnum);
+  success &= mapPdos(configuration_.rxPdoTypeEnum, configuration_.txPdoTypeEnum);
 
   // Set Interpolation
-  success &= sdoVerifyWrite(OD_INDEX_INTERPOLATION_TIME_PERIOD, 0x01, false,
-                            static_cast<uint8_t>(0x01),
+  success &= sdoVerifyWrite(OD_INDEX_INTERPOLATION_TIME_PERIOD, 0x01, false, static_cast<uint8_t>(0x01),
                             configuration_.configRunSdoVerifyTimeout);
 
-  std::this_thread::sleep_for(
-      std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+  std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
-  success &= sdoVerifyWrite(OD_INDEX_INTERPOLATION_TIME_PERIOD, 0x02, false,
-                            static_cast<int8_t>(-3),
+  success &= sdoVerifyWrite(OD_INDEX_INTERPOLATION_TIME_PERIOD, 0x02, false, static_cast<int8_t>(-3),
                             configuration_.configRunSdoVerifyTimeout);
 
-  std::this_thread::sleep_for(
-      std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+  std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
   // Set initial mode of operation
   success &=
-      sdoVerifyWrite(OD_INDEX_MODES_OF_OPERATION, 0x00, false,
-                     static_cast<int8_t>(configuration_.modeOfOperationEnum),
+      sdoVerifyWrite(OD_INDEX_MODES_OF_OPERATION, 0x00, false, static_cast<int8_t>(configuration_.modeOfOperationEnum),
                      configuration_.configRunSdoVerifyTimeout);
   // To be on the safe side: set currect PDO sizes
   autoConfigurePdoSizes();
 
   // write the configuration parameters
-  switch (configuration_.modeOfOperationEnum) {
-    case ModeOfOperationEnum::ProfiledVelocityMode:
+  success &= configParam(configuration_.modeOfOperationEnum);
 
-      success &= sdoVerifyWrite(OD_INDEX_MAX_PROFILE_VELOCITY, 0x00, false,
-                                configuration_.maxProfileVelocity);
-
-      uint32_t maxMotorSpeed = static_cast<uint32_t>(
-          configuration_.workVoltage * configuration_.motorConstant /
-          configuration_.polePairs);
-      success &=
-          sdoVerifyWrite(OD_INDEX_MAX_MOTOR_SPEED, 0x00, false, maxMotorSpeed);
-
-      uint32_t maxGearSpeed =
-          static_cast<uint32_t>(maxMotorSpeed / configuration_.gearRatio);
-      success &= sdoVerifyWrite(OD_INDEX_GEAR_DATA, 0x03, false, maxGearSpeed);
-
-      success &= sdoVerifyWrite(OD_INDEX_SOFTWARE_POSITION_LIMIT, 0x01, false,
-                                configuration_.minPosition);
-
-      success &= sdoVerifyWrite(OD_INDEX_SOFTWARE_POSITION_LIMIT, 0x02, false,
-                                configuration_.maxPosition);
-      break;
-    case ModeOfOperationEnum::CyclicSynchronousTorqueMode:
-      uint32_t nominalCurrent =
-          static_cast<uint32_t>(round(1000.0 * configuration_.nominalCurrentA));
-      success &=
-          sdoVerifyWrite(OD_INDEX_MOTOR_DATA, 0x01, false, nominalCurrent);
-
-      uint32_t torqueConstant =
-          static_cast<uint32_t>(1000000.0 * configuration_.torqueConstantNmA);
-      success &=
-          sdoVerifyWrite(OD_INDEX_MOTOR_DATA, 0x05, false, torqueConstant);
-
-      uint32_t maxMotorSpeed = static_cast<uint32_t>(
-          configuration_.workVoltage * configuration_.motorConstant /
-          configuration_.polePairs);
-      success &=
-          sdoVerifyWrite(OD_INDEX_MAX_MOTOR_SPEED, 0x00, false, maxMotorSpeed);
-
-      uint32_t maxGearSpeed =
-          static_cast<uint32_t>(maxMotorSpeed / configuration_.gearRatio);
-      success &= sdoVerifyWrite(OD_INDEX_GEAR_DATA, 0x03, false, maxGearSpeed);
-
-      success &= sdoVerifyWrite(OD_INDEX_SOFTWARE_POSITION_LIMIT, 0x01, false,
-                                configuration_.minPosition);
-
-      success &= sdoVerifyWrite(OD_INDEX_SOFTWARE_POSITION_LIMIT, 0x02, false,
-                                configuration_.maxPosition);
-    default:
-      break;
-  }
-
-  // Write maximum current to drive
-  uint32_t maxCurrent =
-      static_cast<uint32_t>(floor(1000.0 * configuration_.maxCurrentA));
-  success &= sdoVerifyWrite(OD_INDEX_MOTOR_DATA, 0x02, false, maxCurrent);
-
-  if (!success) {
-    MELO_ERROR_STREAM(
-        "[maxon_epos_ethercat_sdk:Maxon::preStartupOnlineConfiguration] "
-        "hardware configuration of '"
-        << name_ << "' not successful!");
+  if (!success)
+  {
+    MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::preStartupOnlineConfiguration] "
+                      "hardware configuration of '"
+                      << name_ << "' not successful!");
     addErrorToReading(ErrorType::ConfigurationError);
   }
   MELO_INFO_STREAM("Hardware configuration suceeded. success = " << success);
@@ -182,41 +130,48 @@ bool Maxon::startup() {
   return success;
 }
 
-void Maxon::shutdown() {
+void Maxon::shutdown()
+{
   bus_->setState(EC_STATE_INIT, address_);
 }
 
-void Maxon::updateWrite() {
+void Maxon::updateWrite()
+{
   std::lock_guard<std::recursive_mutex> lock(mutex_);
 
   /*
   ** Check if the Mode of Operation has been set properly
   */
-  if (modeOfOperation_ == ModeOfOperationEnum::NA) {
+  if (modeOfOperation_ == ModeOfOperationEnum::NA)
+  {
     reading_.addError(ErrorType::ModeOfOperationError);
-    MELO_ERROR_STREAM(
-        "[maxon_epos_ethercat_sdk:Maxon::updateWrite] Mode of operation for '"
-        << name_ << "' has not been set.");
+    MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::updateWrite] Mode of operation for '" << name_
+                                                                                             << "' has not been set.");
     return;
   }
 
   /*!
    * engage the state machine if a state change is requested
    */
-  if (conductStateChange_ && hasRead_) {
+  if (conductStateChange_ && hasRead_)
+  {
     engagePdoStateMachine();
   }
 
-  switch (configuration_.rxPdoTypeEnum) {
-    case RxPdoTypeEnum::RxPdoStandard: {
+  switch (configuration_.rxPdoTypeEnum)
+  {
+    case RxPdoTypeEnum::RxPdoStandard:
+    {
       RxPdoStandard rxPdo{};
       rxPdo.modeOfOperation_ = static_cast<int8_t>(modeOfOperation_);
       rxPdo.controlWord_ = controlword_.getRawControlword();
 
       // actually writing to the hardware
       bus_->writeRxPdo(address_, rxPdo);
-    } break;
-    case RxPdoTypeEnum::RxPdoCST: {
+    }
+    break;
+    case RxPdoTypeEnum::RxPdoCST:
+    {
       RxPdoCST rxPdo{};
       rxPdo.targetTorque_ = stagedCommand_.getTargetTorqueRaw();
       // rxPdo.modeOfOperation_ = static_cast<int8_t>(modeOfOperation_);
@@ -224,9 +179,11 @@ void Maxon::updateWrite() {
 
       // actually writing to the hardware
       bus_->writeRxPdo(address_, rxPdo);
-    } break;
+    }
+    break;
 
-    case RxPdoTypeEnum::RxPdoPVM: {
+    case RxPdoTypeEnum::RxPdoPVM:
+    {
       RxPdoPVM rxPdo{};
       rxPdo.controlWord_ = controlword_.getRawControlword();
       rxPdo.targetVelocity_ = stagedCommand_.getTargetVelocityRaw();
@@ -236,138 +193,146 @@ void Maxon::updateWrite() {
 
       // actually writing to the hardware
       bus_->writeRxPdo(address_, rxPdo);
-    } break;
+    }
+    break;
     default:
-      MELO_ERROR_STREAM(
-          "[maxon_epos_ethercat_sdk:Maxon::updateWrite] Unsupported Rx Pdo "
-          "type for '"
-          << name_ << "'");
+      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::updateWrite] Unsupported Rx Pdo "
+                        "type for '"
+                        << name_ << "'");
       addErrorToReading(ErrorType::RxPdoTypeError);
   }
 }
 
-void Maxon::updateRead() {
+void Maxon::updateRead()
+{
   std::lock_guard<std::recursive_mutex> lock(mutex_);
 
   // TODO(duboisf): implement some sort of time stamp
-  switch (configuration_.txPdoTypeEnum) {
-    case TxPdoTypeEnum::TxPdoStandard: {
+  switch (configuration_.txPdoTypeEnum)
+  {
+    case TxPdoTypeEnum::TxPdoStandard:
+    {
       TxPdoStandard txPdo{};
       // reading from the bus
       bus_->readTxPdo(address_, txPdo);
       reading_.setStatusword(txPdo.statusword_);
-    } break;
+    }
+    break;
 
-    case TxPdoTypeEnum::TxPdoCST: {
+    case TxPdoTypeEnum::TxPdoCST:
+    {
       TxPdoCST txPdo{};
       // reading from the bus
       bus_->readTxPdo(address_, txPdo);
       reading_.setActualPosition(txPdo.actualPosition_);
-      reading_.setActualCurrent(
-          txPdo.actualTorque_);  /// torque readings are actually current
-                                 /// readings, the conversion is handled later
+      reading_.setActualCurrent(txPdo.actualTorque_);  /// torque readings are actually current
+                                                       /// readings, the conversion is handled later
       // reading_.setStatusword(txPdo.statusword_);
       reading_.setActualVelocity(txPdo.actualVelocity_);
-    } break;
+    }
+    break;
 
-    case TxPdoTypeEnum::TxPdoPVM: {
+    case TxPdoTypeEnum::TxPdoPVM:
+    {
       TxPdoPVM txPdo{};
       // reading from the bus
       bus_->readTxPdo(address_, txPdo);
 
       reading_.setDemandVelocity(txPdo.demandVelocity_);
       reading_.setStatusword(txPdo.statusword_);
-    } break;
+    }
+    break;
 
     default:
-      MELO_ERROR_STREAM(
-          "[maxon_epos_ethercat_sdk:Maxon::updateRrite] Unsupported Tx Pdo "
-          "type for '"
-          << name_ << "'");
+      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::updateRrite] Unsupported Tx Pdo "
+                        "type for '"
+                        << name_ << "'");
       reading_.addError(ErrorType::TxPdoTypeError);
   }
 
   // set the hasRead_ variable to true since a nes reading was read
-  if (!hasRead_) {
+  if (!hasRead_)
+  {
     hasRead_ = true;
   }
 
   // Print warning if drive is in Fault state.
-  if (reading_.getDriveState() == DriveState::Fault) {
-    MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::updateRead] '"
-                      << name_ << "' is in drive state 'Fault'");
+  if (reading_.getDriveState() == DriveState::Fault)
+  {
+    MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::updateRead] '" << name_ << "' is in drive state 'Fault'");
   }
 }
 
-void Maxon::stageCommand(const Command& command) {
+void Maxon::stageCommand(const Command& command)
+{
   std::lock_guard<std::recursive_mutex> lock(stagedCommandMutex_);
   stagedCommand_ = command;
-  stagedCommand_.setPositionFactorRadToInteger(
-      static_cast<double>(configuration_.positionEncoderResolution) /
-      (2.0 * M_PI));
+  stagedCommand_.setPositionFactorRadToInteger(static_cast<double>(configuration_.positionEncoderResolution) /
+                                               (2.0 * M_PI));
   stagedCommand_.setVelocityFactorRadPerSecToIntegerPerSec(
-      static_cast<double>(configuration_.positionEncoderResolution) /
-      (2.0 * M_PI));
+      static_cast<double>(configuration_.positionEncoderResolution) / (2.0 * M_PI));
 
   double currentFactorAToInt = 1000.0 / configuration_.nominalCurrentA;
   stagedCommand_.setCurrentFactorAToInteger(currentFactorAToInt);
-  stagedCommand_.setTorqueFactorNmToInteger(currentFactorAToInt /
-                                            configuration_.motorConstant /
+  stagedCommand_.setTorqueFactorNmToInteger(currentFactorAToInt / configuration_.motorConstant /
                                             configuration_.gearRatio);
 
   stagedCommand_.setMaxCurrent(configuration_.maxCurrentA);
-  stagedCommand_.setMaxTorque(configuration_.maxCurrentA *
-                              configuration_.motorConstant *
-                              configuration_.gearRatio);
+  stagedCommand_.setMaxTorque(configuration_.maxCurrentA * configuration_.motorConstant * configuration_.gearRatio);
 
   stagedCommand_.setUseRawCommands(configuration_.useRawCommands);
 
   stagedCommand_.doUnitConversion();
 
-  if (allowModeChange_) {
+  if (allowModeChange_)
+  {
     modeOfOperation_ = command.getModeOfOperation();
-  } else {
-    if (modeOfOperation_ != command.getModeOfOperation() &&
-        command.getModeOfOperation() != ModeOfOperationEnum::NA) {
-      MELO_ERROR_STREAM(
-          "[maxon_epos_ethercat_sdk:Maxon::stageCommand] Changing the mode of "
-          "operation of '"
-          << name_ << "' is not allowed for the active configuration.");
+  }
+  else
+  {
+    if (modeOfOperation_ != command.getModeOfOperation() && command.getModeOfOperation() != ModeOfOperationEnum::NA)
+    {
+      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::stageCommand] Changing the mode of "
+                        "operation of '"
+                        << name_ << "' is not allowed for the active configuration.");
     }
   }
 }
 
-Reading Maxon::getReading() const {
+Reading Maxon::getReading() const
+{
   std::lock_guard<std::recursive_mutex> lock(readingMutex_);
   return reading_;
 }
 
-void Maxon::getReading(Reading& reading) const {
+void Maxon::getReading(Reading& reading) const
+{
   std::lock_guard<std::recursive_mutex> lock(readingMutex_);
   reading = reading_;
 }
 
-bool Maxon::loadConfigFile(const std::string& fileName) {
+bool Maxon::loadConfigFile(const std::string& fileName)
+{
   ConfigurationParser configurationParser(fileName);
   return loadConfiguration(configurationParser.getConfiguration());
 }
 
-bool Maxon::loadConfigNode(YAML::Node configNode) {
+bool Maxon::loadConfigNode(YAML::Node configNode)
+{
   ConfigurationParser configurationParser(configNode);
   return loadConfiguration(configurationParser.getConfiguration());
 }
 
-bool Maxon::loadConfiguration(const Configuration& configuration) {
+bool Maxon::loadConfiguration(const Configuration& configuration)
+{
   bool success = true;
   reading_.configureReading(configuration);
 
   // Check if changing mode of operation will be allowed
   allowModeChange_ = true;
   allowModeChange_ &= configuration.useMultipleModeOfOperations;
-  allowModeChange_ &=
-      (configuration.rxPdoTypeEnum == RxPdoTypeEnum::RxPdoStandard);
-  allowModeChange_ &=
-      (configuration.txPdoTypeEnum == TxPdoTypeEnum::TxPdoStandard);
+  allowModeChange_ &= (configuration.rxPdoTypeEnum == RxPdoTypeEnum::RxPdoStandard);
+  allowModeChange_ &= (configuration.txPdoTypeEnum == TxPdoTypeEnum::TxPdoStandard);
 
   modeOfOperation_ = configuration.modeOfOperationEnum;
 
@@ -375,23 +340,26 @@ bool Maxon::loadConfiguration(const Configuration& configuration) {
   return success;
 }
 
-Configuration Maxon::getConfiguration() const {
+Configuration Maxon::getConfiguration() const
+{
   return configuration_;
 }
 
-bool Maxon::getStatuswordViaSdo(Statusword& statusword) {
+bool Maxon::getStatuswordViaSdo(Statusword& statusword)
+{
   uint16_t statuswordValue = 0;
   bool success = sendSdoRead(OD_INDEX_STATUSWORD, 0, false, statuswordValue);
   statusword.setFromRawStatusword(statuswordValue);
   return success;
 }
 
-bool Maxon::setControlwordViaSdo(Controlword& controlword) {
-  return sendSdoWrite(OD_INDEX_CONTROLWORD, 0, false,
-                      controlword.getRawControlword());
+bool Maxon::setControlwordViaSdo(Controlword& controlword)
+{
+  return sendSdoWrite(OD_INDEX_CONTROLWORD, 0, false, controlword.getRawControlword());
 }
 
-bool Maxon::setDriveStateViaSdo(const DriveState& driveState) {
+bool Maxon::setDriveStateViaSdo(const DriveState& driveState)
+{
   bool success = true;
   Statusword currentStatusword;
   success &= getStatuswordViaSdo(currentStatusword);
@@ -399,12 +367,14 @@ bool Maxon::setDriveStateViaSdo(const DriveState& driveState) {
 
   // do the adequate state changes (via sdo) depending on the requested and
   // current drive states
-  switch (driveState) {
+  switch (driveState)
+  {
     // Target: switch on disabled
     // This is the lowest state in which the state machine can be brought over
     // EtherCAT
     case DriveState::SwitchOnDisabled:
-      switch (currentDriveState) {
+      switch (currentDriveState)
+      {
         case DriveState::SwitchOnDisabled:
           success &= true;
           break;
@@ -424,16 +394,16 @@ bool Maxon::setDriveStateViaSdo(const DriveState& driveState) {
           success &= stateTransitionViaSdo(StateTransition::_15);
           break;
         default:
-          MELO_ERROR_STREAM(
-              "[maxon_epos_ethercat_sdk:Maxon::setDriveStateViaSdo] State "
-              "Transition not implemented");
+          MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::setDriveStateViaSdo] State "
+                            "Transition not implemented");
           addErrorToReading(ErrorType::SdoStateTransitionError);
           success = false;
       }
       break;
 
     case DriveState::ReadyToSwitchOn:
-      switch (currentDriveState) {
+      switch (currentDriveState)
+      {
         case DriveState::SwitchOnDisabled:
           success &= stateTransitionViaSdo(StateTransition::_2);
           break;
@@ -455,16 +425,16 @@ bool Maxon::setDriveStateViaSdo(const DriveState& driveState) {
           success &= stateTransitionViaSdo(StateTransition::_2);
           break;
         default:
-          MELO_ERROR_STREAM(
-              "[maxon_epos_ethercat_sdk:Maxon::setDriveStateViaSdo] State "
-              "Transition not implemented");
+          MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::setDriveStateViaSdo] State "
+                            "Transition not implemented");
           addErrorToReading(ErrorType::SdoStateTransitionError);
           success = false;
       }
       break;
 
     case DriveState::SwitchedOn:
-      switch (currentDriveState) {
+      switch (currentDriveState)
+      {
         case DriveState::SwitchOnDisabled:
           success &= stateTransitionViaSdo(StateTransition::_2);
           success &= stateTransitionViaSdo(StateTransition::_3);
@@ -489,16 +459,16 @@ bool Maxon::setDriveStateViaSdo(const DriveState& driveState) {
           success &= stateTransitionViaSdo(StateTransition::_3);
           break;
         default:
-          MELO_ERROR_STREAM(
-              "[maxon_epos_ethercat_sdk:Maxon::setDriveStateViaSdo] State "
-              "Transition not implemented");
+          MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::setDriveStateViaSdo] State "
+                            "Transition not implemented");
           addErrorToReading(ErrorType::SdoStateTransitionError);
           success = false;
       }
       break;
 
     case DriveState::OperationEnabled:
-      switch (currentDriveState) {
+      switch (currentDriveState)
+      {
         case DriveState::SwitchOnDisabled:
           success &= stateTransitionViaSdo(StateTransition::_2);
           success &= stateTransitionViaSdo(StateTransition::_3);
@@ -527,16 +497,16 @@ bool Maxon::setDriveStateViaSdo(const DriveState& driveState) {
           success &= stateTransitionViaSdo(StateTransition::_4);
           break;
         default:
-          MELO_ERROR_STREAM(
-              "[maxon_epos_ethercat_sdk:Maxon::setDriveStateViaSdo] State "
-              "Transition not implemented");
+          MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::setDriveStateViaSdo] State "
+                            "Transition not implemented");
           addErrorToReading(ErrorType::SdoStateTransitionError);
           success = false;
       }
       break;
 
     case DriveState::QuickStopActive:
-      switch (currentDriveState) {
+      switch (currentDriveState)
+      {
         case DriveState::SwitchOnDisabled:
           success &= stateTransitionViaSdo(StateTransition::_2);
           success &= stateTransitionViaSdo(StateTransition::_3);
@@ -566,27 +536,27 @@ bool Maxon::setDriveStateViaSdo(const DriveState& driveState) {
           success &= stateTransitionViaSdo(StateTransition::_11);
           break;
         default:
-          MELO_ERROR_STREAM(
-              "[maxon_epos_ethercat_sdk:Maxon::setDriveStateViaSdo] State "
-              "Transition not implemented");
+          MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::setDriveStateViaSdo] State "
+                            "Transition not implemented");
           addErrorToReading(ErrorType::SdoStateTransitionError);
           success = false;
       }
       break;
 
     default:
-      MELO_ERROR_STREAM(
-          "[maxon_epos_ethercat_sdk:Maxon::setDriveStateViaSdo] State "
-          "Transition not implemented");
+      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::setDriveStateViaSdo] State "
+                        "Transition not implemented");
       addErrorToReading(ErrorType::SdoStateTransitionError);
       success = false;
   }
   return success;
 }
 
-bool Maxon::stateTransitionViaSdo(const StateTransition& stateTransition) {
+bool Maxon::stateTransitionViaSdo(const StateTransition& stateTransition)
+{
   Controlword controlword;
-  switch (stateTransition) {
+  switch (stateTransition)
+  {
     case StateTransition::_2:
       controlword.setStateTransition2();
       return setControlwordViaSdo(controlword);
@@ -636,16 +606,15 @@ bool Maxon::stateTransitionViaSdo(const StateTransition& stateTransition) {
       return setControlwordViaSdo(controlword);
       break;
     default:
-      MELO_ERROR_STREAM(
-          "[maxon_epos_ethercat_sdk:Maxon::stateTransitionViaSdo] State "
-          "Transition not implemented");
+      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::stateTransitionViaSdo] State "
+                        "Transition not implemented");
       addErrorToReading(ErrorType::SdoStateTransitionError);
       return false;
   }
 }
 
-bool Maxon::setDriveStateViaPdo(const DriveState& driveState,
-                                const bool waitForState) {
+bool Maxon::setDriveStateViaPdo(const DriveState& driveState, const bool waitForState)
+{
   bool success = false;
   /*
   ** locking the mutex_
@@ -676,7 +645,8 @@ bool Maxon::setDriveStateViaPdo(const DriveState& driveState,
   auto driveStateChangeStartTimePoint = std::chrono::steady_clock::now();
 
   // return if no waiting is requested
-  if (!waitForState) {
+  if (!waitForState)
+  {
     // unlock the mutex
     mutex_.unlock();
     // return true if no waiting is requested
@@ -686,9 +656,11 @@ bool Maxon::setDriveStateViaPdo(const DriveState& driveState,
   // Wait for the state change to be successful
   // during the waiting time the mutex MUST be unlocked!
 
-  while (true) {
+  while (true)
+  {
     // break loop as soon as the state change was successful
-    if (stateChangeSuccessful_) {
+    if (stateChangeSuccessful_)
+    {
       success = true;
       break;
     }
@@ -696,9 +668,10 @@ bool Maxon::setDriveStateViaPdo(const DriveState& driveState,
     // break the loop if the state change takes too long
     // this prevents a freezing of the end user's program if the hardware is not
     // able to change it's state.
-    if ((std::chrono::duration_cast<std::chrono::microseconds>(
-             std::chrono::steady_clock::now() - driveStateChangeStartTimePoint))
-            .count() > configuration_.driveStateChangeMaxTimeout) {
+    if ((std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() -
+                                                               driveStateChangeStartTimePoint))
+            .count() > configuration_.driveStateChangeMaxTimeout)
+    {
       break;
     }
     // unlock the mutex during sleep time
@@ -712,105 +685,81 @@ bool Maxon::setDriveStateViaPdo(const DriveState& driveState,
   return success;
 }
 
-bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum) {
+bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum)
+{
   uint32_t objectIndex;
 
   bool rxSuccess = true;
-  switch (rxPdoTypeEnum) {
+  switch (rxPdoTypeEnum)
+  {
     case RxPdoTypeEnum::RxPdoStandard:
 
       MELO_INFO_STREAM("[maxon_epos_ethercat_sdk:Maxon::mapPdos] Rx Pdo: "
                        << "Standard Mode");
 
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Disable PDO
-      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_ASSIGNMENT, 0x00, false,
-                                  static_cast<uint8_t>(0),
+      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_ASSIGNMENT, 0x00, false, static_cast<uint8_t>(0),
                                   configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Write mapping
-      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_ASSIGNMENT, 0x01, false,
-                                  OD_INDEX_RX_PDO_MAPPING_3,
+      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_ASSIGNMENT, 0x01, false, OD_INDEX_RX_PDO_MAPPING_3,
                                   configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Write number of objects
-      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x00, false,
-                                  static_cast<uint8_t>(0),
+      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x00, false, static_cast<uint8_t>(0),
                                   configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Enable PDO
-      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_ASSIGNMENT, 0x00, false,
-                                  static_cast<uint8_t>(1),
+      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_ASSIGNMENT, 0x00, false, static_cast<uint8_t>(1),
                                   configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
       break;
 
     case RxPdoTypeEnum::RxPdoCST:
       MELO_INFO_STREAM("[maxon_epos_ethercat_sdk:Maxon::mapPdos] Rx Pdo: "
                        << "Cyclic Synchronous Troque Mode");
 
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Disable PDO
-      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_ASSIGNMENT, 0x00, false,
-                                  static_cast<uint8_t>(0),
+      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_ASSIGNMENT, 0x00, false, static_cast<uint8_t>(0),
                                   configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
-      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x00, false,
-                                  static_cast<uint8_t>(0),
+      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x00, false, static_cast<uint8_t>(0),
                                   configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Write mapping
-      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_ASSIGNMENT, 0x01, false,
-                                  OD_INDEX_RX_PDO_MAPPING_3,
+      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_ASSIGNMENT, 0x01, false, OD_INDEX_RX_PDO_MAPPING_3,
                                   configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Write objects...
-      objectIndex =
-          (OD_INDEX_TARGET_TORQUE << 16) | (0x00 << 8) | sizeof(int16_t) * 8;
+      objectIndex = (OD_INDEX_TARGET_TORQUE << 16) | (0x00 << 8) | sizeof(int16_t) * 8;
       rxSuccess &=
-          sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x01, false, objectIndex,
-                         configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+          sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x01, false, objectIndex, configuration_.configRunSdoVerifyTimeout);
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
-      objectIndex =
-          (OD_INDEX_OFFSET_TORQUE << 16) | (0x00 << 8) | sizeof(int16_t) * 8;
+      objectIndex = (OD_INDEX_OFFSET_TORQUE << 16) | (0x00 << 8) | sizeof(int16_t) * 8;
       rxSuccess &=
-          sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x02, false, objectIndex,
-                         configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+          sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x02, false, objectIndex, configuration_.configRunSdoVerifyTimeout);
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Write number of objects
-      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x00, false,
-                                  static_cast<uint8_t>(2),
+      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x00, false, static_cast<uint8_t>(2),
                                   configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Enable PDO
-      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_ASSIGNMENT, 0x00, false,
-                                  static_cast<uint8_t>(1),
+      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_ASSIGNMENT, 0x00, false, static_cast<uint8_t>(1),
                                   configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
       break;
 
     case RxPdoTypeEnum::RxPdoPVM:
@@ -818,138 +767,102 @@ bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum) {
       MELO_INFO_STREAM("[maxon_epos_ethercat_sdk:Maxon::mapPdos] Rx Pdo: "
                        << "Profile Velocity Mode");
 
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Disable PDO
-      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_ASSIGNMENT, 0x00, false,
-                                  static_cast<uint8_t>(0),
+      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_ASSIGNMENT, 0x00, false, static_cast<uint8_t>(0),
                                   configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
-      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x00, false,
-                                  static_cast<uint8_t>(0),
+      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x00, false, static_cast<uint8_t>(0),
                                   configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Write mapping
-      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_ASSIGNMENT, 0x01, false,
-                                  OD_INDEX_RX_PDO_MAPPING_3,
+      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_ASSIGNMENT, 0x01, false, OD_INDEX_RX_PDO_MAPPING_3,
                                   configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Write objects...
-      objectIndex =
-          (OD_INDEX_CONTROLWORD << 16) | (0x00 << 8) | sizeof(int16_t) * 8;
+      objectIndex = (OD_INDEX_CONTROLWORD << 16) | (0x00 << 8) | sizeof(int16_t) * 8;
       rxSuccess &=
-          sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x01, false, objectIndex,
-                         configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+          sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x01, false, objectIndex, configuration_.configRunSdoVerifyTimeout);
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
-      objectIndex =
-          (OD_INDEX_TARGET_VELOCITY << 16) | (0x00 << 8) | sizeof(int32_t) * 8;
+      objectIndex = (OD_INDEX_TARGET_VELOCITY << 16) | (0x00 << 8) | sizeof(int32_t) * 8;
       rxSuccess &=
-          sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x02, false, objectIndex,
-                         configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+          sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x02, false, objectIndex, configuration_.configRunSdoVerifyTimeout);
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
-      objectIndex = (OD_INDEX_PROFILE_ACCELERATION << 16) | (0x00 << 8) |
-                    sizeof(uint32_t) * 8;
+      objectIndex = (OD_INDEX_PROFILE_ACCELERATION << 16) | (0x00 << 8) | sizeof(uint32_t) * 8;
       rxSuccess &=
-          sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x03, false, objectIndex,
-                         configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+          sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x03, false, objectIndex, configuration_.configRunSdoVerifyTimeout);
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
-      objectIndex = (OD_INDEX_PROFILE_DECELERATION << 16) | (0x00 << 8) |
-                    sizeof(uint32_t) * 8;
+      objectIndex = (OD_INDEX_PROFILE_DECELERATION << 16) | (0x00 << 8) | sizeof(uint32_t) * 8;
       rxSuccess &=
-          sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x04, false, objectIndex,
-                         configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+          sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x04, false, objectIndex, configuration_.configRunSdoVerifyTimeout);
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
-      objectIndex = (OD_INDEX_MOTION_PROFILE_TYPE << 16) | (0x00 << 8) |
-                    sizeof(int16_t) * 8;
+      objectIndex = (OD_INDEX_MOTION_PROFILE_TYPE << 16) | (0x00 << 8) | sizeof(int16_t) * 8;
       rxSuccess &=
-          sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x05, false, objectIndex,
-                         configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+          sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x05, false, objectIndex, configuration_.configRunSdoVerifyTimeout);
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Write number of objects
-      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x00, false,
-                                  static_cast<uint8_t>(5),
+      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x00, false, static_cast<uint8_t>(5),
                                   configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Enable PDO
-      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_ASSIGNMENT, 0x00, false,
-                                  static_cast<uint8_t>(1),
+      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_ASSIGNMENT, 0x00, false, static_cast<uint8_t>(1),
                                   configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
       break;
 
     case RxPdoTypeEnum::NA:
-      MELO_ERROR_STREAM(
-          "[maxon_epos_ethercat_sdk:Maxon::mapPdos] Cannot map "
-          "RxPdoTypeEnum::NA, PdoType not configured properly");
+      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::mapPdos] Cannot map "
+                        "RxPdoTypeEnum::NA, PdoType not configured properly");
       addErrorToReading(ErrorType::PdoMappingError);
       rxSuccess = false;
       break;
     default:  // Non-implemented type
-      MELO_ERROR_STREAM(
-          "[maxon_epos_ethercat_sdk:Maxon::mapPdos] Cannot map unimplemented "
-          "RxPdo, PdoType not configured properly");
+      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::mapPdos] Cannot map unimplemented "
+                        "RxPdo, PdoType not configured properly");
       addErrorToReading(ErrorType::PdoMappingError);
       rxSuccess = false;
       break;
   }
 
   bool txSuccess = true;
-  switch (txPdoTypeEnum) {
+  switch (txPdoTypeEnum)
+  {
     case TxPdoTypeEnum::TxPdoStandard:
 
       MELO_INFO_STREAM("[maxon_epos_ethercat_sdk:Maxon::mapPdos] Tx Pdo: "
                        << "Standard Mode");
 
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Disable PDO
-      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x00, false,
-                                  static_cast<uint8_t>(0),
+      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x00, false, static_cast<uint8_t>(0),
                                   configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Write mapping
-      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x01, false,
-                                  OD_INDEX_TX_PDO_MAPPING_3,
+      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x01, false, OD_INDEX_TX_PDO_MAPPING_3,
                                   configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Write number of objects
-      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x00, false,
-                                  static_cast<uint8_t>(0),
+      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x00, false, static_cast<uint8_t>(0),
                                   configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Enable PDO
-      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x00, false,
-                                  static_cast<uint8_t>(1),
+      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x00, false, static_cast<uint8_t>(1),
                                   configuration_.configRunSdoVerifyTimeout);
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
       break;
 
     case TxPdoTypeEnum::TxPdoCST:
@@ -957,71 +870,52 @@ bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum) {
                        << "Cyclic Synchronous Torque Mode");
 
       // Disable PDO
-      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x00, false,
-                                  static_cast<uint8_t>(0),
+      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x00, false, static_cast<uint8_t>(0),
                                   configuration_.configRunSdoVerifyTimeout);
 
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
-      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x00, false,
-                                  static_cast<uint8_t>(0),
+      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x00, false, static_cast<uint8_t>(0),
                                   configuration_.configRunSdoVerifyTimeout);
 
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Write mapping
-      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x01, false,
-                                  OD_INDEX_TX_PDO_MAPPING_3,
+      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x01, false, OD_INDEX_TX_PDO_MAPPING_3,
                                   configuration_.configRunSdoVerifyTimeout);
 
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Write objects...
-      objectIndex =
-          (OD_INDEX_POSITION_ACTUAL << 16) | (0x00 << 8) | sizeof(int32_t) * 8;
+      objectIndex = (OD_INDEX_POSITION_ACTUAL << 16) | (0x00 << 8) | sizeof(int32_t) * 8;
       txSuccess &=
-          sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x01, false, objectIndex,
-                         configuration_.configRunSdoVerifyTimeout);
+          sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x01, false, objectIndex, configuration_.configRunSdoVerifyTimeout);
 
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
-      objectIndex =
-          (OD_INDEX_TORQUE_ACTUAL << 16) | (0x00 << 8) | sizeof(int16_t) * 8;
+      objectIndex = (OD_INDEX_TORQUE_ACTUAL << 16) | (0x00 << 8) | sizeof(int16_t) * 8;
       txSuccess &=
-          sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x02, false, objectIndex,
-                         configuration_.configRunSdoVerifyTimeout);
+          sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x02, false, objectIndex, configuration_.configRunSdoVerifyTimeout);
 
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
-      objectIndex =
-          (OD_INDEX_VELOCITY_ACTUAL << 16) | (0x00 << 8) | sizeof(int32_t) * 8;
+      objectIndex = (OD_INDEX_VELOCITY_ACTUAL << 16) | (0x00 << 8) | sizeof(int32_t) * 8;
       txSuccess &=
-          sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x03, false, objectIndex,
-                         configuration_.configRunSdoVerifyTimeout);
+          sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x03, false, objectIndex, configuration_.configRunSdoVerifyTimeout);
 
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Write number of objects
-      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x00, false,
-                                  static_cast<uint8_t>(3),
+      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x00, false, static_cast<uint8_t>(3),
                                   configuration_.configRunSdoVerifyTimeout);
 
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Enable PDO
-      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x00, false,
-                                  static_cast<uint8_t>(1),
+      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x00, false, static_cast<uint8_t>(1),
                                   configuration_.configRunSdoVerifyTimeout);
 
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
       break;
 
     case TxPdoTypeEnum::TxPdoPVM:
@@ -1030,75 +924,57 @@ bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum) {
                        << "Profile Velocity Mode");
 
       // Disable PDO
-      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x00, false,
-                                  static_cast<uint8_t>(0),
+      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x00, false, static_cast<uint8_t>(0),
                                   configuration_.configRunSdoVerifyTimeout);
 
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
-      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x00, false,
-                                  static_cast<uint8_t>(0),
+      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x00, false, static_cast<uint8_t>(0),
                                   configuration_.configRunSdoVerifyTimeout);
 
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Write mapping
-      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x01, false,
-                                  OD_INDEX_TX_PDO_MAPPING_3,
+      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x01, false, OD_INDEX_TX_PDO_MAPPING_3,
                                   configuration_.configRunSdoVerifyTimeout);
 
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Write objects...
-      objectIndex =
-          (OD_INDEX_VELOCITY_DEMAND << 16) | (0x00 << 8) | sizeof(int32_t) * 8;
+      objectIndex = (OD_INDEX_VELOCITY_DEMAND << 16) | (0x00 << 8) | sizeof(int32_t) * 8;
       txSuccess &=
-          sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x01, false, objectIndex,
-                         configuration_.configRunSdoVerifyTimeout);
+          sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x01, false, objectIndex, configuration_.configRunSdoVerifyTimeout);
 
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
-      objectIndex =
-          (OD_INDEX_STATUSWORD << 16) | (0x00 << 8) | sizeof(uint16_t) * 8;
+      objectIndex = (OD_INDEX_STATUSWORD << 16) | (0x00 << 8) | sizeof(uint16_t) * 8;
       txSuccess &=
-          sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x02, false, objectIndex,
-                         configuration_.configRunSdoVerifyTimeout);
+          sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x02, false, objectIndex, configuration_.configRunSdoVerifyTimeout);
 
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Write number of objects
-      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x00, false,
-                                  static_cast<uint8_t>(2),
+      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x00, false, static_cast<uint8_t>(2),
                                   configuration_.configRunSdoVerifyTimeout);
 
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
 
       // Enable PDO
-      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x00, false,
-                                  static_cast<uint8_t>(1),
+      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x00, false, static_cast<uint8_t>(1),
                                   configuration_.configRunSdoVerifyTimeout);
 
-      std::this_thread::sleep_for(
-          std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
       break;
 
     case TxPdoTypeEnum::NA:
-      MELO_ERROR_STREAM(
-          "[maxon_epos_ethercat_sdk:Maxon::mapPdos] Cannot map "
-          "TxPdoTypeEnum::NA, PdoType not configured properly");
+      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::mapPdos] Cannot map "
+                        "TxPdoTypeEnum::NA, PdoType not configured properly");
       addErrorToReading(ErrorType::TxPdoMappingError);
       txSuccess = false;
       break;
     default:  // if any case was forgotten
-      MELO_ERROR_STREAM(
-          "[maxon_epos_ethercat_sdk:Maxon::mapPdos] Cannot map undefined "
-          "TxPdo, PdoType not configured properly");
+      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::mapPdos] Cannot map undefined "
+                        "TxPdo, PdoType not configured properly");
       addErrorToReading(ErrorType::TxPdoMappingError);
       txSuccess = false;
       break;
@@ -1106,19 +982,121 @@ bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum) {
 
   return (txSuccess && rxSuccess);
 }
-Controlword Maxon::getNextStateTransitionControlword(
-    const DriveState& requestedDriveState,
-    const DriveState& currentDriveState) {
+
+bool Maxon::configParam(ModeOfOperationEnum modeOfOperationEnum)
+{
+  bool configSuccess = true;
+  uint32_t maxMotorSpeed;
+  uint32_t maxGearSpeed;
+  uint32_t nominalCurrent;
+  uint32_t torqueConstant;
+  switch (modeOfOperationEnum)
+  {
+    case ModeOfOperationEnum::ProfiledVelocityMode:
+
+      maxMotorSpeed =
+          static_cast<uint32_t>(configuration_.workVoltage * configuration_.speedConstant / configuration_.polePairs);
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_MAX_MOTOR_SPEED, 0x00, false, maxMotorSpeed);
+
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_MAX_PROFILE_VELOCITY, 0x00, false, maxMotorSpeed);
+
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+
+      maxGearSpeed = static_cast<uint32_t>(maxMotorSpeed / configuration_.gearRatio);
+      configSuccess &= sdoVerifyWrite(OD_INDEX_GEAR_DATA, 0x03, false, maxGearSpeed);
+
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_SOFTWARE_POSITION_LIMIT, 0x01, false, configuration_.minPosition);
+
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_SOFTWARE_POSITION_LIMIT, 0x02, false, configuration_.maxPosition);
+
+      if (configSuccess)
+      {
+        MELO_INFO("Setting PVM configuration parameters succeeded.");
+      }
+      else
+      {
+        MELO_ERROR("Setting PVM configuration parameters failed.");
+      }
+      break;
+
+    case ModeOfOperationEnum::CyclicSynchronousTorqueMode:
+
+      nominalCurrent = static_cast<uint32_t>(round(1000.0 * configuration_.nominalCurrentA));
+      configSuccess &= sdoVerifyWrite(OD_INDEX_MOTOR_DATA, 0x01, false, nominalCurrent);
+
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+
+      torqueConstant = static_cast<uint32_t>(1000000.0 * configuration_.torqueConstantNmA);
+      configSuccess &= sdoVerifyWrite(OD_INDEX_MOTOR_DATA, 0x05, false, torqueConstant);
+
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+
+      maxMotorSpeed =
+          static_cast<uint32_t>(configuration_.workVoltage * configuration_.speedConstant / configuration_.polePairs);
+      configSuccess &= sdoVerifyWrite(OD_INDEX_MAX_MOTOR_SPEED, 0x00, false, maxMotorSpeed);
+
+      maxGearSpeed = static_cast<uint32_t>(maxMotorSpeed / configuration_.gearRatio);
+      configSuccess &= sdoVerifyWrite(OD_INDEX_GEAR_DATA, 0x03, false, maxGearSpeed);
+
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_QUICKSTOP_DECELERATION, 0x00, false, configuration_.quickStopDecel);
+
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_PROFILE_DECELERATION, 0x00, false, configuration_.profileDecel);
+
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_SOFTWARE_POSITION_LIMIT, 0x01, false, configuration_.minPosition);
+
+      std::this_thread::sleep_for(std::chrono::microseconds(configuration_.configRunSdoVerifyTimeout));
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_SOFTWARE_POSITION_LIMIT, 0x02, false, configuration_.maxPosition);
+
+      if (configSuccess)
+      {
+        MELO_INFO("Setting CST configuration parameters succeeded.");
+      }
+      else
+      {
+        MELO_ERROR("Setting CST configuration parameters failed.");
+      }
+
+      break;
+
+    default:
+      break;
+  }
+
+  // Write maximum current to drive
+  uint32_t maxCurrent = static_cast<uint32_t>(floor(1000.0 * configuration_.maxCurrentA));
+  configSuccess &= sdoVerifyWrite(OD_INDEX_MOTOR_DATA, 0x02, false, maxCurrent);
+
+  return configSuccess;
+}
+
+Controlword Maxon::getNextStateTransitionControlword(const DriveState& requestedDriveState,
+                                                     const DriveState& currentDriveState)
+{
   Controlword controlword;
   controlword.setAllFalse();
-  switch (requestedDriveState) {
+  switch (requestedDriveState)
+  {
     case DriveState::SwitchOnDisabled:
-      switch (currentDriveState) {
+      switch (currentDriveState)
+      {
         case DriveState::SwitchOnDisabled:
-          MELO_ERROR_STREAM(
-              "[maxon_epos_ethercat_sdk:Maxon::"
-              "getNextStateTransitionControlword] "
-              << "drive state has already been reached for '" << name_ << "'");
+          MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::"
+                            "getNextStateTransitionControlword] "
+                            << "drive state has already been reached for '" << name_ << "'");
           addErrorToReading(ErrorType::PdoStateTransitionError);
           break;
         case DriveState::ReadyToSwitchOn:
@@ -1137,26 +1115,25 @@ Controlword Maxon::getNextStateTransitionControlword(
           controlword.setStateTransition15();
           break;
         default:
-          MELO_ERROR_STREAM(
-              "[maxon_epos_ethercat_sdk:Maxon::"
-              "getNextStateTransitionControlword] "
-              << "PDO state transition not implemented for '" << name_ << "'\n"
-              << "Current: " << currentDriveState << "\n"
-              << "Requested: " << requestedDriveState);
+          MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::"
+                            "getNextStateTransitionControlword] "
+                            << "PDO state transition not implemented for '" << name_ << "'\n"
+                            << "Current: " << currentDriveState << "\n"
+                            << "Requested: " << requestedDriveState);
           addErrorToReading(ErrorType::PdoStateTransitionError);
       }
       break;
 
     case DriveState::ReadyToSwitchOn:
-      switch (currentDriveState) {
+      switch (currentDriveState)
+      {
         case DriveState::SwitchOnDisabled:
           controlword.setStateTransition2();
           break;
         case DriveState::ReadyToSwitchOn:
-          MELO_ERROR_STREAM(
-              "[maxon_epos_ethercat_sdk:Maxon::"
-              "getNextStateTransitionControlword] "
-              << "drive state has already been reached for '" << name_ << "'");
+          MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::"
+                            "getNextStateTransitionControlword] "
+                            << "drive state has already been reached for '" << name_ << "'");
           addErrorToReading(ErrorType::PdoStateTransitionError);
           break;
         case DriveState::SwitchedOn:
@@ -1172,18 +1149,18 @@ Controlword Maxon::getNextStateTransitionControlword(
           controlword.setStateTransition15();
           break;
         default:
-          MELO_ERROR_STREAM(
-              "[maxon_epos_ethercat_sdk:Maxon::"
-              "getNextStateTransitionControlword] "
-              << "PDO state transition not implemented for '" << name_ << "'\n"
-              << "Current: " << currentDriveState << "\n"
-              << "Requested: " << requestedDriveState);
+          MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::"
+                            "getNextStateTransitionControlword] "
+                            << "PDO state transition not implemented for '" << name_ << "'\n"
+                            << "Current: " << currentDriveState << "\n"
+                            << "Requested: " << requestedDriveState);
           addErrorToReading(ErrorType::PdoStateTransitionError);
       }
       break;
 
     case DriveState::SwitchedOn:
-      switch (currentDriveState) {
+      switch (currentDriveState)
+      {
         case DriveState::SwitchOnDisabled:
           controlword.setStateTransition2();
           break;
@@ -1191,10 +1168,9 @@ Controlword Maxon::getNextStateTransitionControlword(
           controlword.setStateTransition3();
           break;
         case DriveState::SwitchedOn:
-          MELO_ERROR_STREAM(
-              "[maxon_epos_ethercat_sdk:Maxon::"
-              "getNextStateTransitionControlword] "
-              << "drive state has already been reached for '" << name_ << "'");
+          MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::"
+                            "getNextStateTransitionControlword] "
+                            << "drive state has already been reached for '" << name_ << "'");
           addErrorToReading(ErrorType::PdoStateTransitionError);
           break;
         case DriveState::OperationEnabled:
@@ -1207,18 +1183,18 @@ Controlword Maxon::getNextStateTransitionControlword(
           controlword.setStateTransition15();
           break;
         default:
-          MELO_ERROR_STREAM(
-              "[maxon_epos_ethercat_sdk:Maxon::"
-              "getNextStateTransitionControlword] "
-              << "PDO state transition not implemented for '" << name_ << "'\n"
-              << "Current: " << currentDriveState << "\n"
-              << "Requested: " << requestedDriveState);
+          MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::"
+                            "getNextStateTransitionControlword] "
+                            << "PDO state transition not implemented for '" << name_ << "'\n"
+                            << "Current: " << currentDriveState << "\n"
+                            << "Requested: " << requestedDriveState);
           addErrorToReading(ErrorType::PdoStateTransitionError);
       }
       break;
 
     case DriveState::OperationEnabled:
-      switch (currentDriveState) {
+      switch (currentDriveState)
+      {
         case DriveState::SwitchOnDisabled:
           controlword.setStateTransition2();
           break;
@@ -1229,10 +1205,9 @@ Controlword Maxon::getNextStateTransitionControlword(
           controlword.setStateTransition4();
           break;
         case DriveState::OperationEnabled:
-          MELO_ERROR_STREAM(
-              "[maxon_epos_ethercat_sdk:Maxon::"
-              "getNextStateTransitionControlword] "
-              << "drive state has already been reached for '" << name_ << "'");
+          MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::"
+                            "getNextStateTransitionControlword] "
+                            << "drive state has already been reached for '" << name_ << "'");
           addErrorToReading(ErrorType::PdoStateTransitionError);
           break;
         case DriveState::QuickStopActive:
@@ -1242,18 +1217,18 @@ Controlword Maxon::getNextStateTransitionControlword(
           controlword.setStateTransition15();
           break;
         default:
-          MELO_ERROR_STREAM(
-              "[maxon_epos_ethercat_sdk:Maxon::"
-              "getNextStateTransitionControlword] "
-              << "PDO state transition not implemented for '" << name_ << "'\n"
-              << "Current: " << currentDriveState << "\n"
-              << "Requested: " << requestedDriveState);
+          MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::"
+                            "getNextStateTransitionControlword] "
+                            << "PDO state transition not implemented for '" << name_ << "'\n"
+                            << "Current: " << currentDriveState << "\n"
+                            << "Requested: " << requestedDriveState);
           addErrorToReading(ErrorType::PdoStateTransitionError);
       }
       break;
 
     case DriveState::QuickStopActive:
-      switch (currentDriveState) {
+      switch (currentDriveState)
+      {
         case DriveState::SwitchOnDisabled:
           controlword.setStateTransition2();
           break;
@@ -1267,59 +1242,59 @@ Controlword Maxon::getNextStateTransitionControlword(
           controlword.setStateTransition11();
           break;
         case DriveState::QuickStopActive:
-          MELO_ERROR_STREAM(
-              "[maxon_epos_ethercat_sdk:Maxon::"
-              "getNextStateTransitionControlword] "
-              << "drive state has already been reached for '" << name_ << "'");
+          MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::"
+                            "getNextStateTransitionControlword] "
+                            << "drive state has already been reached for '" << name_ << "'");
           addErrorToReading(ErrorType::PdoStateTransitionError);
           break;
         case DriveState::Fault:
           controlword.setStateTransition15();
           break;
         default:
-          MELO_ERROR_STREAM(
-              "[maxon_epos_ethercat_sdk:Maxon::"
-              "getNextStateTransitionControlword] "
-              << "PDO state transition not implemented for '" << name_ << "'\n"
-              << "Current: " << currentDriveState << "\n"
-              << "Requested: " << requestedDriveState);
+          MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::"
+                            "getNextStateTransitionControlword] "
+                            << "PDO state transition not implemented for '" << name_ << "'\n"
+                            << "Current: " << currentDriveState << "\n"
+                            << "Requested: " << requestedDriveState);
           addErrorToReading(ErrorType::PdoStateTransitionError);
       }
       break;
 
     default:
-      MELO_ERROR_STREAM(
-          "[maxon_epos_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
-          << "PDO state cannot be reached for '" << name_ << "'");
+      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::getNextStateTransitionControlword] "
+                        << "PDO state cannot be reached for '" << name_ << "'");
       addErrorToReading(ErrorType::PdoStateTransitionError);
   }
 
   return controlword;
 }
 
-void Maxon::autoConfigurePdoSizes() {
+void Maxon::autoConfigurePdoSizes()
+{
   auto pdoSizes = bus_->getHardwarePdoSizes(static_cast<uint16_t>(address_));
   pdoInfo_.rxPdoSize_ = pdoSizes.first;
   pdoInfo_.txPdoSize_ = pdoSizes.second;
 }
 
-uint16_t Maxon::getTxPdoSize() {
+uint16_t Maxon::getTxPdoSize()
+{
   return pdoInfo_.txPdoSize_;
 }
 
-uint16_t Maxon::getRxPdoSize() {
+uint16_t Maxon::getRxPdoSize()
+{
   return pdoInfo_.rxPdoSize_;
 }
 
-void Maxon::engagePdoStateMachine() {
+void Maxon::engagePdoStateMachine()
+{
   // locking the mutex
   std::lock_guard<std::recursive_mutex> lock(mutex_);
 
   // elapsed time since the last new controlword
-  auto microsecondsSinceChange =
-      (std::chrono::duration_cast<std::chrono::microseconds>(
-           std::chrono::steady_clock::now() - driveStateChangeTimePoint_))
-          .count();
+  auto microsecondsSinceChange = (std::chrono::duration_cast<std::chrono::microseconds>(
+                                      std::chrono::steady_clock::now() - driveStateChangeTimePoint_))
+                                     .count();
 
   // get the current state
   // since we wait until "hasRead" is true, this is guaranteed to be a newly
@@ -1327,21 +1302,22 @@ void Maxon::engagePdoStateMachine() {
   const DriveState currentDriveState = reading_.getDriveState();
 
   // check if the state change already was successful:
-  if (currentDriveState == targetDriveState_) {
+  if (currentDriveState == targetDriveState_)
+  {
     numberOfSuccessfulTargetStateReadings_++;
-    if (numberOfSuccessfulTargetStateReadings_ >=
-        configuration_.minNumberOfSuccessfulTargetStateReadings) {
+    if (numberOfSuccessfulTargetStateReadings_ >= configuration_.minNumberOfSuccessfulTargetStateReadings)
+    {
       // disable the state machine
       conductStateChange_ = false;
       numberOfSuccessfulTargetStateReadings_ = 0;
       stateChangeSuccessful_ = true;
       return;
     }
-  } else if (microsecondsSinceChange >
-             configuration_.driveStateChangeMinTimeout) {
+  }
+  else if (microsecondsSinceChange > configuration_.driveStateChangeMinTimeout)
+  {
     // get the next controlword from the state machine
-    controlword_ =
-        getNextStateTransitionControlword(targetDriveState_, currentDriveState);
+    controlword_ = getNextStateTransitionControlword(targetDriveState_, currentDriveState);
     driveStateChangeTimePoint_ = std::chrono::steady_clock::now();
   }
 
@@ -1350,43 +1326,49 @@ void Maxon::engagePdoStateMachine() {
   hasRead_ = false;
 }
 
-void Maxon::addErrorToReading(const ErrorType& errorType) {
+void Maxon::addErrorToReading(const ErrorType& errorType)
+{
   std::lock_guard<std::recursive_mutex> lock(mutex_);
   reading_.addError(errorType);
 }
 
-void Maxon::printErrorCode() {
+void Maxon::printErrorCode()
+{
   uint16_t errorcode = 0;
-  bool error_read_success =
-      sendSdoRead(OD_INDEX_ERROR_CODE, 0x00, false, errorcode);
-  if (error_read_success) {
+  bool error_read_success = sendSdoRead(OD_INDEX_ERROR_CODE, 0x00, false, errorcode);
+  if (error_read_success)
+  {
     MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::printErrorCode] "
                       << "Error code: " << std::hex << errorcode);
-  } else {
-    MELO_ERROR_STREAM(
-        "[maxon_epos_ethercat_sdk:Maxon::printErrorCode] read error code "
-        "uncessuful.")
+  }
+  else
+  {
+    MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::printErrorCode] read error code "
+                      "uncessuful.")
   }
 }
 
-void Maxon::printDiagnosis() {
+void Maxon::printDiagnosis()
+{
   uint8_t newestIdx = 0;
   bool newMsgAvailable = false;
   std::array<uint, 4> diagnosisMsg;
   sendSdoRead(OD_INDEX_DIAGNOSIS, 0x04, false, newMsgAvailable);
-  if (newMsgAvailable) {
+  if (newMsgAvailable)
+  {
     sendSdoRead(OD_INDEX_DIAGNOSIS, 0x02, false, newestIdx);
     sendSdoRead(OD_INDEX_DIAGNOSIS, newestIdx, false, diagnosisMsg);
-    MELO_INFO(
-        "[maxon_epos_ethercat_sdk:Maxon::printDiagnosis] Latest diagnostic "
-        "message: ");
-    for (const auto& s : diagnosisMsg) {
+    MELO_INFO("[maxon_epos_ethercat_sdk:Maxon::printDiagnosis] Latest diagnostic "
+              "message: ");
+    for (const auto& s : diagnosisMsg)
+    {
       MELO_INFO_STREAM(std::hex << s);
     }
-  } else {
-    MELO_INFO(
-        "[maxon_epos_ethercat_sdk:Maxon::printDiagnosis] "
-        "No diagnostic message available.");
+  }
+  else
+  {
+    MELO_INFO("[maxon_epos_ethercat_sdk:Maxon::printDiagnosis] "
+              "No diagnostic message available.");
   }
 }
 }  // namespace maxon

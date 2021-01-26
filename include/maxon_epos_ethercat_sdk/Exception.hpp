@@ -16,12 +16,12 @@
 **
 ** You should have received a copy of the GNU General Public License
 ** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 
 #include <message_logger/message_logger.hpp>
 
-namespace maxon {
-
+namespace maxon
+{
 using Exception = message_logger::log::melo_fatal;
 
 }  // namespace maxon

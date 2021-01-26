@@ -16,15 +16,16 @@
 **
 ** You should have received a copy of the GNU General Public License
 ** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 
 #pragma once
 
 #include <cstdint>
 
-namespace maxon {
-
-enum class ModeOfOperationEnum : int8_t {
+namespace maxon
+{
+enum class ModeOfOperationEnum : int8_t
+{
   NA = 0,
   ProfiledPositionMode = 1,
   ProfiledVelocityMode = 3,
