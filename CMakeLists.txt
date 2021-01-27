@@ -67,6 +67,8 @@ add_library(${PROJECT_NAME}
   src/${PROJECT_NAME}/Maxon.cpp
   src/${PROJECT_NAME}/Configuration.cpp
   src/${PROJECT_NAME}/ConfigurationParser.cpp
+  src/${PROJECT_NAME}/ConfigureParameters.cpp
+  src/${PROJECT_NAME}/Diagnostics.cpp
   src/${PROJECT_NAME}/Reading.cpp
   src/${PROJECT_NAME}/Command.cpp
   src/${PROJECT_NAME}/Controlword.cpp
