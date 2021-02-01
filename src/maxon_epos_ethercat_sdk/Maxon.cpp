@@ -75,7 +75,7 @@ bool Maxon::startup()
 {
   bool success = true;
   success &= bus_->waitForState(EC_STATE_PRE_OP, address_, 50, 0.05);
-  bus_->syncDistributedClock0(address_, true, timeStep_, timeStep_ / 2.f);
+  bus_->syncDistributedClock0(address_, true, timeStep_, timeStep_ / 2.f);  // Might not need
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   // use hardware motor rated current value if necessary
@@ -130,6 +130,8 @@ bool Maxon::startup()
 
 void Maxon::shutdown()
 {
+  setDriveStateViaSdo(DriveState::QuickStopActive);
+  setDriveStateViaSdo(DriveState::SwitchOnDisabled);
   bus_->setState(EC_STATE_INIT, address_);
 }
 

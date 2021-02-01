@@ -219,10 +219,9 @@ bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum)
                                   configuration_.configRunSdoVerifyTimeout);
 
       // Write objects...
-      std::array<uint32_t, 3> objects{
-        (OD_INDEX_VELOCITY_DEMAND << 16) | (0x00 << 8) | sizeof(int32_t) * 8,
+      std::array<uint32_t, 2> objects{
         (OD_INDEX_STATUSWORD << 16) | (0x00 << 8) | sizeof(uint16_t) * 8,
-        (OD_INDEX_TORQUE_ACTUAL << 16) | (0x00 << 8) | sizeof(int16_t) * 8  // Added actual torque
+        (OD_INDEX_VELOCITY_DEMAND << 16) | (0x00 << 8) | sizeof(int32_t) * 8,
       };
 
       subIndex = 0;
