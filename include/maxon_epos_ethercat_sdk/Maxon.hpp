@@ -108,6 +108,7 @@ protected:
   uint16_t getRxPdoSize();
 
   bool isAllowedModeCombination(const std::vector<ModeOfOperationEnum> modes);
+  std::pair<RxPdoTypeEnum, TxPdoTypeEnum> getMixedPdoType(std::vector<ModeOfOperationEnum> modes);
 
   // Errors
 protected:

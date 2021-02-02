@@ -425,8 +425,9 @@ bool Maxon::loadConfiguration(const Configuration& configuration)
   } else {
     if(isAllowedModeCombination(configuration.modesOfOperation)){
       allowModeChange_ = true;
-      rxPdoTypeEnum_ = mode2PdoMap.at(configuration.modesOfOperation[0]).first;
-      txPdoTypeEnum_ = mode2PdoMap.at(configuration.modesOfOperation[0]).second;
+      auto mixedPdoTypes = getMixedPdoType(configuration.modesOfOperation);
+      rxPdoTypeEnum_ = mixedPdoTypes.first;
+      txPdoTypeEnum_ = mixedPdoTypes.second;
     } else {
       MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::loadConfiguration] " <<
                         "The chosen mode of operation combination is not supported.")
@@ -1049,5 +1050,25 @@ bool Maxon::isAllowedModeCombination(const std::vector<ModeOfOperationEnum> mode
 
     success |= (includedSuccess1&&includedSuccess2);
   }
+  return success;
+}
+std::pair<RxPdoTypeEnum, TxPdoTypeEnum> Maxon::getMixedPdoType(std::vector<ModeOfOperationEnum> modes)
+{
+  const std::map<std::vector<ModeOfOperationEnum>, std::pair<RxPdoTypeEnum, TxPdoTypeEnum>> mixedModePdoMap = {
+  {{ModeOfOperationEnum::CyclicSynchronousTorqueMode, ModeOfOperationEnum::CyclicSynchronousPositionMode}, {RxPdoTypeEnum::RxPdoCSTCSP, TxPdoTypeEnum::TxPdoCSTCSP}},
+  };
+
+  for(const auto& entry : mixedModePdoMap) {
+    bool includedSuccess1 = true;
+    for(const auto& mode : modes)
+      includedSuccess1 &= (std::find(entry.first.begin(), entry.first.end(), mode) != entry.first.end());
+    bool includedSuccess2 = true;
+    for(const auto& mode : entry.first)
+      includedSuccess2 &= (std::find(modes.begin(), modes.end(), mode) != modes.end());
+
+    if(includedSuccess1 && includedSuccess2)
+      return entry.second;
+  }
+  return std::pair<RxPdoTypeEnum, TxPdoTypeEnum>{RxPdoTypeEnum::NA, TxPdoTypeEnum::NA};
 }
 }  // namespace maxon
