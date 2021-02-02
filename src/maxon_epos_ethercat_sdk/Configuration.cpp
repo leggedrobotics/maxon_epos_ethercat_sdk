@@ -56,12 +56,14 @@ std::string rxPdoString(RxPdoTypeEnum rxPdo)
       return "NA";
     case RxPdoTypeEnum::RxPdoStandard:
       return "Rx PDO Standard";
+    case RxPdoTypeEnum::RxPdoCSP:
+      return "Rx PDO CSP";
     case RxPdoTypeEnum::RxPdoCST:
       return "Rx PDO CST";
     case RxPdoTypeEnum::RxPdoCSV:
       return "Rx PDO CSV";
-    case RxPdoTypeEnum::RxPdoCSTCSV:
-      return "Rx PDO CST/CSV mixed mode";
+    case RxPdoTypeEnum::RxPdoCSTCSP:
+      return "Rx PDO CST/CSP mixed mode";
     case RxPdoTypeEnum::RxPdoPVM:
       return "Rx PDO PVM";
     default:
@@ -75,12 +77,14 @@ std::string txPdoString(TxPdoTypeEnum txPdo)
   {
     case TxPdoTypeEnum::NA:
       return "NA";
+    case TxPdoTypeEnum::TxPdoCSP:
+      return "Tx PDO CSP";
     case TxPdoTypeEnum::TxPdoCST:
       return "Tx PDO CST";
     case TxPdoTypeEnum::TxPdoCSV:
       return "Tx PDO CSV";
-    case TxPdoTypeEnum::TxPdoCSTCSV:
-      return "Tx PDO CST/CSV mixed mode";
+    case TxPdoTypeEnum::TxPdoCSTCSP:
+      return "Tx PDO CST/CSP mixed mode";
     case TxPdoTypeEnum::TxPdoPVM:
       return "Tx PDO PVM";
     case TxPdoTypeEnum::TxPdoStandard:

@@ -76,7 +76,8 @@ bool Maxon::startup()
 {
   bool success = true;
   success &= bus_->waitForState(EC_STATE_PRE_OP, address_, 50, 0.05);
-  // bus_->syncDistributedClock0(address_, true, timeStep_, timeStep_ / 2.f);  // Might not need
+  // bus_->syncDistributedClock0(address_, true, timeStep_, timeStep_ / 2.f); //
+  // Might not need
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   // use hardware motor rated current value if necessary
@@ -174,34 +175,63 @@ void Maxon::updateWrite()
 
       // actually writing to the hardware
       bus_->writeRxPdo(address_, rxPdo);
+      break;
     }
-    break;
+    case RxPdoTypeEnum::RxPdoCSP:
+    {
+      RxPdoCSP rxPdo{};
+      rxPdo.targetPosition_ = stagedCommand_.getTargetPositionRaw();
+      rxPdo.positionOffset_ = stagedCommand_.getPositionOffsetRaw();
+      rxPdo.torqueOffset_ = stagedCommand_.getTorqueOffsetRaw();
+
+      // Extra data
+      rxPdo.controlWord_ = controlword_.getRawControlword();
+      rxPdo.modeOfOperation_ = static_cast<int8_t>(stagedCommand_.getModeOfOperation());
+
+      // actually writing to the hardware
+      bus_->writeRxPdo(address_, rxPdo);
+      break;
+    }
     case RxPdoTypeEnum::RxPdoCST:
     {
       RxPdoCST rxPdo{};
       rxPdo.targetTorque_ = stagedCommand_.getTargetTorqueRaw();
       rxPdo.torqueOffset_ = stagedCommand_.getTorqueOffsetRaw();
-      rxPdo.controlWord_ = controlword_.getRawControlword();  // Added
+
+      // Extra data
+      rxPdo.controlWord_ = controlword_.getRawControlword();
       rxPdo.modeOfOperation_ = static_cast<int8_t>(stagedCommand_.getModeOfOperation());
 
       // actually writing to the hardware
       bus_->writeRxPdo(address_, rxPdo);
+      break;
     }
-    break;
     case RxPdoTypeEnum::RxPdoCSV:
     {
       RxPdoCSV rxPdo{};
       rxPdo.targetVelocity_ = stagedCommand_.getTargetVelocityRaw();
       rxPdo.velocityOffset_ = stagedCommand_.getVelocityOffsetRaw();
-      rxPdo.controlWord_ = controlword_.getRawControlword();  // Added
-      rxPdo.modeOfOperation_ = static_cast<int8_t>(stagedCommand_.getModeOfOperation());
 
-      std::cout << "target velocity " << rxPdo.targetVelocity_ << std::endl;
+      // Extra data
+      rxPdo.controlWord_ = controlword_.getRawControlword();
+      rxPdo.modeOfOperation_ = static_cast<int8_t>(stagedCommand_.getModeOfOperation());
 
       // actually writing to the hardware
       bus_->writeRxPdo(address_, rxPdo);
+      break;
     }
-    break;
+    case RxPdoTypeEnum::RxPdoCSTCSP:
+    {
+      RxPdoCSTCSP rxPdo{};
+
+      // Extra data
+      rxPdo.controlWord_ = controlword_.getRawControlword();
+      rxPdo.modeOfOperation_ = static_cast<int8_t>(stagedCommand_.getModeOfOperation());
+
+      // actually writing to the hardware
+      bus_->writeRxPdo(address_, rxPdo);
+      break;
+    }
     case RxPdoTypeEnum::RxPdoPVM:
     {
       RxPdoPVM rxPdo{};
@@ -213,8 +243,8 @@ void Maxon::updateWrite()
 
       // actually writing to the hardware
       bus_->writeRxPdo(address_, rxPdo);
+      break;
     }
-    break;
     default:
       MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::updateWrite] "
                         " Unsupported Rx Pdo type for '"
@@ -236,9 +266,19 @@ void Maxon::updateRead()
       // reading from the bus
       bus_->readTxPdo(address_, txPdo);
       reading_.setStatusword(txPdo.statusword_);
+      break;
     }
-    break;
-
+    case TxPdoTypeEnum::TxPdoCSP:
+    {
+      TxPdoCSP txPdo{};
+      // reading from the bus
+      bus_->readTxPdo(address_, txPdo);
+      reading_.setStatusword(txPdo.statusword_);
+      reading_.setActualCurrent(txPdo.actualTorque_);
+      reading_.setActualVelocity(txPdo.actualVelocity_);
+      reading_.setActualPosition(txPdo.actualPosition_);
+      break;
+    }
     case TxPdoTypeEnum::TxPdoCST:
     {
       TxPdoCST txPdo{};
@@ -248,9 +288,8 @@ void Maxon::updateRead()
       reading_.setActualCurrent(txPdo.actualTorque_);
       reading_.setActualVelocity(txPdo.actualVelocity_);
       reading_.setActualPosition(txPdo.actualPosition_);
+      break;
     }
-    break;
-
     case TxPdoTypeEnum::TxPdoCSV:
     {
       TxPdoCSV txPdo{};
@@ -260,9 +299,19 @@ void Maxon::updateRead()
       reading_.setActualCurrent(txPdo.actualTorque_);
       reading_.setActualVelocity(txPdo.actualVelocity_);
       reading_.setActualPosition(txPdo.actualPosition_);
+      break;
     }
-    break;
-
+    case TxPdoTypeEnum::TxPdoCSTCSP:
+    {
+      TxPdoCSTCSP txPdo{};
+      // reading from the bus
+      bus_->readTxPdo(address_, txPdo);
+      reading_.setStatusword(txPdo.statusword_);
+      reading_.setActualCurrent(txPdo.actualTorque_);
+      reading_.setActualVelocity(txPdo.actualVelocity_);
+      reading_.setActualPosition(txPdo.actualPosition_);
+      break;
+    }
     case TxPdoTypeEnum::TxPdoPVM:
     {
       TxPdoPVM txPdo{};
@@ -271,9 +320,8 @@ void Maxon::updateRead()
 
       reading_.setDemandVelocity(txPdo.demandVelocity_);
       reading_.setStatusword(txPdo.statusword_);
+      break;
     }
-    break;
-
     default:
       MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::updateRrite] Unsupported Tx Pdo "
                         "type for '"
@@ -291,7 +339,7 @@ void Maxon::updateRead()
   if (reading_.getDriveState() == DriveState::Fault)
   {
     MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::updateRead] '" << name_ << "' is in drive state 'Fault'");
-    printErrorCode();
+    // printErrorCode();
   }
 }
 

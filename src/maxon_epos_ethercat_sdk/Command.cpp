@@ -145,6 +145,10 @@ void Command::setTargetCurrentRaw(int16_t targetCurrent)
 {
   targetCurrent_ = targetCurrent;
 }
+void Command::setPositionOffsetRaw(int32_t positionOffset)
+{
+  positionOffset_ = positionOffset;
+}
 void Command::setTorqueOffsetRaw(int16_t torqueOffset)
 {
   torqueOffset_ = torqueOffset;
@@ -174,6 +178,10 @@ void Command::setTargetCurrent(double targetCurrent)
   std::lock_guard<std::mutex> lockGuard(targetTorqueCommandMutex_);
   targetCurrentUU_ = targetCurrent;
   targetTorqueCommandUsed_ = false;
+}
+void Command::setPositionOffset(double positionOffset)
+{
+  positionOffsetUU_ = positionOffset;
 }
 void Command::setTorqueOffset(double torqueOffset)
 {
@@ -247,11 +255,15 @@ uint16_t Command::getMaxCurrentRaw() const
 {
   return maxCurrent_;
 }
+int32_t Command::getPositionOffsetRaw() const
+{
+  return positionOffset_;
+}
 int16_t Command::getTorqueOffsetRaw() const
 {
   return torqueOffset_;
 }
-int16_t Command::getVelocityOffsetRaw() const
+int32_t Command::getVelocityOffsetRaw() const
 {
   return velocityOffset_;
 }
@@ -306,7 +318,6 @@ void Command::doUnitConversion()
   {
     targetPosition_ = static_cast<int32_t>(positionFactorRadToInteger_ * targetPositionUU_);
     targetVelocity_ = static_cast<int32_t>(velocityFactorRadPerSecToMicroRPM_ * targetVelocityUU_);
-    std::cout << "targetVelocity=" << targetVelocity_ << "\ntargetVelocityUU=" << targetVelocityUU_ << std::endl;
     targetTorque_ = static_cast<int16_t>(torqueFactorNmToInteger_ * targetTorqueUU_);
     {
       std::lock_guard<std::mutex> lockGuard(targetTorqueCommandMutex_);
@@ -321,6 +332,7 @@ void Command::doUnitConversion()
     }
     maxTorque_ = static_cast<uint16_t>(torqueFactorNmToInteger_ * maxTorqueUU_);
     maxCurrent_ = static_cast<uint16_t>(currentFactorAToInteger_ * maxCurrentUU_);
+    positionOffset_ = static_cast<int16_t>(positionFactorRadToInteger_ * positionOffsetUU_);
     torqueOffset_ = static_cast<int16_t>(torqueFactorNmToInteger_ * torqueOffsetUU_);
     velocityOffset_ = static_cast<int16_t>(velocityFactorRadPerSecToMicroRPM_ * velocityOffsetUU_);
   }

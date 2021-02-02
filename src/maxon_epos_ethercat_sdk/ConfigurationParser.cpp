@@ -59,7 +59,6 @@ bool getValueFromFile(YAML::Node& yamlNode, const std::string& varName, T& var)
   }
 }
 
-
 /*!
  * Function to read a Modes of Operation enum from the yaml file
  * @param[in] yamlNode	the node containing the requested value
@@ -305,6 +304,11 @@ void ConfigurationParser::parseConfiguration(YAML::Node configNode)
       configuration_.profileDecel = profileDecel;
     }
 
+    uint32_t followErrorWindow;
+    if (getValueFromFile(hardwareNode, "follow_error_window", followErrorWindow))
+    {
+      configuration_.followErrorWindow = followErrorWindow;
+    }
   }
 }
 

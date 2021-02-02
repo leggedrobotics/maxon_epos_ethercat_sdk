@@ -33,9 +33,10 @@ enum class RxPdoTypeEnum : int8_t
 {
   NA = 0,
   RxPdoStandard,
+  RxPdoCSP,
   RxPdoCST,
   RxPdoCSV,
-  RxPdoCSTCSV,
+  RxPdoCSTCSP,
   RxPdoPVM
 };
 
@@ -44,9 +45,10 @@ enum class TxPdoTypeEnum : int8_t
 {
   NA = -128,
   TxPdoStandard,
+  TxPdoCSP,
   TxPdoCST,
   TxPdoCSV,
-  TxPdoCSTCSV,
+  TxPdoCSTCSP,
   TxPdoPVM
 };
 

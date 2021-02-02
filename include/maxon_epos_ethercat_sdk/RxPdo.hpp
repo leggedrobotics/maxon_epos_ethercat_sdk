@@ -34,7 +34,6 @@ namespace maxon
 {
 /*!
  * Standard Rx PDO type.
- * Includes a padding_ byte for firmware version 01.01.15.00 (october 2018)
  */
 struct RxPdoStandard
 {
@@ -43,8 +42,19 @@ struct RxPdoStandard
 } __attribute__((packed));
 
 /*!
+ * CSP Rx PDO type.
+*/
+struct RxPdoCSP
+{
+  int32_t targetPosition_;
+  int32_t positionOffset_;
+  int16_t torqueOffset_;
+  uint16_t controlWord_;
+  int8_t modeOfOperation_;
+} __attribute__((packed));
+
+/*!
  * CST Rx PDO type.
- * Includes a padding_ byte for firmware version 01.01.15.00 (october 2018)
  */
 struct RxPdoCST
 {
@@ -54,6 +64,10 @@ struct RxPdoCST
   int8_t modeOfOperation_;
 } __attribute__((packed));
 
+
+/*!
+ * CSV Rx PDO type.
+ */
 struct RxPdoCSV
 {
   int32_t targetVelocity_;
@@ -63,12 +77,12 @@ struct RxPdoCSV
 } __attribute__((packed));
 
 // Mixed operation mode for CST and CSV
-struct RxPdoCSTCSV
+struct RxPdoCSTCSP
 {
   int16_t targetTorque_;
   int16_t torqueOffset_;
-  int32_t targetVelocity_;
-  int32_t velocityOffset_;
+  int32_t targetPosition_;
+  int32_t positionOffset_;
   uint16_t controlWord_;
   int8_t modeOfOperation_;
 }  __attribute__((packed));

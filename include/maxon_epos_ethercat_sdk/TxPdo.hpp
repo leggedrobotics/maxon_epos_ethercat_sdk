@@ -1,7 +1,7 @@
 /*
 ** Copyright (2019-2020) Robotics Systems Lab - ETH Zurich:
 ** Jonas Junger, Johannes Pankert, Fabio Dubois, Lennart Nachtigall,
-** Markus Staeuble
+** Markus Staeuble, Linghao Zhang
 **
 ** This file is part of the maxon_epos_ethercat_sdk.
 ** The maxon_epos_ethercat_sdk is free software: you can redistribute it and/or
@@ -44,6 +44,14 @@ struct TxPdoStandard
  * CST Tx PDO type
  * Includes padding_ byte for firmware version 01.01.15.00 (october 2018)
  */
+struct TxPdoCSP
+{
+  uint16_t statusword_;
+  int16_t actualTorque_;
+  int32_t actualVelocity_;
+  int32_t actualPosition_;
+} __attribute__((packed));
+
 struct TxPdoCST
 {
   uint16_t statusword_;
@@ -61,7 +69,7 @@ struct TxPdoCSV
 } __attribute__((packed));
 
 // Mixed operation mode for CST and CSV
-struct TxPdoCSTCSV
+struct TxPdoCSTCSP
 {
   uint16_t statusword_;
   int16_t actualTorque_;
