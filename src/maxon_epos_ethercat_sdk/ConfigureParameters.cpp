@@ -523,6 +523,7 @@ bool Maxon::configParam()
   uint32_t maxMotorSpeed;
   uint32_t maxGearSpeed;
   uint32_t nominalCurrent;
+  uint32_t maxCurrent;
   uint32_t torqueConstant;
 
   // Set velocity unit to micro revs per minute
@@ -551,6 +552,10 @@ bool Maxon::configParam()
   nominalCurrent = static_cast<uint32_t>(round(1000.0 * configuration_.nominalCurrentA));
   configSuccess &=
       sdoVerifyWrite(OD_INDEX_MOTOR_DATA, 0x01, false, nominalCurrent, configuration_.configRunSdoVerifyTimeout);
+
+  maxCurrent = static_cast<uint32_t>(round(1000.0 * configuration_.maxCurrentA));
+  configSuccess &=
+      sdoVerifyWrite(OD_INDEX_MOTOR_DATA, 0x02, false, maxCurrent, configuration_.configRunSdoVerifyTimeout);
 
   torqueConstant = static_cast<uint32_t>(1000000.0 * configuration_.torqueConstantNmA);
   configSuccess &=
@@ -591,11 +596,6 @@ bool Maxon::configParam()
   {
     MELO_ERROR("Setting configuration parameters failed.");
   }
-
-  // Write maximum current to drive
-  uint32_t maxCurrent = static_cast<uint32_t>(floor(1000.0 * configuration_.maxCurrentA));
-  configSuccess &=
-      sdoVerifyWrite(OD_INDEX_MOTOR_DATA, 0x02, false, maxCurrent, configuration_.configRunSdoVerifyTimeout);
 
   return configSuccess;
 }

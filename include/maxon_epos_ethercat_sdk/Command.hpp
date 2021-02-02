@@ -81,8 +81,6 @@ public:
   int32_t getTargetVelocityRaw() const;
   int16_t getTargetTorqueRaw() const;
   int16_t getTargetCurrentRaw() const;
-  uint16_t getMaxTorqueRaw() const;
-  uint16_t getMaxCurrentRaw() const;
   int32_t getPositionOffsetRaw() const;
   int16_t getTorqueOffsetRaw() const;
   int32_t getVelocityOffsetRaw() const;
@@ -95,8 +93,6 @@ public:
   double getTargetVelocity() const;
   double getTargetTorque() const;
   double getTargetCurrent() const;
-  double getMaxTorque() const;
-  double getMaxCurrent() const;
   double getTorqueOffset() const;
   double getVelocityOffset() const;
 
@@ -119,16 +115,12 @@ public:
   friend std::ostream& operator<<(std::ostream& os, Command& command);
 
   // Set command max current/torque
-  void setMaxCurrent(double maxCurrent);
-  void setMaxTorque(double maxTorque);
 
 private:
   double targetPositionUU_{ 0 };
   double targetVelocityUU_{ 0 };
   double targetTorqueUU_{ 0 };
   double targetCurrentUU_{ 0 };
-  double maxTorqueUU_{ 0 };
-  double maxCurrentUU_{ 0 };
   double positionOffsetUU_{ 0 };
   double torqueOffsetUU_{ 0 };
   double velocityOffsetUU_{ 0 };
@@ -137,8 +129,6 @@ private:
   int32_t targetVelocity_{ 0 };
   int16_t targetTorque_{ 0 };
   int16_t targetCurrent_{ 0 };
-  uint16_t maxTorque_{ 0 };
-  uint16_t maxCurrent_{ 0 };
   int32_t positionOffset_{ 0 };
   int16_t torqueOffset_{ 0 };
   int32_t velocityOffset_{ 0 };

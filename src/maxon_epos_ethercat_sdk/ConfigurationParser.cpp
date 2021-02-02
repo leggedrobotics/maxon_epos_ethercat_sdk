@@ -268,12 +268,6 @@ void ConfigurationParser::parseConfiguration(YAML::Node configNode)
       configuration_.torqueConstantNmA = torqueConstantNmA;
     }
 
-    double motorRatedTorqueNm;
-    if (getValueFromFile(hardwareNode, "motor_rated_torque", motorRatedTorqueNm))
-    {
-      configuration_.motorRatedTorqueNm = motorRatedTorqueNm;
-    }
-
     int32_t minPosition;
     if (getValueFromFile(hardwareNode, "min_position", minPosition))
     {

@@ -33,16 +33,12 @@ Command::Command(const Command& other)
   targetVelocityUU_ = other.targetVelocityUU_;
   targetTorqueUU_ = other.targetTorqueUU_;
   targetCurrentUU_ = other.targetCurrentUU_;
-  maxTorqueUU_ = other.maxTorqueUU_;
-  maxCurrentUU_ = other.maxCurrentUU_;
   torqueOffsetUU_ = other.torqueOffsetUU_;
 
   targetPosition_ = other.targetPosition_;
   targetVelocity_ = other.targetVelocity_;
   targetTorque_ = other.targetTorque_;
   targetCurrent_ = other.targetCurrent_;
-  maxTorque_ = other.maxTorque_;
-  maxCurrent_ = other.maxCurrent_;
   torqueOffset_ = other.torqueOffset_;
 
   digitalOutputs_ = other.digitalOutputs_;
@@ -63,16 +59,12 @@ Command& Command::operator=(const Command& other)
   targetVelocityUU_ = other.targetVelocityUU_;
   targetTorqueUU_ = other.targetTorqueUU_;
   targetCurrentUU_ = other.targetCurrentUU_;
-  maxTorqueUU_ = other.maxTorqueUU_;
-  maxCurrentUU_ = other.maxCurrentUU_;
   torqueOffsetUU_ = other.torqueOffsetUU_;
 
   targetPosition_ = other.targetPosition_;
   targetVelocity_ = other.targetVelocity_;
   targetTorque_ = other.targetTorque_;
   targetCurrent_ = other.targetCurrent_;
-  maxTorque_ = other.maxTorque_;
-  maxCurrent_ = other.maxCurrent_;
   torqueOffset_ = other.torqueOffset_;
 
   digitalOutputs_ = other.digitalOutputs_;
@@ -94,8 +86,6 @@ std::ostream& operator<<(std::ostream& os, Command& command)
      << std::setw(25) << "Target Velocity:" << command.targetVelocityUU_ << "\n"
      << std::setw(25) << "Target Torque:" << command.targetTorqueUU_ << "\n"
      << std::setw(25) << "Target Current:" << command.targetCurrentUU_ << "\n"
-     << std::setw(25) << "Maximum Torque:" << command.maxTorqueUU_ << "\n"
-     << std::setw(25) << "Maximum Current:" << command.maxCurrentUU_ << "\n"
      << std::setw(25) << "Torque Offset:" << command.torqueOffsetUU_ << "\n"
      << std::setw(25) << "Digital Outputs:" << command.getDigitalOutputString() << "\n"
      << std::right;
@@ -187,14 +177,6 @@ void Command::setTorqueOffset(double torqueOffset)
 {
   torqueOffsetUU_ = torqueOffset;
 }
-void Command::setMaxCurrent(double maxCurrent)
-{
-  maxCurrentUU_ = maxCurrent;
-}
-void Command::setMaxTorque(double maxTorque)
-{
-  maxTorqueUU_ = maxTorque;
-}
 
 /*!
  * factors set methods
@@ -247,14 +229,6 @@ int16_t Command::getTargetCurrentRaw() const
 {
   return targetCurrent_;
 }
-uint16_t Command::getMaxTorqueRaw() const
-{
-  return maxTorque_;
-}
-uint16_t Command::getMaxCurrentRaw() const
-{
-  return maxCurrent_;
-}
 int32_t Command::getPositionOffsetRaw() const
 {
   return positionOffset_;
@@ -299,14 +273,6 @@ double Command::getTargetCurrent() const
 {
   return targetCurrentUU_;
 }
-double Command::getMaxTorque() const
-{
-  return maxTorqueUU_;
-}
-double Command::getMaxCurrent() const
-{
-  return maxCurrentUU_;
-}
 double Command::getTorqueOffset() const
 {
   return torqueOffsetUU_;
@@ -330,8 +296,6 @@ void Command::doUnitConversion()
         targetCurrent_ = static_cast<int16_t>(currentFactorAToInteger_ * targetCurrentUU_);
       }
     }
-    maxTorque_ = static_cast<uint16_t>(torqueFactorNmToInteger_ * maxTorqueUU_);
-    maxCurrent_ = static_cast<uint16_t>(currentFactorAToInteger_ * maxCurrentUU_);
     positionOffset_ = static_cast<int16_t>(positionFactorRadToInteger_ * positionOffsetUU_);
     torqueOffset_ = static_cast<int16_t>(torqueFactorNmToInteger_ * torqueOffsetUU_);
     velocityOffset_ = static_cast<int16_t>(velocityFactorRadPerSecToMicroRPM_ * velocityOffsetUU_);

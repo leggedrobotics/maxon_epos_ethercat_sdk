@@ -55,7 +55,6 @@ public:
   double polePairs{ 11 };
   double nominalCurrentA{ 0 };
   double torqueConstantNmA{ 0 };
-  double motorRatedTorqueNm{ 0 };
   double maxCurrentA{ 0 };
   int32_t minPosition{ 0 };
   int32_t maxPosition{ 0 };
