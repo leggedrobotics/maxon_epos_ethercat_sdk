@@ -338,7 +338,7 @@ void Reading::configureReading(const Configuration& configuration)
 
   currentFactorIntegerToAmp_ = currentFactor;
 
-  torqueFactorIntegerToNm_ = currentFactor * configuration.motorConstant * configuration.gearRatio;
+  torqueFactorIntegerToNm_ = configuration.nominalCurrentA * configuration.torqueConstantNmA / 1000.0;
 }
 
 }  // namespace maxon

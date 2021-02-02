@@ -356,7 +356,7 @@ void Maxon::stageCommand(const Command& command)
 
   double currentFactorAToInt = 1000.0 / configuration_.nominalCurrentA;
   stagedCommand_.setCurrentFactorAToInteger(currentFactorAToInt);
-  stagedCommand_.setTorqueFactorNmToInteger(1000.0 / configuration_.nominalCurrentA * configuration_.torqueConstantNmA);
+  stagedCommand_.setTorqueFactorNmToInteger(1000.0 / (configuration_.nominalCurrentA * configuration_.torqueConstantNmA));
 
   stagedCommand_.setUseRawCommands(configuration_.useRawCommands);
 
