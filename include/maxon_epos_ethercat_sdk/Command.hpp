@@ -51,6 +51,7 @@ public:
   void setTargetVelocityRaw(int32_t targetVelocity);
   void setTargetCurrentRaw(int16_t targetCurrent);
   void setTorqueOffsetRaw(int16_t torqueOffset);
+  void setVelocityOffsetRaw(int16_t velocityOffset);
 
   /// set factors
   void setPositionFactorRadToInteger(double factor);
@@ -63,7 +64,8 @@ public:
   void setTargetVelocity(double targetVelocity);
   void setTargetTorque(double targetTorque);
   void setTargetCurrent(double targetCurrent);
-  void setTorqueOffset(double torqueOffset);
+  void setTorqueOffset(double velocityOffset);
+  void setVelocityOffset(double velocityOffset);
 
   /// other
   void setDigitalOutputs(uint32_t digitalOutputs);
@@ -78,6 +80,7 @@ public:
   uint16_t getMaxTorqueRaw() const;
   uint16_t getMaxCurrentRaw() const;
   int16_t getTorqueOffsetRaw() const;
+  int16_t getVelocityOffsetRaw() const;
   uint32_t getProfileAccelRaw() const;
   uint32_t getProfileDeccelRaw() const;
   int16_t getMotionProfileType() const;
@@ -90,6 +93,7 @@ public:
   double getMaxTorque() const;
   double getMaxCurrent() const;
   double getTorqueOffset() const;
+  double getVelocityOffset() const;
 
   /*!
    * Get the digital outputs.
@@ -121,6 +125,7 @@ private:
   double maxTorqueUU_{ 0 };
   double maxCurrentUU_{ 0 };
   double torqueOffsetUU_{ 0 };
+  double velocityOffsetUU_{ 0 };
 
   int32_t targetPosition_{ 0 };
   int32_t targetVelocity_{ 0 };
@@ -129,6 +134,7 @@ private:
   uint16_t maxTorque_{ 0 };
   uint16_t maxCurrent_{ 0 };
   int16_t torqueOffset_{ 0 };
+  int16_t velocityOffset_{ 0 };
   uint32_t profileAccel_{ 0 };
   uint32_t profileDeccel_{ 0 };
   int16_t motionProfileType_{ 0 };

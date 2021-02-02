@@ -53,6 +53,7 @@ public:
   // pure virtual overwrites
 public:
   bool startup() override;
+  void preShutdown() override;
   void shutdown() override;
   void updateWrite() override;
   void updateRead() override;

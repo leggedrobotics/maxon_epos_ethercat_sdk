@@ -257,6 +257,10 @@ int16_t Command::getTorqueOffsetRaw() const
 {
   return torqueOffset_;
 }
+int16_t Command::getVelocityOffsetRaw() const
+{
+  return velocityOffset_;
+}
 uint32_t Command::getProfileAccelRaw() const
 {
   return profileAccel_;
@@ -323,6 +327,7 @@ void Command::doUnitConversion()
     maxTorque_ = static_cast<uint16_t>(torqueFactorNmToInteger_ * maxTorqueUU_);
     maxCurrent_ = static_cast<uint16_t>(currentFactorAToInteger_ * maxCurrentUU_);
     torqueOffset_ = static_cast<int16_t>(torqueFactorNmToInteger_ * torqueOffsetUU_);
+    velocityOffset_ = static_cast<int16_t>(velocityFactorRadPerSecToIntegerPerSec_ * velocityOffsetUU_);
   }
 }
 

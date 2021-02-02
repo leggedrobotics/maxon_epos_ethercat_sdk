@@ -75,7 +75,7 @@ bool Maxon::startup()
 {
   bool success = true;
   success &= bus_->waitForState(EC_STATE_PRE_OP, address_, 50, 0.05);
-  bus_->syncDistributedClock0(address_, true, timeStep_, timeStep_ / 2.f);  // Might not need
+  // bus_->syncDistributedClock0(address_, true, timeStep_, timeStep_ / 2.f);  // Might not need
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   // use hardware motor rated current value if necessary
@@ -128,10 +128,14 @@ bool Maxon::startup()
   return success;
 }
 
-void Maxon::shutdown()
+void Maxon::preShutdown()
 {
   setDriveStateViaSdo(DriveState::QuickStopActive);
   setDriveStateViaSdo(DriveState::SwitchOnDisabled);
+}
+
+void Maxon::shutdown()
+{
   bus_->setState(EC_STATE_INIT, address_);
 }
 
@@ -175,14 +179,26 @@ void Maxon::updateWrite()
     {
       RxPdoCST rxPdo{};
       rxPdo.targetTorque_ = stagedCommand_.getTargetTorqueRaw();
-      // rxPdo.modeOfOperation_ = static_cast<int8_t>(modeOfOperation_);
       rxPdo.torqueOffset_ = stagedCommand_.getTorqueOffsetRaw();
+      rxPdo.controlWord_ = controlword_.getRawControlword();  // Added
+      rxPdo.modeOfOperation_ = static_cast<int8_t>(stagedCommand_.getModeOfOperation());
 
       // actually writing to the hardware
       bus_->writeRxPdo(address_, rxPdo);
     }
     break;
+    case RxPdoTypeEnum::RxPdoCSV:
+    {
+      RxPdoCSV rxPdo{};
+      rxPdo.targetVelocity_ = stagedCommand_.getTargetVelocityRaw();
+      rxPdo.velocityOffset_ = stagedCommand_.getVelocityOffsetRaw();
+      rxPdo.controlWord_ = controlword_.getRawControlword();  // Added
+      rxPdo.modeOfOperation_ = static_cast<int8_t>(stagedCommand_.getModeOfOperation());
 
+      // actually writing to the hardware
+      bus_->writeRxPdo(address_, rxPdo);
+    }
+    break;
     case RxPdoTypeEnum::RxPdoPVM:
     {
       RxPdoPVM rxPdo{};
@@ -225,6 +241,19 @@ void Maxon::updateRead()
       TxPdoCST txPdo{};
       // reading from the bus
       bus_->readTxPdo(address_, txPdo);
+      reading_.setStatusword(txPdo.statusword_);
+      reading_.setActualCurrent(txPdo.actualTorque_);
+      reading_.setActualVelocity(txPdo.actualVelocity_);
+      reading_.setActualPosition(txPdo.actualPosition_);
+    }
+    break;
+
+    case TxPdoTypeEnum::TxPdoCSV:
+    {
+      TxPdoCSV txPdo{};
+      // reading from the bus
+      bus_->readTxPdo(address_, txPdo);
+      reading_.setStatusword(txPdo.statusword_);
       reading_.setActualCurrent(txPdo.actualTorque_);
       reading_.setActualVelocity(txPdo.actualVelocity_);
       reading_.setActualPosition(txPdo.actualPosition_);
@@ -889,6 +918,8 @@ uint16_t Maxon::getRxPdoSize()
 
 void Maxon::engagePdoStateMachine()
 {
+  std::cout << "Pdo State Machine engaged" << std::endl;
+  std::cout << "Conduct state change: " << conductStateChange_ << std::endl;
   // locking the mutex
   std::lock_guard<std::recursive_mutex> lock(mutex_);
 
@@ -901,10 +932,12 @@ void Maxon::engagePdoStateMachine()
   // since we wait until "hasRead" is true, this is guaranteed to be a newly
   // read value
   const DriveState currentDriveState = reading_.getDriveState();
+  std::cout << "Current drive state is: " << currentDriveState << std::endl;
 
   // check if the state change already was successful:
   if (currentDriveState == targetDriveState_)
   {
+    std::cout << "Correct target state reached" << std::endl;
     numberOfSuccessfulTargetStateReadings_++;
     if (numberOfSuccessfulTargetStateReadings_ >= configuration_.minNumberOfSuccessfulTargetStateReadings)
     {

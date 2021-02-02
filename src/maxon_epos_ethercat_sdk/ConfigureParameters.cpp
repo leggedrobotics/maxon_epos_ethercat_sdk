@@ -53,9 +53,53 @@ bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum)
                                   configuration_.configRunSdoVerifyTimeout);
 
       // Write objects...
-      std::array<uint32_t, 5> objects{
+      std::array<uint32_t, 4> objects{
         (OD_INDEX_TARGET_TORQUE << 16) | (0x00 << 8) | sizeof(int16_t) * 8,
         (OD_INDEX_OFFSET_TORQUE << 16) | (0x00 << 8) | sizeof(int16_t) * 8,
+        (OD_INDEX_CONTROLWORD << 16) | (0x00 << 8) | sizeof(int16_t) * 8,
+        (OD_INDEX_MODES_OF_OPERATION << 16) | (0x00 << 8) | sizeof(int8_t) * 8,
+      };
+
+      subIndex = 0;
+      for (const auto& objectIndex : objects)
+      {
+        subIndex += 1;
+        rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, subIndex, false, objectIndex,
+                                    configuration_.configRunSdoVerifyTimeout);
+      }
+
+      // Write number of objects
+      rxSuccess &=
+          sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x00, false, subIndex, configuration_.configRunSdoVerifyTimeout);
+
+      // Enable PDO
+      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_ASSIGNMENT, 0x00, false, static_cast<uint8_t>(1),
+                                  configuration_.configRunSdoVerifyTimeout);
+
+      break;
+    }
+    case RxPdoTypeEnum::RxPdoCSV:
+    {
+      MELO_INFO_STREAM("[maxon_epos_ethercat_sdk:Maxon::mapPdos] Rx Pdo: "
+                       << "Cyclic Synchronous Veloctity Mode");
+
+      // Disable PDO
+      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_ASSIGNMENT, 0x00, false, static_cast<uint8_t>(0),
+                                  configuration_.configRunSdoVerifyTimeout);
+
+      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_MAPPING_3, 0x00, false, static_cast<uint8_t>(0),
+                                  configuration_.configRunSdoVerifyTimeout);
+
+      // Write mapping
+      rxSuccess &= sdoVerifyWrite(OD_INDEX_RX_PDO_ASSIGNMENT, 0x01, false, OD_INDEX_RX_PDO_MAPPING_3,
+                                  configuration_.configRunSdoVerifyTimeout);
+
+      // Write objects...
+      std::array<uint32_t, 4> objects{
+        (OD_INDEX_TARGET_VELOCITY << 16) | (0x00 << 8) | sizeof(int32_t) * 8,
+        (OD_INDEX_OFFSET_VELOCITY << 16) | (0x00 << 8) | sizeof(int32_t) * 8,
+        (OD_INDEX_CONTROLWORD << 16) | (0x00 << 8) | sizeof(int16_t) * 8,
+        (OD_INDEX_MODES_OF_OPERATION << 16) | (0x00 << 8) | sizeof(int8_t) * 8,
       };
 
       subIndex = 0;
@@ -176,10 +220,53 @@ bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum)
                                   configuration_.configRunSdoVerifyTimeout);
 
       // Write objects...
-      std::array<uint32_t, 3> objects{
-        (OD_INDEX_POSITION_ACTUAL << 16) | (0x00 << 8) | sizeof(int32_t) * 8,
+      std::array<uint32_t, 4> objects{
+        (OD_INDEX_STATUSWORD << 16) | (0x00 << 8) | sizeof(uint16_t) * 8,
         (OD_INDEX_TORQUE_ACTUAL << 16) | (0x00 << 8) | sizeof(int16_t) * 8,
         (OD_INDEX_VELOCITY_ACTUAL << 16) | (0x00 << 8) | sizeof(int32_t) * 8,
+        (OD_INDEX_POSITION_ACTUAL << 16) | (0x00 << 8) | sizeof(int32_t) * 8,
+      };
+
+      subIndex = 0;
+      for (const auto& objectIndex : objects)
+      {
+        subIndex += 1;
+        txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, subIndex, false, objectIndex,
+                                    configuration_.configRunSdoVerifyTimeout);
+      }
+
+      // Write number of objects
+      txSuccess &=
+          sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x00, false, subIndex, configuration_.configRunSdoVerifyTimeout);
+
+      // Enable PDO
+      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x00, false, static_cast<uint8_t>(1),
+                                  configuration_.configRunSdoVerifyTimeout);
+
+      break;
+    }
+    case TxPdoTypeEnum::TxPdoCSV:
+    {
+      MELO_INFO_STREAM("[maxon_epos_ethercat_sdk:Maxon::mapPdos] Tx Pdo: "
+                       << "Cyclic Synchronous Velocity Mode");
+
+      // Disable PDO
+      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x00, false, static_cast<uint8_t>(0),
+                                  configuration_.configRunSdoVerifyTimeout);
+
+      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_MAPPING_3, 0x00, false, static_cast<uint8_t>(0),
+                                  configuration_.configRunSdoVerifyTimeout);
+
+      // Write mapping
+      txSuccess &= sdoVerifyWrite(OD_INDEX_TX_PDO_ASSIGNMENT, 0x01, false, OD_INDEX_TX_PDO_MAPPING_3,
+                                  configuration_.configRunSdoVerifyTimeout);
+
+      // Write objects...
+      std::array<uint32_t, 4> objects{
+        (OD_INDEX_STATUSWORD << 16) | (0x00 << 8) | sizeof(uint16_t) * 8,
+        (OD_INDEX_TORQUE_ACTUAL << 16) | (0x00 << 8) | sizeof(int16_t) * 8,
+        (OD_INDEX_VELOCITY_ACTUAL << 16) | (0x00 << 8) | sizeof(int32_t) * 8,
+        (OD_INDEX_POSITION_ACTUAL << 16) | (0x00 << 8) | sizeof(int32_t) * 8,
       };
 
       subIndex = 0;
@@ -316,10 +403,10 @@ bool Maxon::configParam(ModeOfOperationEnum modeOfOperationEnum)
       configSuccess &=
           sdoVerifyWrite(OD_INDEX_GEAR_DATA, 0x03, false, maxGearSpeed, configuration_.configRunSdoVerifyTimeout);
 
-      configSuccess &= sdoVerifyWrite(OD_INDEX_CURRENT_CONTROL_PARAM, 0x01, false, static_cast<uint32_t>(1171880),
+      configSuccess &= sdoVerifyWrite(OD_INDEX_CURRENT_CONTROL_PARAM, 0x01, false, static_cast<uint32_t>(8426858),
                                       configuration_.configRunSdoVerifyTimeout);
 
-      configSuccess &= sdoVerifyWrite(OD_INDEX_CURRENT_CONTROL_PARAM, 0x02, false, static_cast<uint32_t>(3906250),
+      configSuccess &= sdoVerifyWrite(OD_INDEX_CURRENT_CONTROL_PARAM, 0x02, false, static_cast<uint32_t>(10699972),
                                       configuration_.configRunSdoVerifyTimeout);
 
       configSuccess &= sdoVerifyWrite(OD_INDEX_QUICKSTOP_DECELERATION, 0x00, false, configuration_.quickStopDecel,
@@ -344,7 +431,53 @@ bool Maxon::configParam(ModeOfOperationEnum modeOfOperationEnum)
       }
 
       break;
+    case ModeOfOperationEnum::CyclicSynchronousVelocityMode:
 
+      nominalCurrent = static_cast<uint32_t>(round(1000.0 * configuration_.nominalCurrentA));
+      configSuccess &=
+          sdoVerifyWrite(OD_INDEX_MOTOR_DATA, 0x01, false, nominalCurrent, configuration_.configRunSdoVerifyTimeout);
+
+      torqueConstant = static_cast<uint32_t>(1000000.0 * configuration_.torqueConstantNmA);
+      configSuccess &=
+          sdoVerifyWrite(OD_INDEX_MOTOR_DATA, 0x05, false, torqueConstant, configuration_.configRunSdoVerifyTimeout);
+
+      maxMotorSpeed =
+          static_cast<uint32_t>(configuration_.workVoltage * configuration_.speedConstant / configuration_.polePairs);
+      configSuccess &= sdoVerifyWrite(OD_INDEX_MAX_MOTOR_SPEED, 0x00, false, maxMotorSpeed,
+                                      configuration_.configRunSdoVerifyTimeout);
+
+      maxGearSpeed = static_cast<uint32_t>(maxMotorSpeed / configuration_.gearRatio);
+      configSuccess &=
+          sdoVerifyWrite(OD_INDEX_GEAR_DATA, 0x03, false, maxGearSpeed, configuration_.configRunSdoVerifyTimeout);
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_VELOCITY_CONTROL_PARAM, 0x01, false, static_cast<uint32_t>(119284),
+                                      configuration_.configRunSdoVerifyTimeout);
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_VELOCITY_CONTROL_PARAM, 0x02, false, static_cast<uint32_t>(9654194),
+                                      configuration_.configRunSdoVerifyTimeout);
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_QUICKSTOP_DECELERATION, 0x00, false, configuration_.quickStopDecel,
+                                      configuration_.configRunSdoVerifyTimeout);
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_PROFILE_DECELERATION, 0x00, false, configuration_.profileDecel,
+                                      configuration_.configRunSdoVerifyTimeout);
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_SOFTWARE_POSITION_LIMIT, 0x01, false, configuration_.minPosition,
+                                      configuration_.configRunSdoVerifyTimeout);
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_SOFTWARE_POSITION_LIMIT, 0x02, false, configuration_.maxPosition,
+                                      configuration_.configRunSdoVerifyTimeout);
+
+      if (configSuccess)
+      {
+        MELO_INFO("Setting CSV configuration parameters succeeded.");
+      }
+      else
+      {
+        MELO_ERROR("Setting CSV configuration parameters failed.");
+      }
+
+      break;
     default:
       break;
   }

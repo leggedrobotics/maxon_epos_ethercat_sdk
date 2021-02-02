@@ -58,8 +58,10 @@ std::string rxPdoString(RxPdoTypeEnum rxPdo)
       return "Rx PDO Standard";
     case RxPdoTypeEnum::RxPdoCST:
       return "Rx PDO CST";
+    case RxPdoTypeEnum::RxPdoCSV:
+      return "Rx PDO CSV";
     case RxPdoTypeEnum::RxPdoPVM:
-      return "Rx PDO CST";
+      return "Rx PDO PVM";
     default:
       return "Unsupported Type";
   }
@@ -73,6 +75,8 @@ std::string txPdoString(TxPdoTypeEnum txPdo)
       return "NA";
     case TxPdoTypeEnum::TxPdoCST:
       return "Tx PDO CST";
+    case TxPdoTypeEnum::TxPdoCSV:
+      return "Tx PDO CSV";
     case TxPdoTypeEnum::TxPdoPVM:
       return "Tx PDO PVM";
     case TxPdoTypeEnum::TxPdoStandard:
