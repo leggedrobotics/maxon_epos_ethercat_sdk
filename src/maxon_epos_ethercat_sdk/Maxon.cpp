@@ -988,8 +988,6 @@ uint16_t Maxon::getRxPdoSize()
 
 void Maxon::engagePdoStateMachine()
 {
-  std::cout << "Pdo State Machine engaged" << std::endl;
-  std::cout << "Conduct state change: " << conductStateChange_ << std::endl;
   // locking the mutex
   std::lock_guard<std::recursive_mutex> lock(mutex_);
 
@@ -1002,12 +1000,9 @@ void Maxon::engagePdoStateMachine()
   // since we wait until "hasRead" is true, this is guaranteed to be a newly
   // read value
   const DriveState currentDriveState = reading_.getDriveState();
-  std::cout << "Current drive state is: " << currentDriveState << std::endl;
-
   // check if the state change already was successful:
   if (currentDriveState == targetDriveState_)
   {
-    std::cout << "Correct target state reached" << std::endl;
     numberOfSuccessfulTargetStateReadings_++;
     if (numberOfSuccessfulTargetStateReadings_ >= configuration_.minNumberOfSuccessfulTargetStateReadings)
     {
