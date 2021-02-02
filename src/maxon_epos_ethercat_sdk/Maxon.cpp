@@ -338,7 +338,7 @@ void Maxon::updateRead()
   if (reading_.getDriveState() == DriveState::Fault)
   {
     MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::updateRead] '" << name_ << "' is in drive state 'Fault'");
-    printErrorCode();
+    // printErrorCode();
   }
 }
 

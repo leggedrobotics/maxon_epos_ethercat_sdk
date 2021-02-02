@@ -475,7 +475,62 @@ bool Maxon::configParam(ModeOfOperationEnum modeOfOperationEnum)
         MELO_ERROR("Setting PVM configuration parameters failed.");
       }
       break;
+    case ModeOfOperationEnum::CyclicSynchronousPositionMode:
 
+      nominalCurrent = static_cast<uint32_t>(round(1000.0 * configuration_.nominalCurrentA));
+      configSuccess &=
+          sdoVerifyWrite(OD_INDEX_MOTOR_DATA, 0x01, false, nominalCurrent, configuration_.configRunSdoVerifyTimeout);
+
+      torqueConstant = static_cast<uint32_t>(1000000.0 * configuration_.torqueConstantNmA);
+      configSuccess &=
+          sdoVerifyWrite(OD_INDEX_MOTOR_DATA, 0x05, false, torqueConstant, configuration_.configRunSdoVerifyTimeout);
+
+      maxMotorSpeed =
+          static_cast<uint32_t>(configuration_.workVoltage * configuration_.speedConstant / configuration_.polePairs);
+      configSuccess &= sdoVerifyWrite(OD_INDEX_MAX_MOTOR_SPEED, 0x00, false, maxMotorSpeed,
+                                      configuration_.configRunSdoVerifyTimeout);
+
+      maxGearSpeed = static_cast<uint32_t>(maxMotorSpeed / configuration_.gearRatio);
+      configSuccess &=
+          sdoVerifyWrite(OD_INDEX_GEAR_DATA, 0x03, false, maxGearSpeed, configuration_.configRunSdoVerifyTimeout);
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_CURRENT_CONTROL_PARAM, 0x01, false, static_cast<uint32_t>(8426858),
+                                      configuration_.configRunSdoVerifyTimeout);
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_CURRENT_CONTROL_PARAM, 0x02, false, static_cast<uint32_t>(10699972),
+                                      configuration_.configRunSdoVerifyTimeout);
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_POSITION_CONTROL_PARAM, 0x01, false, static_cast<uint32_t>(7553428),
+                                      configuration_.configRunSdoVerifyTimeout);
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_POSITION_CONTROL_PARAM, 0x02, false, static_cast<uint32_t>(46226330),
+                                      configuration_.configRunSdoVerifyTimeout);
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_QUICKSTOP_DECELERATION, 0x00, false, configuration_.quickStopDecel,
+                                      configuration_.configRunSdoVerifyTimeout);
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_PROFILE_DECELERATION, 0x00, false, configuration_.profileDecel,
+                                      configuration_.configRunSdoVerifyTimeout);
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_SOFTWARE_POSITION_LIMIT, 0x01, false, configuration_.minPosition,
+                                      configuration_.configRunSdoVerifyTimeout);
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_SOFTWARE_POSITION_LIMIT, 0x02, false, configuration_.maxPosition,
+                                      configuration_.configRunSdoVerifyTimeout);
+
+      configSuccess &= sdoVerifyWrite(OD_INDEX_FOLLOW_ERROR_WINDOW, 0x00, false, configuration_.followErrorWindow,
+                                      configuration_.configRunSdoVerifyTimeout);
+
+      if (configSuccess)
+      {
+        MELO_INFO("Setting CSP configuration parameters succeeded.");
+      }
+      else
+      {
+        MELO_ERROR("Setting CSP configuration parameters failed.");
+      }
+
+      break;
     case ModeOfOperationEnum::CyclicSynchronousTorqueMode:
 
       nominalCurrent = static_cast<uint32_t>(round(1000.0 * configuration_.nominalCurrentA));

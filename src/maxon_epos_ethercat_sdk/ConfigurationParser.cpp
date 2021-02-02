@@ -465,6 +465,12 @@ void ConfigurationParser::parseConfiguration(YAML::Node configNode)
       configuration_.profileDecel = profileDecel;
     }
 
+    uint32_t followErrorWindow;
+    if (getValueFromFile(hardwareNode, "follow_error_window", followErrorWindow))
+    {
+      configuration_.followErrorWindow = followErrorWindow;
+    }
+
     bool useMultipleModeOfOperations;
     if (getValueFromFile(hardwareNode, "use_multiple_modes_of_operation", useMultipleModeOfOperations))
     {

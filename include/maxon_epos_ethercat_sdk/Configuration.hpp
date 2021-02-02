@@ -64,6 +64,7 @@ public:
   bool useMultipleModeOfOperations{ false };
   uint32_t quickStopDecel{ 10000 };
   uint32_t profileDecel{ 10000 };
+  uint32_t followErrorWindow{ 2000 };
 
 public:
   // stream operator
