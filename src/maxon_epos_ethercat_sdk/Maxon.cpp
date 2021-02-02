@@ -1049,5 +1049,6 @@ bool Maxon::isAllowedModeCombination(const std::vector<ModeOfOperationEnum> mode
 
     success |= (includedSuccess1&&includedSuccess2);
   }
+  return success;
 }
 }  // namespace maxon
