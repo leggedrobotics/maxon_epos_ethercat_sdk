@@ -186,7 +186,7 @@ void Maxon::updateWrite()
 
       // Extra data
       rxPdo.controlWord_ = controlword_.getRawControlword();
-      rxPdo.modeOfOperation_ = static_cast<int8_t>(stagedCommand_.getModeOfOperation());
+      rxPdo.modeOfOperation_ = static_cast<int8_t>(modeOfOperation_);
 
       // actually writing to the hardware
       bus_->writeRxPdo(address_, rxPdo);
@@ -200,7 +200,7 @@ void Maxon::updateWrite()
 
       // Extra data
       rxPdo.controlWord_ = controlword_.getRawControlword();
-      rxPdo.modeOfOperation_ = static_cast<int8_t>(stagedCommand_.getModeOfOperation());
+      rxPdo.modeOfOperation_ = static_cast<int8_t>(modeOfOperation_);
 
       // actually writing to the hardware
       bus_->writeRxPdo(address_, rxPdo);
@@ -214,7 +214,7 @@ void Maxon::updateWrite()
 
       // Extra data
       rxPdo.controlWord_ = controlword_.getRawControlword();
-      rxPdo.modeOfOperation_ = static_cast<int8_t>(stagedCommand_.getModeOfOperation());
+      rxPdo.modeOfOperation_ = static_cast<int8_t>(modeOfOperation_);
 
       // actually writing to the hardware
       bus_->writeRxPdo(address_, rxPdo);
@@ -223,10 +223,14 @@ void Maxon::updateWrite()
     case RxPdoTypeEnum::RxPdoCSTCSP:
     {
       RxPdoCSTCSP rxPdo{};
+      rxPdo.targetPosition_ = stagedCommand_.getTargetPositionRaw();
+      rxPdo.positionOffset_ = stagedCommand_.getPositionOffsetRaw();
+      rxPdo.targetTorque_ = stagedCommand_.getTargetTorqueRaw();
+      rxPdo.torqueOffset_ = stagedCommand_.getTorqueOffsetRaw();
 
       // Extra data
       rxPdo.controlWord_ = controlword_.getRawControlword();
-      rxPdo.modeOfOperation_ = static_cast<int8_t>(stagedCommand_.getModeOfOperation());
+      rxPdo.modeOfOperation_ = static_cast<int8_t>(modeOfOperation_);
 
       // actually writing to the hardware
       bus_->writeRxPdo(address_, rxPdo);
@@ -406,8 +410,6 @@ bool Maxon::loadConfiguration(const Configuration& configuration)
   bool success = true;
   reading_.configureReading(configuration);
 
-
-
   // TODO check mapping
   const std::map<ModeOfOperationEnum, std::pair<RxPdoTypeEnum, TxPdoTypeEnum>> mode2PdoMap = {
     {ModeOfOperationEnum::CyclicSynchronousPositionMode, {RxPdoTypeEnum::RxPdoCSP, TxPdoTypeEnum::TxPdoCSP}},
@@ -433,7 +435,7 @@ bool Maxon::loadConfiguration(const Configuration& configuration)
       success = false;
     }
   }
-  modeOfOperation_ = configuration_.modesOfOperation[0];
+  modeOfOperation_ = configuration.modesOfOperation[0];
 
   configuration_ = configuration;
   return success;
