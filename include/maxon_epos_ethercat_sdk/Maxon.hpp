@@ -99,7 +99,7 @@ public:
 protected:
   void engagePdoStateMachine();
   bool mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum);
-  bool configParam(ModeOfOperationEnum modeOfOperationEnum);
+  bool configParam();
   Controlword getNextStateTransitionControlword(const DriveState& requestedDriveState,
                                                 const DriveState& currentDriveState);
   void autoConfigurePdoSizes();
