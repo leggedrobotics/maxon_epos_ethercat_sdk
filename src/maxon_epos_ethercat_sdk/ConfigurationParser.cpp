@@ -58,136 +58,16 @@ bool getValueFromFile(YAML::Node& yamlNode, const std::string& varName, T& var)
     return false;
   }
 }
-/*!
- * Function to read a RxPdo enum from the yaml file
- * @param[in] yamlNode	the node containing the requested value
- * @param [in] varName	The name of the variable
- * @param [out] rxPdo	The read Rx PDO type
- * @return	true on success
- */
-bool getRxPdoFromFile(YAML::Node& yamlNode, const std::string& varName, RxPdoTypeEnum& rxPdo)
-{
-  if (!yamlNode[varName].IsDefined())
-  {
-    MELO_WARN_STREAM("[maxon_epos_ethercat_sdk:ConfigurationParser::parseConfiguration]: "
-                     "field '"
-                     << varName << "' is missing. Default value will be used.");
-    return false;
-  }
-  try
-  {
-    std::string str = yamlNode[varName].as<std::string>();
-    /// no switch statements with std::string possible
-    if (str == "NA")
-    {
-      rxPdo = RxPdoTypeEnum::NA;
-      return true;
-    }
-    else if (str == "RxPdoStandard")
-    {
-      rxPdo = RxPdoTypeEnum::RxPdoStandard;
-      return true;
-    }
-    else if (str == "RxPdoCST")
-    {
-      rxPdo = RxPdoTypeEnum::RxPdoCST;
-      return true;
-    }
-    else if (str == "RxPdoCSV")
-    {
-      rxPdo = RxPdoTypeEnum::RxPdoCSV;
-      return true;
-    }
-    else if (str == "RxPdoPVM")
-    {
-      rxPdo = RxPdoTypeEnum::RxPdoPVM;
-      return true;
-    }
-    else
-    {
-      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:ConfigurationParser::getRxPdoFromFile] "
-                        "Unsupported Rx PDO Type");
-      return false;
-    }
-  }
-  catch (...)
-  {
-    MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:ConfigurationParser::getRxPdoFromFile] Error "
-                      "while parsing value \""
-                      << varName << "\", default values will be used");
-    return false;
-  }
-}
+
 
 /*!
- * Function to read a TxPdo enum from the yaml file
- * @param[in] yamlNode	the node containing the requested value
- * @param [in] varName	The name of the variable
- * @param [out] txPdo	The read Tx PDO type
- * @return	true on success
- */
-bool getTxPdoFromFile(YAML::Node& yamlNode, const std::string& varName, TxPdoTypeEnum& txPdo)
-{
-  if (!yamlNode[varName].IsDefined())
-  {
-    MELO_WARN_STREAM("[maxon_epos_ethercat_sdk:ConfigurationParser::parseConfiguration]: "
-                     "field '"
-                     << varName << "' is missing. Default value will be used.");
-    return false;
-  }
-  try
-  {
-    std::string str = yamlNode[varName].as<std::string>();
-    /// no switch statements with std::string
-    if (str == "NA")
-    {
-      txPdo = TxPdoTypeEnum::NA;
-      return true;
-    }
-    else if (str == "TxPdoCST")
-    {
-      txPdo = TxPdoTypeEnum::TxPdoCST;
-      return true;
-    }
-    else if (str == "TxPdoCSV")
-    {
-      txPdo = TxPdoTypeEnum::TxPdoCSV;
-      return true;
-    }
-    else if (str == "TxPdoPVM")
-    {
-      txPdo = TxPdoTypeEnum::TxPdoPVM;
-      return true;
-    }
-    else if (str == "TxPdoStandard")
-    {
-      txPdo = TxPdoTypeEnum::TxPdoStandard;
-      return true;
-    }
-    else
-    {
-      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:ConfigurationParser::getTxPdoFromFile] "
-                        "Unsupported Tx PDO Type");
-      return false;
-    }
-  }
-  catch (...)
-  {
-    MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:ConfigurationParser::getTxPdoFromFile] Error "
-                      "while parsing value \""
-                      << varName << "\", default values will be used");
-    return false;
-  }
-}
-
-/*!
- * Function to read a Mode of Operation enum from the yaml file
+ * Function to read a Modes of Operation enum from the yaml file
  * @param[in] yamlNode	the node containing the requested value
  * @param [in] varName	The name of the variable
  * @param [out] mode	The read mode of operation
  * @return	true on success
  */
-bool getModeFromFile(YAML::Node& yamlNode, const std::string& varName, ModeOfOperationEnum& mode)
+bool getModesFromFile(YAML::Node& yamlNode, const std::string& varName, std::vector<ModeOfOperationEnum>& modes)
 {
   if (!yamlNode[varName].IsDefined())
   {
@@ -198,44 +78,26 @@ bool getModeFromFile(YAML::Node& yamlNode, const std::string& varName, ModeOfOpe
   }
   try
   {
-    std::string str = yamlNode[varName].as<std::string>();
-    /// no switch statements with std::string
-    if (str == "ProfiledPositionMode")
-    {
-      mode = ModeOfOperationEnum::ProfiledPositionMode;
-      return true;
+    const std::map<std::string, ModeOfOperationEnum> str2ModeMap = {
+      {"ProfiledPositionMode", ModeOfOperationEnum::ProfiledPositionMode},
+      {"ProfiledVelodictyMode", ModeOfOperationEnum::ProfiledVelocityMode},
+      {"HomingMode", ModeOfOperationEnum::HomingMode},
+      {"CyclicSynchronousPositionMode", ModeOfOperationEnum::CyclicSynchronousPositionMode},
+      {"CyclicSynchronousVelocityMode", ModeOfOperationEnum::CyclicSynchronousVelocityMode},
+      {"CyclicSynchronousTorqueMode", ModeOfOperationEnum::CyclicSynchronousTorqueMode},
+    };
+
+    std::vector<std::string> strModes = yamlNode[varName].as<std::vector<std::string>>();
+    for(const auto& strMode : strModes) {
+      if(str2ModeMap.find(strMode) != str2ModeMap.end()) {
+        modes.push_back(str2ModeMap.at(strMode));
+      } else {
+        MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:ConfigurationParser::parseConfiguration]" <<
+                          "Mode '" << strMode << "' Does not exist.")
+        return false;
+      }
     }
-    else if (str == "ProfiledVelocityMode")
-    {
-      mode = ModeOfOperationEnum::ProfiledVelocityMode;
-      return true;
-    }
-    else if (str == "HomingMode")
-    {
-      mode = ModeOfOperationEnum::HomingMode;
-      return true;
-    }
-    else if (str == "CyclicSynchronousPositionMode")
-    {
-      mode = ModeOfOperationEnum::CyclicSynchronousPositionMode;
-      return true;
-    }
-    else if (str == "CyclicSynchronousVelocityMode")
-    {
-      mode = ModeOfOperationEnum::CyclicSynchronousVelocityMode;
-      return true;
-    }
-    else if (str == "CyclicSynchronousTorqueMode")
-    {
-      mode = ModeOfOperationEnum::CyclicSynchronousTorqueMode;
-      return true;
-    }
-    else
-    {
-      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:ConfigurationParser::getModeFromFile] "
-                        "Unsupported Mode Of Operation");
-      return false;
-    }
+    return true;
   }
   catch (...)
   {
@@ -347,22 +209,10 @@ void ConfigurationParser::parseConfiguration(YAML::Node configNode)
   {
     YAML::Node hardwareNode = configNode["Hardware"];
 
-    RxPdoTypeEnum rxPdo;
-    if (getRxPdoFromFile(hardwareNode, "rx_pdo_type", rxPdo))
+    std::vector<ModeOfOperationEnum> modesOfOperation;
+    if (getModesFromFile(hardwareNode, "mode_of_operation", modesOfOperation))
     {
-      configuration_.rxPdoTypeEnum = rxPdo;
-    }
-
-    TxPdoTypeEnum txPdo;
-    if (getTxPdoFromFile(hardwareNode, "tx_pdo_type", txPdo))
-    {
-      configuration_.txPdoTypeEnum = txPdo;
-    }
-
-    ModeOfOperationEnum modeOfOperation_;
-    if (getModeFromFile(hardwareNode, "mode_of_operation", modeOfOperation_))
-    {
-      configuration_.modeOfOperationEnum = modeOfOperation_;
+      configuration_.modesOfOperation = modesOfOperation;
     }
 
     int32_t positionEncoderResolution;
@@ -455,11 +305,6 @@ void ConfigurationParser::parseConfiguration(YAML::Node configNode)
       configuration_.profileDecel = profileDecel;
     }
 
-    bool useMultipleModeOfOperations;
-    if (getValueFromFile(hardwareNode, "use_multiple_modes_of_operation", useMultipleModeOfOperations))
-    {
-      configuration_.useMultipleModeOfOperations = useMultipleModeOfOperations;
-    }
   }
 }
 

@@ -92,16 +92,9 @@ std::string txPdoString(TxPdoTypeEnum txPdo)
 
 std::ostream& operator<<(std::ostream& os, const Configuration& configuration)
 {
-  std::string modeOfOperation_ = modeOfOperationString(configuration.modeOfOperationEnum);
-  std::string rxPdo = rxPdoString(configuration.rxPdoTypeEnum);
-  std::string txPdo = txPdoString(configuration.txPdoTypeEnum);
-
-  // The size of the second columne
-  unsigned int tmp1 = rxPdo.size();
-  unsigned int tmp2 = txPdo.size();
+  std::string modeOfOperation_ = modeOfOperationString(configuration.modesOfOperation[0]);
   unsigned int tmp3 = modeOfOperation_.size();
-  unsigned int len2 = tmp1 >= tmp2 ? tmp1 : tmp2;
-  len2 = len2 >= tmp3 ? len2 : tmp3;
+  unsigned int len2 = tmp3;
   len2++;
 
   os << std::boolalpha << std::left << std::setw(43) << std::setfill('-') << "|" << std::setw(len2 + 2) << "-"
@@ -110,12 +103,8 @@ std::ostream& operator<<(std::ostream& os, const Configuration& configuration)
      << "|\n"
      << std::setw(43) << std::setfill('-') << "|" << std::setw(len2 + 2) << "+"
      << "|\n"
-     << std::setfill(' ') << std::setw(43) << "| Mode of Operation:"
+     << std::setfill(' ') << std::setw(43) << "| 1st Mode of Operation:"
      << "| " << std::setw(len2) << modeOfOperation_ << "|\n"
-     << std::setw(43) << "| Rx PDO Type:"
-     << "| " << std::setw(len2) << rxPdo << "|\n"
-     << std::setw(43) << "| Tx PDO Type:"
-     << "| " << std::setw(len2) << txPdo << "|\n"
      << std::setw(43) << "| Config Run SDO verify timeout:"
      << "| " << std::setw(len2) << configuration.configRunSdoVerifyTimeout << "|\n"
      << std::setw(43) << "| Print Debug Messages:"

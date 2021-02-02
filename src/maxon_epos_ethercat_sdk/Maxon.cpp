@@ -24,6 +24,7 @@
 #include <chrono>
 #include <cmath>
 #include <thread>
+#include <map>
 
 #include "maxon_epos_ethercat_sdk/ConfigurationParser.hpp"
 #include "maxon_epos_ethercat_sdk/Maxon.hpp"
@@ -93,7 +94,7 @@ bool Maxon::startup()
   // success &= setDriveStateViaSdo(DriveState::ReadyToSwitchOn);
 
   // PDO mapping
-  success &= mapPdos(configuration_.rxPdoTypeEnum, configuration_.txPdoTypeEnum);
+  success &= mapPdos(rxPdoTypeEnum_, txPdoTypeEnum_);
 
   // Set Interpolation
   success &= sdoVerifyWrite(OD_INDEX_INTERPOLATION_TIME_PERIOD, 0x01, false, static_cast<uint8_t>(0x01),
@@ -108,13 +109,13 @@ bool Maxon::startup()
 
   // Set initial mode of operation
   success &=
-      sdoVerifyWrite(OD_INDEX_MODES_OF_OPERATION, 0x00, false, static_cast<int8_t>(configuration_.modeOfOperationEnum),
+      sdoVerifyWrite(OD_INDEX_MODES_OF_OPERATION, 0x00, false, static_cast<int8_t>(configuration_.modesOfOperation[0]),
                      configuration_.configRunSdoVerifyTimeout);
   // To be on the safe side: set currect PDO sizes
   autoConfigurePdoSizes();
 
   // write the configuration parameters
-  success &= configParam(configuration_.modeOfOperationEnum);
+  success &= configParam(configuration_.modesOfOperation[0]);
 
   if (!success)
   {
@@ -163,7 +164,7 @@ void Maxon::updateWrite()
     engagePdoStateMachine();
   }
 
-  switch (configuration_.rxPdoTypeEnum)
+  switch (rxPdoTypeEnum_)
   {
     case RxPdoTypeEnum::RxPdoStandard:
     {
@@ -227,7 +228,7 @@ void Maxon::updateRead()
   std::lock_guard<std::recursive_mutex> lock(mutex_);
 
   // TODO(duboisf): implement some sort of time stamp
-  switch (configuration_.txPdoTypeEnum)
+  switch (txPdoTypeEnum_)
   {
     case TxPdoTypeEnum::TxPdoStandard:
     {
@@ -357,13 +358,34 @@ bool Maxon::loadConfiguration(const Configuration& configuration)
   bool success = true;
   reading_.configureReading(configuration);
 
-  // Check if changing mode of operation will be allowed
-  allowModeChange_ = true;
-  allowModeChange_ &= configuration.useMultipleModeOfOperations;
-  allowModeChange_ &= (configuration.rxPdoTypeEnum == RxPdoTypeEnum::RxPdoStandard);
-  allowModeChange_ &= (configuration.txPdoTypeEnum == TxPdoTypeEnum::TxPdoStandard);
 
-  modeOfOperation_ = configuration.modeOfOperationEnum;
+
+  // TODO check mapping
+  const std::map<ModeOfOperationEnum, std::pair<RxPdoTypeEnum, TxPdoTypeEnum>> mode2PdoMap = {
+    {ModeOfOperationEnum::CyclicSynchronousPositionMode, {RxPdoTypeEnum::RxPdoCSP, TxPdoTypeEnum::TxPdoCSP}},
+    {ModeOfOperationEnum::CyclicSynchronousTorqueMode, {RxPdoTypeEnum::RxPdoCST, TxPdoTypeEnum::TxPdoCST}},
+    {ModeOfOperationEnum::CyclicSynchronousVelocityMode, {RxPdoTypeEnum::RxPdoCSV, TxPdoTypeEnum::TxPdoCSV}},
+    {ModeOfOperationEnum::HomingMode, {RxPdoTypeEnum::NA, TxPdoTypeEnum::NA}},
+    {ModeOfOperationEnum::ProfiledPositionMode, {RxPdoTypeEnum::NA, TxPdoTypeEnum::NA}},
+    {ModeOfOperationEnum::ProfiledVelocityMode, {RxPdoTypeEnum::RxPdoPVM, TxPdoTypeEnum::TxPdoPVM}},
+    {ModeOfOperationEnum::NA, {RxPdoTypeEnum::NA, TxPdoTypeEnum::NA}},
+  };
+
+  if(configuration.modesOfOperation.size() == 1) {
+    rxPdoTypeEnum_ = mode2PdoMap.at(configuration.modesOfOperation[0]).first;
+    txPdoTypeEnum_ = mode2PdoMap.at(configuration.modesOfOperation[0]).second;
+  } else {
+    if(isAllowedModeCombination(configuration.modesOfOperation)){
+      allowModeChange_ = true;
+      rxPdoTypeEnum_ = mode2PdoMap.at(configuration.modesOfOperation[0]).first;
+      txPdoTypeEnum_ = mode2PdoMap.at(configuration.modesOfOperation[0]).second;
+    } else {
+      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::loadConfiguration] " <<
+                        "The chosen mode of operation combination is not supported.")
+      success = false;
+    }
+  }
+  modeOfOperation_ = configuration_.modesOfOperation[0];
 
   configuration_ = configuration;
   return success;
@@ -959,5 +981,25 @@ void Maxon::engagePdoStateMachine()
   // set the "hasRead" variable to false such that there will definitely be a
   // new reading when this method is called again
   hasRead_ = false;
+}
+bool Maxon::isAllowedModeCombination(const std::vector<ModeOfOperationEnum> modes)
+{
+  const std::array<std::vector<ModeOfOperationEnum>, 1> allowedModeCombinations = {
+    {{ModeOfOperationEnum::CyclicSynchronousTorqueMode, ModeOfOperationEnum::CyclicSynchronousPositionMode}},
+  };
+  bool success = false;
+  for(const auto& allowedCombination : allowedModeCombinations) {
+    // all of 'modes' in allowedCombination
+    bool includedSuccess1 = true;
+    for(const auto& mode : modes)
+      includedSuccess1 &= (std::find(allowedCombination.begin(), allowedCombination.end(), mode) != allowedCombination.end());
+
+    // all of 'allowedCombination' in modes
+    bool includedSuccess2 = true;
+    for(const auto& mode : allowedCombination)
+      includedSuccess2 &= (std::find(modes.begin(), modes.end(), mode) != modes.end());
+
+    success |= (includedSuccess1&&includedSuccess2);
+  }
 }
 }  // namespace maxon

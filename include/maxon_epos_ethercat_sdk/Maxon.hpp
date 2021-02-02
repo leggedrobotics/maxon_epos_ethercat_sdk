@@ -107,6 +107,8 @@ protected:
   uint16_t getTxPdoSize();
   uint16_t getRxPdoSize();
 
+  bool isAllowedModeCombination(const std::vector<ModeOfOperationEnum> modes);
+
   // Errors
 protected:
   void addErrorToReading(const ErrorType& errorType);
@@ -119,6 +121,8 @@ protected:
   Command stagedCommand_;
   Reading reading_;
   Configuration configuration_;
+  RxPdoTypeEnum rxPdoTypeEnum_{RxPdoTypeEnum::NA};
+  TxPdoTypeEnum txPdoTypeEnum_{TxPdoTypeEnum::NA};
   Controlword controlword_;
   PdoInfo pdoInfo_;
   bool hasRead_{ false };

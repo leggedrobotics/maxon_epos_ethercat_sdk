@@ -26,6 +26,7 @@
 #include <cstdint>
 #include <iostream>
 #include <utility>
+#include <vector>
 
 #include "maxon_epos_ethercat_sdk/ModeOfOperationEnum.hpp"
 #include "maxon_epos_ethercat_sdk/PdoTypeEnum.hpp"
@@ -35,9 +36,7 @@ namespace maxon
 class Configuration
 {
 public:
-  ModeOfOperationEnum modeOfOperationEnum{ ModeOfOperationEnum::NA };
-  RxPdoTypeEnum rxPdoTypeEnum{ RxPdoTypeEnum::NA };
-  TxPdoTypeEnum txPdoTypeEnum{ TxPdoTypeEnum::NA };
+  std::vector<ModeOfOperationEnum> modesOfOperation = { ModeOfOperationEnum::NA };
   unsigned int configRunSdoVerifyTimeout{ 20000 };
   bool printDebugMessages{ true };
   unsigned int driveStateChangeMinTimeout{ 20000 };
@@ -61,7 +60,6 @@ public:
   int32_t minPosition{ 0 };
   int32_t maxPosition{ 0 };
   uint32_t maxProfileVelocity{ 0 };
-  bool useMultipleModeOfOperations{ false };
   uint32_t quickStopDecel{ 10000 };
   uint32_t profileDecel{ 10000 };
 

@@ -14,9 +14,7 @@ Reading:
   fault_storage_capacity: 100
 
 Hardware:
-  rx_pdo_type: "RxPdoStandard"
-  tx_pdo_type: "TxPdoStandard"
-  mode_of_operation: "ProfiledVelocityMode"
+  mode_of_operation: ["ProfiledVelocityMode"]
   use_multiple_modes_of_operation: true
   position_encoder_resolution: 66
   gear_ratio: [1, 1]
