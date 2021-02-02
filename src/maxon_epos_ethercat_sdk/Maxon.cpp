@@ -115,8 +115,8 @@ bool Maxon::startup()
   // To be on the safe side: set currect PDO sizes
   autoConfigurePdoSizes();
 
-  // write the configuration parameters
-  success &= configParam(configuration_.modesOfOperation[0]);
+  // write the configuration parameters via Sdo
+  success &= configParam();
 
   if (!success)
   {
