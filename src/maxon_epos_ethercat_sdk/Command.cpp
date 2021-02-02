@@ -247,11 +247,15 @@ uint16_t Command::getMaxCurrentRaw() const
 {
   return maxCurrent_;
 }
+int32_t Command::getPositionOffsetRaw() const
+{
+  return positionOffset_;
+}
 int16_t Command::getTorqueOffsetRaw() const
 {
   return torqueOffset_;
 }
-int16_t Command::getVelocityOffsetRaw() const
+int32_t Command::getVelocityOffsetRaw() const
 {
   return velocityOffset_;
 }
@@ -306,7 +310,6 @@ void Command::doUnitConversion()
   {
     targetPosition_ = static_cast<int32_t>(positionFactorRadToInteger_ * targetPositionUU_);
     targetVelocity_ = static_cast<int32_t>(velocityFactorRadPerSecToMicroRPM_ * targetVelocityUU_);
-    std::cout << "targetVelocity=" << targetVelocity_ << "\ntargetVelocityUU=" << targetVelocityUU_ << std::endl;
     targetTorque_ = static_cast<int16_t>(torqueFactorNmToInteger_ * targetTorqueUU_);
     {
       std::lock_guard<std::mutex> lockGuard(targetTorqueCommandMutex_);

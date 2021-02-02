@@ -88,6 +88,11 @@ bool getRxPdoFromFile(YAML::Node& yamlNode, const std::string& varName, RxPdoTyp
       rxPdo = RxPdoTypeEnum::RxPdoStandard;
       return true;
     }
+    else if (str == "RxPdoCSP")
+    {
+      rxPdo = RxPdoTypeEnum::RxPdoCSP;
+      return true;
+    }
     else if (str == "RxPdoCST")
     {
       rxPdo = RxPdoTypeEnum::RxPdoCST;
@@ -142,6 +147,11 @@ bool getTxPdoFromFile(YAML::Node& yamlNode, const std::string& varName, TxPdoTyp
     if (str == "NA")
     {
       txPdo = TxPdoTypeEnum::NA;
+      return true;
+    }
+    else if (str == "TxPdoCSP")
+    {
+      txPdo = TxPdoTypeEnum::TxPdoCSP;
       return true;
     }
     else if (str == "TxPdoCST")
