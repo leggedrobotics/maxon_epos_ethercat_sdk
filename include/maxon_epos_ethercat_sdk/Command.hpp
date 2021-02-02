@@ -23,10 +23,13 @@
 
 #pragma once
 
+#define _USE_MATH_DEFINES
+
 #include <cstdint>
 #include <iostream>
 #include <mutex>
 #include <string>
+#include <cmath>
 
 #include "maxon_epos_ethercat_sdk/ModeOfOperationEnum.hpp"
 
@@ -55,7 +58,6 @@ public:
 
   /// set factors
   void setPositionFactorRadToInteger(double factor);
-  void setVelocityFactorRadPerSecToIntegerPerSec(double factor);
   void setTorqueFactorNmToInteger(double factor);
   void setCurrentFactorAToInteger(double factor);
 
@@ -144,7 +146,7 @@ private:
   uint32_t digitalOutputs_{ 0 };
 
   double positionFactorRadToInteger_{ 1 };
-  double velocityFactorRadPerSecToIntegerPerSec_{ 1 };
+  const double velocityFactorRadPerSecToMicroRPM_{ 1.0 / (2 * M_PI) * 60 * 1e6};
   double torqueFactorNmToInteger_{ 1 };
   double currentFactorAToInteger_{ 1 };
 

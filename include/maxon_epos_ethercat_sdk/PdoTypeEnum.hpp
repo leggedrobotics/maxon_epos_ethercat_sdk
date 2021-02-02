@@ -35,6 +35,7 @@ enum class RxPdoTypeEnum : int8_t
   RxPdoStandard,
   RxPdoCST,
   RxPdoCSV,
+  RxPdoCSTCSV,
   RxPdoPVM
 };
 
@@ -45,6 +46,7 @@ enum class TxPdoTypeEnum : int8_t
   TxPdoStandard,
   TxPdoCST,
   TxPdoCSV,
+  TxPdoCSTCSV,
   TxPdoPVM
 };
 

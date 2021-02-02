@@ -48,7 +48,6 @@ Command::Command(const Command& other)
   digitalOutputs_ = other.digitalOutputs_;
 
   positionFactorRadToInteger_ = other.positionFactorRadToInteger_;
-  velocityFactorRadPerSecToIntegerPerSec_ = other.velocityFactorRadPerSecToIntegerPerSec_;
   torqueFactorNmToInteger_ = other.torqueFactorNmToInteger_;
   currentFactorAToInteger_ = other.currentFactorAToInteger_;
 
@@ -79,7 +78,6 @@ Command& Command::operator=(const Command& other)
   digitalOutputs_ = other.digitalOutputs_;
 
   positionFactorRadToInteger_ = other.positionFactorRadToInteger_;
-  velocityFactorRadPerSecToIntegerPerSec_ = other.velocityFactorRadPerSecToIntegerPerSec_;
   torqueFactorNmToInteger_ = other.torqueFactorNmToInteger_;
   currentFactorAToInteger_ = other.currentFactorAToInteger_;
 
@@ -197,10 +195,6 @@ void Command::setPositionFactorRadToInteger(double factor)
 {
   positionFactorRadToInteger_ = factor;
 }
-void Command::setVelocityFactorRadPerSecToIntegerPerSec(double factor)
-{
-  velocityFactorRadPerSecToIntegerPerSec_ = factor;
-}
 void Command::setTorqueFactorNmToInteger(double factor)
 {
   torqueFactorNmToInteger_ = factor;
@@ -311,7 +305,8 @@ void Command::doUnitConversion()
   if (!useRawCommands_)
   {
     targetPosition_ = static_cast<int32_t>(positionFactorRadToInteger_ * targetPositionUU_);
-    targetVelocity_ = static_cast<int32_t>(velocityFactorRadPerSecToIntegerPerSec_ * targetVelocityUU_);
+    targetVelocity_ = static_cast<int32_t>(velocityFactorRadPerSecToMicroRPM_ * targetVelocityUU_);
+    std::cout << "targetVelocity=" << targetVelocity_ << "\ntargetVelocityUU=" << targetVelocityUU_ << std::endl;
     targetTorque_ = static_cast<int16_t>(torqueFactorNmToInteger_ * targetTorqueUU_);
     {
       std::lock_guard<std::mutex> lockGuard(targetTorqueCommandMutex_);
@@ -327,7 +322,7 @@ void Command::doUnitConversion()
     maxTorque_ = static_cast<uint16_t>(torqueFactorNmToInteger_ * maxTorqueUU_);
     maxCurrent_ = static_cast<uint16_t>(currentFactorAToInteger_ * maxCurrentUU_);
     torqueOffset_ = static_cast<int16_t>(torqueFactorNmToInteger_ * torqueOffsetUU_);
-    velocityOffset_ = static_cast<int16_t>(velocityFactorRadPerSecToIntegerPerSec_ * velocityOffsetUU_);
+    velocityOffset_ = static_cast<int16_t>(velocityFactorRadPerSecToMicroRPM_ * velocityOffsetUU_);
   }
 }
 

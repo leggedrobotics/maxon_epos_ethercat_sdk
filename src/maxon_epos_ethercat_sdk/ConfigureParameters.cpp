@@ -353,6 +353,13 @@ bool Maxon::configParam(ModeOfOperationEnum modeOfOperationEnum)
   uint32_t maxGearSpeed;
   uint32_t nominalCurrent;
   uint32_t torqueConstant;
+
+  // Set velocity unit to micro revs per minute
+  uint32_t velocity_unit;
+  velocity_unit = 0xFAB44700;
+  configSuccess &=
+      sdoVerifyWrite(OD_INDEX_SI_UNIT_VELOCITY, 0x00, false, velocity_unit, configuration_.configRunSdoVerifyTimeout);
+
   switch (modeOfOperationEnum)
   {
     case ModeOfOperationEnum::ProfiledVelocityMode:
@@ -449,6 +456,12 @@ bool Maxon::configParam(ModeOfOperationEnum modeOfOperationEnum)
       maxGearSpeed = static_cast<uint32_t>(maxMotorSpeed / configuration_.gearRatio);
       configSuccess &=
           sdoVerifyWrite(OD_INDEX_GEAR_DATA, 0x03, false, maxGearSpeed, configuration_.configRunSdoVerifyTimeout);
+
+      // uint32_t velocityUnit;
+      // sendSdoRead(0x60A9, 0x00, false, velocityUnit);
+      // std::cout << "Velocity Unit is: " << std::hex << velocityUnit << std::dec << std::endl;
+      // std::cout << "Max Motor Speed is " << maxMotorSpeed << std::endl;
+      // std::cout << "Max Gear Speed is " << maxGearSpeed << std::endl;
 
       configSuccess &= sdoVerifyWrite(OD_INDEX_VELOCITY_CONTROL_PARAM, 0x01, false, static_cast<uint32_t>(119284),
                                       configuration_.configRunSdoVerifyTimeout);

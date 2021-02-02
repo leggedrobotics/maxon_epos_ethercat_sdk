@@ -195,6 +195,8 @@ void Maxon::updateWrite()
       rxPdo.controlWord_ = controlword_.getRawControlword();  // Added
       rxPdo.modeOfOperation_ = static_cast<int8_t>(stagedCommand_.getModeOfOperation());
 
+      std::cout << "target velocity " << rxPdo.targetVelocity_ << std::endl;
+
       // actually writing to the hardware
       bus_->writeRxPdo(address_, rxPdo);
     }
@@ -288,6 +290,7 @@ void Maxon::updateRead()
   if (reading_.getDriveState() == DriveState::Fault)
   {
     MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::updateRead] '" << name_ << "' is in drive state 'Fault'");
+    printErrorCode();
   }
 }
 
@@ -297,8 +300,6 @@ void Maxon::stageCommand(const Command& command)
   stagedCommand_ = command;
   stagedCommand_.setPositionFactorRadToInteger(static_cast<double>(configuration_.positionEncoderResolution) /
                                                (2.0 * M_PI));
-  stagedCommand_.setVelocityFactorRadPerSecToIntegerPerSec(
-      static_cast<double>(configuration_.positionEncoderResolution) / (2.0 * M_PI));
 
   double currentFactorAToInt = 1000.0 / configuration_.nominalCurrentA;
   stagedCommand_.setCurrentFactorAToInteger(currentFactorAToInt);
