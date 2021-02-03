@@ -32,16 +32,12 @@ Command::Command(const Command& other)
   targetPositionUU_ = other.targetPositionUU_;
   targetVelocityUU_ = other.targetVelocityUU_;
   targetTorqueUU_ = other.targetTorqueUU_;
-  targetCurrentUU_ = other.targetCurrentUU_;
   torqueOffsetUU_ = other.torqueOffsetUU_;
 
   targetPosition_ = other.targetPosition_;
   targetVelocity_ = other.targetVelocity_;
   targetTorque_ = other.targetTorque_;
-  targetCurrent_ = other.targetCurrent_;
   torqueOffset_ = other.torqueOffset_;
-
-  digitalOutputs_ = other.digitalOutputs_;
 
   positionFactorRadToInteger_ = other.positionFactorRadToInteger_;
   torqueFactorNmToInteger_ = other.torqueFactorNmToInteger_;
@@ -56,18 +52,18 @@ Command::Command(const Command& other)
 Command& Command::operator=(const Command& other)
 {
   targetPositionUU_ = other.targetPositionUU_;
+  positionOffsetUU_ = other.positionOffsetUU_;
   targetVelocityUU_ = other.targetVelocityUU_;
+  velocityOffsetUU_ = other.velocityOffsetUU_;
   targetTorqueUU_ = other.targetTorqueUU_;
-  targetCurrentUU_ = other.targetCurrentUU_;
   torqueOffsetUU_ = other.torqueOffsetUU_;
 
   targetPosition_ = other.targetPosition_;
+  positionOffset_ = other.positionOffset_;
   targetVelocity_ = other.targetVelocity_;
+  velocityOffset_ = other.velocityOffset_;
   targetTorque_ = other.targetTorque_;
-  targetCurrent_ = other.targetCurrent_;
   torqueOffset_ = other.torqueOffset_;
-
-  digitalOutputs_ = other.digitalOutputs_;
 
   positionFactorRadToInteger_ = other.positionFactorRadToInteger_;
   torqueFactorNmToInteger_ = other.torqueFactorNmToInteger_;
@@ -83,11 +79,12 @@ Command& Command::operator=(const Command& other)
 std::ostream& operator<<(std::ostream& os, Command& command)
 {
   os << std::left << std::setw(25) << "Target Position:" << command.targetPositionUU_ << "\n"
+     << std::setw(25) << "Position Offset:" << command.positionOffsetUU_ << "\n"
      << std::setw(25) << "Target Velocity:" << command.targetVelocityUU_ << "\n"
+     << std::setw(25) << "Velocity Offset:" << command.velocityOffsetUU_ << "\n"
      << std::setw(25) << "Target Torque:" << command.targetTorqueUU_ << "\n"
-     << std::setw(25) << "Target Current:" << command.targetCurrentUU_ << "\n"
      << std::setw(25) << "Torque Offset:" << command.torqueOffsetUU_ << "\n"
-     << std::setw(25) << "Digital Outputs:" << command.getDigitalOutputString() << "\n"
+     << std::setw(25) << "Modes of operation:" << static_cast<int>(command.getModeOfOperation()) << "\n"
      << std::right;
 
   return os;
@@ -296,9 +293,9 @@ void Command::doUnitConversion()
         targetCurrent_ = static_cast<int16_t>(currentFactorAToInteger_ * targetCurrentUU_);
       }
     }
-    positionOffset_ = static_cast<int16_t>(positionFactorRadToInteger_ * positionOffsetUU_);
+    positionOffset_ = static_cast<int32_t>(positionFactorRadToInteger_ * positionOffsetUU_);
     torqueOffset_ = static_cast<int16_t>(torqueFactorNmToInteger_ * torqueOffsetUU_);
-    velocityOffset_ = static_cast<int16_t>(velocityFactorRadPerSecToMicroRPM_ * velocityOffsetUU_);
+    velocityOffset_ = static_cast<int32_t>(velocityFactorRadPerSecToMicroRPM_ * velocityOffsetUU_);
   }
 }
 

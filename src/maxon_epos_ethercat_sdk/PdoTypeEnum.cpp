@@ -42,7 +42,6 @@ std::ostream& operator<<(std::ostream& os, const maxon::TxPdoTypeEnum& txPdoType
     case maxon::TxPdoTypeEnum::TxPdoCSV:
       os << "TxPdoCSV";
       break;
-      break;
     default:
       break;
   }
