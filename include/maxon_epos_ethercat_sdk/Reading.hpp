@@ -29,6 +29,8 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
+#define _USE_MATH_DEFINES
+#include <cmath>
 
 #include "maxon_epos_ethercat_sdk/Configuration.hpp"
 #include "maxon_epos_ethercat_sdk/DriveState.hpp"
@@ -55,6 +57,7 @@ using FaultTimePairDeque = std::deque<std::pair<uint16_t, double>>;
 class Reading
 {
 public:
+
   /*!
    * raw get methods
    */
@@ -64,6 +67,7 @@ public:
   int16_t getActualCurrentRaw() const;
   uint16_t getAnalogInputRaw() const;
   uint32_t getBusVoltageRaw() const;
+
 
   /*!
    * User units get methods
@@ -107,8 +111,6 @@ public:
 
   void setPositionFactorIntegerToRad(double positionFactor);
 
-  void setVelocityFactorIntegerPerSecToRadPerSec(double velocityFactor);
-
   void setCurrentFactorIntegerToAmp(double currentFactor);
 
   void setTorqueFactorIntegerToNm(double torqueFactor);
@@ -124,7 +126,7 @@ protected:
   uint32_t busVoltage_{ 0 };
 
   double positionFactorIntegerToRad_{ 1 };
-  double velocityFactorIntegerPerSecToRadPerSec_{ 1 };
+  static constexpr double velocityFactorMicroRPMToRadPerSec_ = 2.0*M_PI / (60.0 * 1e6);
   double currentFactorIntegerToAmp_{ 1 };
   double torqueFactorIntegerToNm_{ 1 };
 
