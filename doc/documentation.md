@@ -230,12 +230,12 @@ maxon_slave_ptr->stageCommand(command); // Send command to the driver
 
 Both `maxon_epos_ethercat_sdk` and `elmo_ethercat_sdk` take SI units for velocity, position, and torque for the `command` and `reading` API. The raw data for communication with the driver has different units:
 
-| Quantity                 | Maxon EPOS              | Elmo |
-| ------------------------ | ----------------------- | ---- |
-| Velocity                 | $\mu RPM$               |      |
-| Torque (General)         | $\mu Nm$                |      |
-| Torque (Target & Offset) | ‰ of motor rated torque |      |
-| Position                 | $inc$                   |      |
+| Quantity                 | Maxon EPOS              | Elmo                                                                        |
+| ------------------------ | ----------------------- | --------------------------------------------------------------------------- |
+| Velocity                 | $\mu RPM$               | encoder increments                                                          |
+| Torque (General)         | $\mu Nm$                | ‰ of motor rated current (motor constant is explicitly used for conversion) |
+| Torque (Target & Offset) | ‰ of motor rated torque | ‰ of motor rated current (motor constant is explicitly used for conversion) |
+| Position                 | $inc$                   | encoder increments                                                          |
 
 ### Update rate
 
