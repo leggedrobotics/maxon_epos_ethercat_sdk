@@ -118,10 +118,12 @@ public:
   void printErrorCode();
   void printDiagnosis();
 
+public:
+  Configuration configuration_;
+
 protected:
   Command stagedCommand_;
   Reading reading_;
-  Configuration configuration_;
   RxPdoTypeEnum rxPdoTypeEnum_{RxPdoTypeEnum::NA};
   TxPdoTypeEnum txPdoTypeEnum_{TxPdoTypeEnum::NA};
   Controlword controlword_;

@@ -10,6 +10,10 @@ void Maxon::addErrorToReading(const ErrorType& errorType)
   reading_.addError(errorType);
 }
 
+/* 
+** Print error code
+** See firmware documentation for meaning
+*/
 void Maxon::printErrorCode()
 {
   uint16_t errorcode = 0;
