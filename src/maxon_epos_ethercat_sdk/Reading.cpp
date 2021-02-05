@@ -330,7 +330,7 @@ void Reading::configureReading(const Configuration& configuration)
   double currentFactor = configuration.nominalCurrentA / 1000.0;
 
   currentFactorIntegerToAmp_ = currentFactor;
-
+  positionFactorIntegerToRad_ = (2.0 * M_PI) / static_cast<double>(configuration.positionEncoderResolution);
   torqueFactorIntegerToNm_ = configuration.nominalCurrentA * configuration.torqueConstantNmA / 1000.0;
 }
 
