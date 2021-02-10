@@ -21,13 +21,14 @@
 *<https://www.gnu.org/licenses/>.
 */
 
+#include "maxon_epos_ethercat_sdk/Maxon.hpp"
+
 #include <chrono>
 #include <cmath>
 #include <map>
 #include <thread>
 
 #include "maxon_epos_ethercat_sdk/ConfigurationParser.hpp"
-#include "maxon_epos_ethercat_sdk/Maxon.hpp"
 #include "maxon_epos_ethercat_sdk/ObjectDictionary.hpp"
 #include "maxon_epos_ethercat_sdk/RxPdo.hpp"
 #include "maxon_epos_ethercat_sdk/TxPdo.hpp"
@@ -164,8 +165,7 @@ void Maxon::updateWrite()
 
   switch (rxPdoTypeEnum_)
   {
-    case RxPdoTypeEnum::RxPdoStandard:
-    {
+    case RxPdoTypeEnum::RxPdoStandard: {
       RxPdoStandard rxPdo{};
       rxPdo.modeOfOperation_ = static_cast<int8_t>(modeOfOperation_);
       rxPdo.controlWord_ = controlword_.getRawControlword();
@@ -174,8 +174,7 @@ void Maxon::updateWrite()
       bus_->writeRxPdo(address_, rxPdo);
       break;
     }
-    case RxPdoTypeEnum::RxPdoCSP:
-    {
+    case RxPdoTypeEnum::RxPdoCSP: {
       RxPdoCSP rxPdo{};
       rxPdo.targetPosition_ = stagedCommand_.getTargetPositionRaw();
       rxPdo.positionOffset_ = stagedCommand_.getPositionOffsetRaw();
@@ -189,8 +188,7 @@ void Maxon::updateWrite()
       bus_->writeRxPdo(address_, rxPdo);
       break;
     }
-    case RxPdoTypeEnum::RxPdoCST:
-    {
+    case RxPdoTypeEnum::RxPdoCST: {
       RxPdoCST rxPdo{};
       rxPdo.targetTorque_ = stagedCommand_.getTargetTorqueRaw();
       rxPdo.torqueOffset_ = stagedCommand_.getTorqueOffsetRaw();
@@ -203,8 +201,7 @@ void Maxon::updateWrite()
       bus_->writeRxPdo(address_, rxPdo);
       break;
     }
-    case RxPdoTypeEnum::RxPdoCSV:
-    {
+    case RxPdoTypeEnum::RxPdoCSV: {
       RxPdoCSV rxPdo{};
       rxPdo.targetVelocity_ = stagedCommand_.getTargetVelocityRaw();
       rxPdo.velocityOffset_ = stagedCommand_.getVelocityOffsetRaw();
@@ -217,8 +214,7 @@ void Maxon::updateWrite()
       bus_->writeRxPdo(address_, rxPdo);
       break;
     }
-    case RxPdoTypeEnum::RxPdoCSTCSP:
-    {
+    case RxPdoTypeEnum::RxPdoCSTCSP: {
       RxPdoCSTCSP rxPdo{};
       rxPdo.targetPosition_ = stagedCommand_.getTargetPositionRaw();
       rxPdo.positionOffset_ = stagedCommand_.getPositionOffsetRaw();
@@ -233,8 +229,24 @@ void Maxon::updateWrite()
       bus_->writeRxPdo(address_, rxPdo);
       break;
     }
-    case RxPdoTypeEnum::RxPdoPVM:
-    {
+    case RxPdoTypeEnum::RxPdoCSTCSPCSV: {
+      RxPdoCSTCSPCSV rxPdo{};
+      rxPdo.targetPosition_ = stagedCommand_.getTargetPositionRaw();
+      rxPdo.positionOffset_ = stagedCommand_.getPositionOffsetRaw();
+      rxPdo.targetTorque_ = stagedCommand_.getTargetTorqueRaw();
+      rxPdo.torqueOffset_ = stagedCommand_.getTorqueOffsetRaw();
+      rxPdo.targetVelocity_ = stagedCommand_.getTargetVelocityRaw();
+      rxPdo.velocityOffset_ = stagedCommand_.getVelocityOffsetRaw();
+
+      // Extra data
+      rxPdo.controlWord_ = controlword_.getRawControlword();
+      rxPdo.modeOfOperation_ = static_cast<int8_t>(modeOfOperation_);
+
+      // actually writing to the hardware
+      bus_->writeRxPdo(address_, rxPdo);
+      break;
+    }
+    case RxPdoTypeEnum::RxPdoPVM: {
       RxPdoPVM rxPdo{};
       rxPdo.controlWord_ = controlword_.getRawControlword();
       rxPdo.targetVelocity_ = stagedCommand_.getTargetVelocityRaw();
@@ -261,16 +273,14 @@ void Maxon::updateRead()
   // TODO(duboisf): implement some sort of time stamp
   switch (txPdoTypeEnum_)
   {
-    case TxPdoTypeEnum::TxPdoStandard:
-    {
+    case TxPdoTypeEnum::TxPdoStandard: {
       TxPdoStandard txPdo{};
       // reading from the bus
       bus_->readTxPdo(address_, txPdo);
       reading_.setStatusword(txPdo.statusword_);
       break;
     }
-    case TxPdoTypeEnum::TxPdoCSP:
-    {
+    case TxPdoTypeEnum::TxPdoCSP: {
       TxPdoCSP txPdo{};
       // reading from the bus
       bus_->readTxPdo(address_, txPdo);
@@ -280,8 +290,7 @@ void Maxon::updateRead()
       reading_.setActualPosition(txPdo.actualPosition_);
       break;
     }
-    case TxPdoTypeEnum::TxPdoCST:
-    {
+    case TxPdoTypeEnum::TxPdoCST: {
       TxPdoCST txPdo{};
       // reading from the bus
       bus_->readTxPdo(address_, txPdo);
@@ -291,8 +300,7 @@ void Maxon::updateRead()
       reading_.setActualPosition(txPdo.actualPosition_);
       break;
     }
-    case TxPdoTypeEnum::TxPdoCSV:
-    {
+    case TxPdoTypeEnum::TxPdoCSV: {
       TxPdoCSV txPdo{};
       // reading from the bus
       bus_->readTxPdo(address_, txPdo);
@@ -302,8 +310,7 @@ void Maxon::updateRead()
       reading_.setActualPosition(txPdo.actualPosition_);
       break;
     }
-    case TxPdoTypeEnum::TxPdoCSTCSP:
-    {
+    case TxPdoTypeEnum::TxPdoCSTCSP: {
       TxPdoCSTCSP txPdo{};
       // reading from the bus
       bus_->readTxPdo(address_, txPdo);
@@ -313,8 +320,17 @@ void Maxon::updateRead()
       reading_.setActualPosition(txPdo.actualPosition_);
       break;
     }
-    case TxPdoTypeEnum::TxPdoPVM:
-    {
+    case TxPdoTypeEnum::TxPdoCSTCSPCSV: {
+      TxPdoCSTCSPCSV txPdo{};
+      // reading from the bus
+      bus_->readTxPdo(address_, txPdo);
+      reading_.setStatusword(txPdo.statusword_);
+      reading_.setActualCurrent(txPdo.actualTorque_);
+      reading_.setActualVelocity(txPdo.actualVelocity_);
+      reading_.setActualPosition(txPdo.actualPosition_);
+      break;
+    }
+    case TxPdoTypeEnum::TxPdoPVM: {
       TxPdoPVM txPdo{};
       // reading from the bus
       bus_->readTxPdo(address_, txPdo);
@@ -324,7 +340,7 @@ void Maxon::updateRead()
       break;
     }
     default:
-      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::updateRrite] Unsupported Tx Pdo "
+      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::updateRead] Unsupported Tx Pdo "
                         "type for '"
                         << name_ << "'");
       reading_.addError(ErrorType::TxPdoTypeError);
@@ -1038,8 +1054,10 @@ void Maxon::engagePdoStateMachine()
 }
 bool Maxon::isAllowedModeCombination(const std::vector<ModeOfOperationEnum> modes)
 {
-  const std::array<std::vector<ModeOfOperationEnum>, 1> allowedModeCombinations = {
-    { { ModeOfOperationEnum::CyclicSynchronousTorqueMode, ModeOfOperationEnum::CyclicSynchronousPositionMode } },
+  const std::array<std::vector<ModeOfOperationEnum>, 2> allowedModeCombinations = {
+    { { ModeOfOperationEnum::CyclicSynchronousTorqueMode, ModeOfOperationEnum::CyclicSynchronousPositionMode },
+      { ModeOfOperationEnum::CyclicSynchronousTorqueMode, ModeOfOperationEnum::CyclicSynchronousPositionMode,
+        ModeOfOperationEnum::CyclicSynchronousVelocityMode } },
   };
   bool success = false;
   for (const auto& allowedCombination : allowedModeCombinations)
@@ -1064,6 +1082,9 @@ std::pair<RxPdoTypeEnum, TxPdoTypeEnum> Maxon::getMixedPdoType(std::vector<ModeO
   const std::map<std::vector<ModeOfOperationEnum>, std::pair<RxPdoTypeEnum, TxPdoTypeEnum>> mixedModePdoMap = {
     { { ModeOfOperationEnum::CyclicSynchronousTorqueMode, ModeOfOperationEnum::CyclicSynchronousPositionMode },
       { RxPdoTypeEnum::RxPdoCSTCSP, TxPdoTypeEnum::TxPdoCSTCSP } },
+    { { ModeOfOperationEnum::CyclicSynchronousTorqueMode, ModeOfOperationEnum::CyclicSynchronousPositionMode,
+        ModeOfOperationEnum::CyclicSynchronousVelocityMode },
+      { RxPdoTypeEnum::RxPdoCSTCSPCSV, TxPdoTypeEnum::TxPdoCSTCSPCSV } },
   };
 
   for (const auto& entry : mixedModePdoMap)

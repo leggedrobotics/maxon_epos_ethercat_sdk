@@ -68,8 +68,17 @@ struct TxPdoCSV
   int32_t actualPosition_;
 } __attribute__((packed));
 
-// Mixed operation mode for CST and CSV
+// Mixed operation mode for CST and CSP
 struct TxPdoCSTCSP
+{
+  uint16_t statusword_;
+  int16_t actualTorque_;
+  int32_t actualVelocity_;
+  int32_t actualPosition_;
+} __attribute__((packed));
+
+// Mixed operation mode for CST, CSP, and CSV
+struct TxPdoCSTCSPCSV
 {
   uint16_t statusword_;
   int16_t actualTorque_;

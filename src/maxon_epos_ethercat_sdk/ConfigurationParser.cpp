@@ -303,6 +303,48 @@ void ConfigurationParser::parseConfiguration(YAML::Node configNode)
     {
       configuration_.followErrorWindow = followErrorWindow;
     }
+
+    double currentPGainSI;
+    if (getValueFromFile(hardwareNode, "current_p_gain", currentPGainSI))
+    {
+      configuration_.currentPGainSI = currentPGainSI;
+    }
+
+    double currentIGainSI;
+    if (getValueFromFile(hardwareNode, "current_i_gain", currentIGainSI))
+    {
+      configuration_.currentIGainSI = currentIGainSI;
+    }
+
+    double positionPGainSI;
+    if (getValueFromFile(hardwareNode, "position_p_gain", positionPGainSI))
+    {
+      configuration_.positionPGainSI = positionPGainSI;
+    }
+
+    double positionIGainSI;
+    if (getValueFromFile(hardwareNode, "position_i_gain", positionIGainSI))
+    {
+      configuration_.positionIGainSI = positionIGainSI;
+    }
+
+    double positionDGainSI;
+    if (getValueFromFile(hardwareNode, "position_d_gain", positionDGainSI))
+    {
+      configuration_.positionDGainSI = positionDGainSI;
+    }
+
+    double velocityPGainSI;
+    if (getValueFromFile(hardwareNode, "velocity_p_gain", velocityPGainSI))
+    {
+      configuration_.velocityPGainSI = velocityPGainSI;
+    }
+
+    double velcityIGainSI;
+    if (getValueFromFile(hardwareNode, "velocity_i_gain", velcityIGainSI))
+    {
+      configuration_.velocityIGainSI = velcityIGainSI;
+    }
   }
 }
 

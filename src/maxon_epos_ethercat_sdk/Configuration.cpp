@@ -21,9 +21,9 @@
 *<https://www.gnu.org/licenses/>.
 */
 
-#include <iomanip>
-
 #include "maxon_epos_ethercat_sdk/Configuration.hpp"
+
+#include <iomanip>
 
 namespace maxon
 {
@@ -64,6 +64,8 @@ std::string rxPdoString(RxPdoTypeEnum rxPdo)
       return "Rx PDO CSV";
     case RxPdoTypeEnum::RxPdoCSTCSP:
       return "Rx PDO CST/CSP mixed mode";
+    case RxPdoTypeEnum::RxPdoCSTCSPCSV:
+      return "Rx PDO CST/CSP/CSV mixed mode";
     case RxPdoTypeEnum::RxPdoPVM:
       return "Rx PDO PVM";
     default:
@@ -85,6 +87,8 @@ std::string txPdoString(TxPdoTypeEnum txPdo)
       return "Tx PDO CSV";
     case TxPdoTypeEnum::TxPdoCSTCSP:
       return "Tx PDO CST/CSP mixed mode";
+    case TxPdoTypeEnum::TxPdoCSTCSPCSV:
+      return "Rx PDO CST/CSP/CSV mixed mode";
     case TxPdoTypeEnum::TxPdoPVM:
       return "Tx PDO PVM";
     case TxPdoTypeEnum::TxPdoStandard:

@@ -21,9 +21,9 @@
 *<https://www.gnu.org/licenses/>.
 */
 
-#include <iomanip>
-
 #include "maxon_epos_ethercat_sdk/Command.hpp"
+
+#include <iomanip>
 
 namespace maxon
 {

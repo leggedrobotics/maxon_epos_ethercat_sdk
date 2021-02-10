@@ -199,7 +199,7 @@ If the desired mode of operation is not supported, they can be added with these 
     ```
     </details>
 
-    This tells the driver what data to receive and send, therefore, the objects in the `Pdo`s must have the same order as the `struct`s.
+    This tells the driver what data to receive and send, therefore, the objects in the `Pdo`s **must have the same order** as the `struct`s.
 
 5. Then in [ConfigureParameters.cpp](src/maxon_epos_ethercat_sdk/ConfigureParameters.cpp), add the parameters you wish to configure to `bool Maxon::configParam()`.
 

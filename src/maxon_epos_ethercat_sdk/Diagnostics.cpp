@@ -31,27 +31,27 @@ void Maxon::printErrorCode()
 }
 
 // Print diagnosis messages
-void Maxon::printDiagnosis()
-{
-  uint8_t newestIdx = 0;
-  bool newMsgAvailable = false;
-  std::array<uint, 4> diagnosisMsg;
-  sendSdoRead(OD_INDEX_DIAGNOSIS, 0x04, false, newMsgAvailable);
-  if (newMsgAvailable)
-  {
-    sendSdoRead(OD_INDEX_DIAGNOSIS, 0x02, false, newestIdx);
-    sendSdoRead(OD_INDEX_DIAGNOSIS, newestIdx, false, diagnosisMsg);
-    MELO_INFO("[maxon_epos_ethercat_sdk:Maxon::printDiagnosis] Latest diagnostic "
-              "message: ");
-    for (const auto& s : diagnosisMsg)
-    {
-      MELO_INFO_STREAM(std::hex << s);
-    }
-  }
-  else
-  {
-    MELO_INFO("[maxon_epos_ethercat_sdk:Maxon::printDiagnosis] "
-              "No diagnostic message available.");
-  }
-}
+// void Maxon::printDiagnosis()
+// {
+//   uint8_t newestIdx = 0;
+//   bool newMsgAvailable = false;
+//   std::array<uint, 4> diagnosisMsg;
+//   sendSdoRead(OD_INDEX_DIAGNOSIS, 0x04, false, newMsgAvailable);
+//   if (newMsgAvailable)
+//   {
+//     sendSdoRead(OD_INDEX_DIAGNOSIS, 0x02, false, newestIdx);
+//     sendSdoRead(OD_INDEX_DIAGNOSIS, newestIdx, false, diagnosisMsg);
+//     MELO_INFO("[maxon_epos_ethercat_sdk:Maxon::printDiagnosis] Latest diagnostic "
+//               "message: ");
+//     for (const auto& s : diagnosisMsg)
+//     {
+//       MELO_INFO_STREAM(std::hex << s);
+//     }
+//   }
+//   else
+//   {
+//     MELO_INFO("[maxon_epos_ethercat_sdk:Maxon::printDiagnosis] "
+//               "No diagnostic message available.");
+//   }
+// }
 }  // namespace maxon

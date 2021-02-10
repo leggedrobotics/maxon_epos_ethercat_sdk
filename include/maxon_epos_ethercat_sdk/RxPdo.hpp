@@ -76,7 +76,7 @@ struct RxPdoCSV
   int8_t modeOfOperation_;
 } __attribute__((packed));
 
-// Mixed operation mode for CST and CSV
+// Mixed operation mode for CST and CSP
 struct RxPdoCSTCSP
 {
   int16_t targetTorque_;
@@ -85,7 +85,20 @@ struct RxPdoCSTCSP
   int32_t positionOffset_;
   uint16_t controlWord_;
   int8_t modeOfOperation_;
-}  __attribute__((packed));
+} __attribute__((packed));
+
+// Mixed operation mode for CST, CSP and CSV
+struct RxPdoCSTCSPCSV
+{
+  int16_t targetTorque_;
+  int16_t torqueOffset_;
+  int32_t targetPosition_;
+  int32_t positionOffset_;
+  int32_t targetVelocity_;
+  int32_t velocityOffset_;
+  uint16_t controlWord_;
+  int8_t modeOfOperation_;
+} __attribute__((packed));
 
 struct RxPdoPVM
 {
