@@ -25,19 +25,17 @@
 
 #define _USE_MATH_DEFINES
 
+#include <cmath>
 #include <cstdint>
 #include <iostream>
 #include <mutex>
 #include <string>
-#include <cmath>
 
 #include "maxon_epos_ethercat_sdk/ModeOfOperationEnum.hpp"
 
-namespace maxon
-{
-class Command
-{
-public:
+namespace maxon {
+class Command {
+ public:
   Command() = default;
   Command(const Command& other);
   virtual ~Command() = default;
@@ -52,7 +50,7 @@ public:
 
   void setTargetPositionRaw(int32_t targetPosition);
   void setTargetVelocityRaw(int32_t targetVelocity);
-  void setTargetCurrentRaw(int16_t targetCurrent);
+  void setTargetTorqueRaw(int16_t targetTorque);
   void setPositionOffsetRaw(int32_t positionOffset);
   void setTorqueOffsetRaw(int16_t torqueOffset);
   void setVelocityOffsetRaw(int32_t velocityOffset);
@@ -66,7 +64,6 @@ public:
   void setTargetPosition(double targetPosition);
   void setTargetVelocity(double targetVelocity);
   void setTargetTorque(double targetTorque);
-  void setTargetCurrent(double targetCurrent);
   void setPositionOffset(double positionOffset);
   void setTorqueOffset(double velocityOffset);
   void setVelocityOffset(double velocityOffset);
@@ -80,7 +77,6 @@ public:
   int32_t getTargetPositionRaw() const;
   int32_t getTargetVelocityRaw() const;
   int16_t getTargetTorqueRaw() const;
-  int16_t getTargetCurrentRaw() const;
   int32_t getPositionOffsetRaw() const;
   int16_t getTorqueOffsetRaw() const;
   int32_t getVelocityOffsetRaw() const;
@@ -92,7 +88,6 @@ public:
   double getTargetPosition() const;
   double getTargetVelocity() const;
   double getTargetTorque() const;
-  double getTargetCurrent() const;
   double getTorqueOffset() const;
   double getVelocityOffset() const;
 
@@ -116,44 +111,42 @@ public:
 
   // Set command max current/torque
 
-private:
-  double targetPositionUU_{ 0 };
-  double targetVelocityUU_{ 0 };
-  double targetTorqueUU_{ 0 };
-  double targetCurrentUU_{ 0 };
-  double positionOffsetUU_{ 0 };
-  double torqueOffsetUU_{ 0 };
-  double velocityOffsetUU_{ 0 };
+ private:
+  double targetPositionUU_{0};
+  double targetVelocityUU_{0};
+  double targetTorqueUU_{0};
+  double positionOffsetUU_{0};
+  double torqueOffsetUU_{0};
+  double velocityOffsetUU_{0};
 
-  int32_t targetPosition_{ 0 };
-  int32_t targetVelocity_{ 0 };
-  int16_t targetTorque_{ 0 };
-  int16_t targetCurrent_{ 0 };
-  int32_t positionOffset_{ 0 };
-  int16_t torqueOffset_{ 0 };
-  int32_t velocityOffset_{ 0 };
-  uint32_t profileAccel_{ 0 };
-  uint32_t profileDeccel_{ 0 };
-  int16_t motionProfileType_{ 0 };
+  int32_t targetPosition_{0};
+  int32_t targetVelocity_{0};
+  int16_t targetTorque_{0};
+  int32_t positionOffset_{0};
+  int16_t torqueOffset_{0};
+  int32_t velocityOffset_{0};
+  uint32_t profileAccel_{0};
+  uint32_t profileDeccel_{0};
+  int16_t motionProfileType_{0};
 
   std::mutex targetTorqueCommandMutex_;
 
-  uint32_t digitalOutputs_{ 0 };
+  uint32_t digitalOutputs_{0};
 
-  double positionFactorRadToInteger_{ 1 };
-  const double velocityFactorRadPerSecToMicroRPM_{ 1.0 / (2 * M_PI) * 60 * 1e6};
-  double torqueFactorNmToInteger_{ 1 };
-  double currentFactorAToInteger_{ 1 };
+  double positionFactorRadToInteger_{1};
+  const double velocityFactorRadPerSecToMicroRPM_{1.0 / (2 * M_PI) * 60 * 1e6};
+  double torqueFactorNmToInteger_{1};
+  double currentFactorAToInteger_{1};
 
-  ModeOfOperationEnum modeOfOperation_{ ModeOfOperationEnum::NA };
+  ModeOfOperationEnum modeOfOperation_{ModeOfOperationEnum::NA};
 
   /*!
    * set this to true if raw commands have been used and therefore no unit
    * conversion should be done
    */
-  bool useRawCommands_{ false };
+  bool useRawCommands_{false};
 
-  bool targetTorqueCommandUsed_{ false };
+  bool targetTorqueCommandUsed_{false};
 };
 
 }  // namespace maxon

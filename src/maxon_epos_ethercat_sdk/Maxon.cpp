@@ -99,7 +99,8 @@ bool Maxon::startup()
   success &= mapPdos(rxPdoTypeEnum_, txPdoTypeEnum_);
 
   // Set Interpolation
-  success &= sdoVerifyWrite(OD_INDEX_INTERPOLATION_TIME_PERIOD, 0x01, false, static_cast<uint8_t>(2),
+  success &= sdoVerifyWrite(OD_INDEX_INTERPOLATION_TIME_PERIOD, 0x01, false,
+                            static_cast<uint8_t>(1),
                             configuration_.configRunSdoVerifyTimeout);
 
   success &= sdoVerifyWrite(OD_INDEX_INTERPOLATION_TIME_PERIOD, 0x02, false, static_cast<int8_t>(-3),

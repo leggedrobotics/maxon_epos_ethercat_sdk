@@ -128,17 +128,18 @@ void Command::setTargetVelocityRaw(int32_t targetVelocity)
 {
   targetVelocity_ = targetVelocity;
 }
-void Command::setTargetCurrentRaw(int16_t targetCurrent)
-{
-  targetCurrent_ = targetCurrent;
-}
-void Command::setPositionOffsetRaw(int32_t positionOffset)
-{
+void Command::setPositionOffsetRaw(int32_t positionOffset) {
   positionOffset_ = positionOffset;
+}
+void Command::setTargetTorqueRaw(int16_t targetTorque) {
+  targetTorque_ = targetTorque;
 }
 void Command::setTorqueOffsetRaw(int16_t torqueOffset)
 {
   torqueOffset_ = torqueOffset;
+}
+void Command::setVelocityOffsetRaw(int32_t velocityOffset) {
+  velocityOffset_ = velocityOffset;
 }
 
 /*!
@@ -159,13 +160,6 @@ void Command::setTargetTorque(double targetTorque)
   targetTorqueUU_ = targetTorque;
   targetTorqueCommandUsed_ = true;
 }
-void Command::setTargetCurrent(double targetCurrent)
-{
-  // lock for thread safety
-  std::lock_guard<std::mutex> lockGuard(targetTorqueCommandMutex_);
-  targetCurrentUU_ = targetCurrent;
-  targetTorqueCommandUsed_ = false;
-}
 void Command::setPositionOffset(double positionOffset)
 {
   positionOffsetUU_ = positionOffset;
@@ -173,6 +167,9 @@ void Command::setPositionOffset(double positionOffset)
 void Command::setTorqueOffset(double torqueOffset)
 {
   torqueOffsetUU_ = torqueOffset;
+}
+void Command::setVelocityOffset(double velocityOffset) {
+  velocityOffsetUU_ = velocityOffset;
 }
 
 /*!
@@ -218,14 +215,7 @@ int32_t Command::getTargetVelocityRaw() const
 {
   return targetVelocity_;
 }
-int16_t Command::getTargetTorqueRaw() const
-{
-  return targetTorque_;
-}
-int16_t Command::getTargetCurrentRaw() const
-{
-  return targetCurrent_;
-}
+int16_t Command::getTargetTorqueRaw() const { return targetTorque_; }
 int32_t Command::getPositionOffsetRaw() const
 {
   return positionOffset_;
@@ -262,18 +252,12 @@ double Command::getTargetVelocity() const
 {
   return targetVelocityUU_;
 }
-double Command::getTargetTorque() const
-{
-  return targetTorqueUU_;
-}
-double Command::getTargetCurrent() const
-{
-  return targetCurrentUU_;
-}
+double Command::getTargetTorque() const { return targetTorqueUU_; }
 double Command::getTorqueOffset() const
 {
   return torqueOffsetUU_;
 }
+double Command::getVelocityOffset() const { return velocityOffsetUU_; }
 
 void Command::doUnitConversion()
 {
@@ -282,17 +266,7 @@ void Command::doUnitConversion()
     targetPosition_ = static_cast<int32_t>(positionFactorRadToInteger_ * targetPositionUU_);
     targetVelocity_ = static_cast<int32_t>(velocityFactorRadPerSecToMicroRPM_ * targetVelocityUU_);
     targetTorque_ = static_cast<int16_t>(torqueFactorNmToInteger_ * targetTorqueUU_);
-    {
-      std::lock_guard<std::mutex> lockGuard(targetTorqueCommandMutex_);
-      if (targetTorqueCommandUsed_)
-      {
-        targetCurrent_ = static_cast<int16_t>(torqueFactorNmToInteger_ * targetTorqueUU_);
-      }
-      else
-      {
-        targetCurrent_ = static_cast<int16_t>(currentFactorAToInteger_ * targetCurrentUU_);
-      }
-    }
+
     positionOffset_ = static_cast<int32_t>(positionFactorRadToInteger_ * positionOffsetUU_);
     torqueOffset_ = static_cast<int16_t>(torqueFactorNmToInteger_ * torqueOffsetUU_);
     velocityOffset_ = static_cast<int32_t>(velocityFactorRadPerSecToMicroRPM_ * velocityOffsetUU_);
