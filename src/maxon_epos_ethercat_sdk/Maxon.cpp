@@ -124,7 +124,6 @@ bool Maxon::startup()
                       << name_ << "' not successful!");
     addErrorToReading(ErrorType::ConfigurationError);
   }
-  MELO_INFO_STREAM("Hardware configuration suceeded. success = " << success);
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
   return success;
 }
