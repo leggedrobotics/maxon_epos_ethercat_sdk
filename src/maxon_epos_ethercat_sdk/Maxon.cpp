@@ -100,7 +100,7 @@ bool Maxon::startup()
 
   // Set Interpolation
   success &= sdoVerifyWrite(OD_INDEX_INTERPOLATION_TIME_PERIOD, 0x01, false,
-                            static_cast<uint8_t>(1),
+                            static_cast<uint8_t>(2),
                             configuration_.configRunSdoVerifyTimeout);
 
   success &= sdoVerifyWrite(OD_INDEX_INTERPOLATION_TIME_PERIOD, 0x02, false, static_cast<int8_t>(-3),
@@ -355,16 +355,15 @@ void Maxon::updateRead()
   // Print warning if drive is in FaultReactionAcrive state.
   if (reading_.getDriveState() == DriveState::FaultReactionActive)
   {
-    MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::updateRead] '" << name_
-                                                                      << "' is in drive state 'FaultReactionAcrive'");
-    printErrorCode();
+    MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::updateRead] '"
+                      << name_ << "' is in drive state 'FaultReactionAcrive'");
   }
 
   // Print warning if drive is in Fault state.
   if (reading_.getDriveState() == DriveState::Fault)
   {
-    MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::updateRead] '" << name_ << "' is in drive state 'Fault'");
-    printErrorCode();
+    MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::updateRead] '"
+                      << name_ << "' is in drive state 'Fault'");
   }
 }
 
