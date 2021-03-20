@@ -1,7 +1,6 @@
 /*
-** Copyright (2019-2020) Robotics Systems Lab - ETH Zurich:
-** Jonas Junger, Johannes Pankert, Fabio Dubois, Lennart Nachtigall,
-** Markus Staeuble
+** Copyright (2020-2021) Robotics Systems Lab - ETH Zurich:
+** Linghao Zhang, Jonas Junger, Lennart Nachtigall
 **
 ** This file is part of the maxon_epos_ethercat_sdk.
 ** The maxon_epos_ethercat_sdk is free software: you can redistribute it and/or modify

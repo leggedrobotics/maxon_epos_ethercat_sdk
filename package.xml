@@ -1,8 +1,7 @@
 <?xml version="1.0"?>
 <!-->
-Copyright (2019-2020) Robotics Systems Lab - ETH Zurich:
-Jonas Junger, Johannes Pankert, Fabio Dubois, Lennart Nachtigall,
-Markus Staeuble
+Copyright (2020-2021) Robotics Systems Lab - ETH Zurich:
+Linghao Zhang, Jonas Junger, Lennart Nachtigall
 
 This file is part of the maxon_epos_ethercat_sdk.
 The maxon_epos_ethercat_sdk is free software: you can redistribute it and/or modify
@@ -27,13 +26,10 @@ along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/license
   <license>GPLv3</license>
   <author email="jungerj@student.ethz.ch">Jonas Junger</author>
   <author email="lingzhang@ethz.ch">Linghao Zhang</author>
-  <author email="johannes.pankert@mavt.ethz.ch">Johannes Pankert</author>
   <author email="nachtigall@mavt.ethz.ch">Lennart Nachtigall</author>
-  <author email="duboisf@mavt.ethz.ch">Fabio Dubois</author>
-  <author>Markus Staeuble</author>
   <maintainer email="jungerj@student.ethz.ch">Jonas Junger</maintainer>
   <maintainer email="lingzhang@ethz.ch">Linghao Zhang</maintainer>
-  <url type="website">https://bitbucket.org/leggedrobotics/maxon_epos_ethercat_sdk</url>
+  <url type="website">https://github.com/leggedrobotics/maxon_epos_ethercat_sdk</url>
   
   <buildtool_depend>catkin</buildtool_depend>
 
