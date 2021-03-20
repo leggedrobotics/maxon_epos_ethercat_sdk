@@ -35,8 +35,8 @@ void Maxon::printErrorCode()
  */
 void Maxon::printDiagnosis() {
   uint8_t newestIdx = 0;
-  bool newMsgAvailable = false;
-  std::array<uint, 4> diagnosisMsg;
+  uint8_t newMsgAvailable = 0;
+  std::array<uint32_t, 4> diagnosisMsg;
   sendSdoRead(OD_INDEX_DIAGNOSIS, 0x04, false, newMsgAvailable);
   if (newMsgAvailable) {
     sendSdoRead(OD_INDEX_DIAGNOSIS, 0x02, false, newestIdx);
