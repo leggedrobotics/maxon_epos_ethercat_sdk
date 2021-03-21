@@ -5,6 +5,7 @@ std::ostream& operator << (std::ostream& os, const maxon::ModeOfOperationEnum mo
   std::unordered_map<maxon::ModeOfOperationEnum, std::string> mode2strMap = {
     {maxon::ModeOfOperationEnum::NA, "NA"},
     {maxon::ModeOfOperationEnum::ProfiledPositionMode, "ProfiledPositionMode"},
+    {maxon::ModeOfOperationEnum::ProfiledVelocityMode, "ProfiledVelocityMode"},
     {maxon::ModeOfOperationEnum::HomingMode, "HomingMode"},
     {maxon::ModeOfOperationEnum::CyclicSynchronousPositionMode, "CyclicSynchronousPositionMode"},
     {maxon::ModeOfOperationEnum::CyclicSynchronousVelocityMode, "CyclicSynchronousVelocityMode"},
