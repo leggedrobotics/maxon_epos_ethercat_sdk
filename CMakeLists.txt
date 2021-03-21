@@ -76,6 +76,7 @@ add_library(${PROJECT_NAME}
   src/${PROJECT_NAME}/Statusword.cpp
   src/${PROJECT_NAME}/DriveState.cpp
   src/${PROJECT_NAME}/PdoTypeEnum.cpp
+  src/${PROJECT_NAME}/ModeOfOperationEnum.cpp
 )
 add_dependencies(
   ${PROJECT_NAME}

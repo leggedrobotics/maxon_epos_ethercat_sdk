@@ -20,6 +20,7 @@
 #pragma once
 
 #include <cstdint>
+#include <iostream>
 
 namespace maxon
 {
@@ -35,3 +36,5 @@ enum class ModeOfOperationEnum : int8_t
 };
 
 }  // namespace maxon
+
+std::ostream& operator << (std::ostream& os, const maxon::ModeOfOperationEnum modeOfOperation);
