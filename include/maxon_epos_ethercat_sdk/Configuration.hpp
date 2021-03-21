@@ -58,17 +58,28 @@ public:
   uint32_t quickStopDecel{ 10000 };
   uint32_t profileDecel{ 10000 };
   uint32_t followErrorWindow{ 2000 };
-  double currentPGainSI { 1.171880 };
-  double currentIGainSI { 3906.250 };
-  double positionPGainSI { 1.5 };
-  double positionIGainSI { 0.78 };
-  double positionDGainSI { 0.016 };
-  double velocityPGainSI {0.02};
-  double velocityIGainSI {0.5};
+  double currentPGainSI{ 1.171880 };
+  double currentIGainSI{ 3906.250 };
+  double positionPGainSI{ 1.5 };
+  double positionIGainSI{ 0.78 };
+  double positionDGainSI{ 0.016 };
+  double velocityPGainSI{ 0.02 };
+  double velocityIGainSI{ 0.5 };
 
 public:
   // stream operator
   friend std::ostream& operator<<(std::ostream& os, const Configuration& configuration);
+
+  /*!
+   * @brief Check whether the parameters are sane.
+   * Prints a list of the checks and whether they failed or passed.
+   * @param[in] silent If true: Do not print. Only return the success of the test.
+   * @return true if the checks are successful.
+   */
+  bool sanityCheck(bool silent = false) const;
+
+  std::pair<RxPdoTypeEnum, TxPdoTypeEnum> getPdoTypeSolution() const;
+
 };
 
 }  // namespace maxon

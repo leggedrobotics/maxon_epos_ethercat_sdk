@@ -23,6 +23,7 @@
 #include <cmath>
 #include <map>
 #include <thread>
+#include <algorithm>
 
 #include "maxon_epos_ethercat_sdk/ConfigurationParser.hpp"
 #include "maxon_epos_ethercat_sdk/ObjectDictionary.hpp"
@@ -379,18 +380,21 @@ void Maxon::stageCommand(const Command& command)
 
   stagedCommand_.doUnitConversion();
 
-  if (allowModeChange_)
+  const auto targetMode = command.getModeOfOperation();
+  if (std::find(configuration_.modesOfOperation.begin(),
+                configuration_.modesOfOperation.end(),
+                targetMode) != configuration_.modesOfOperation.end())
   {
-    modeOfOperation_ = command.getModeOfOperation();
+    modeOfOperation_ = targetMode;
   }
   else
   {
-    if (modeOfOperation_ != command.getModeOfOperation() && command.getModeOfOperation() != ModeOfOperationEnum::NA)
-    {
-      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::stageCommand] Changing the mode of "
-                        "operation of '"
-                        << name_ << "' is not allowed for the active configuration.");
-    }
+    MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::stageCommand] "
+                      "Target mode of operation '"
+                      << targetMode
+                      << "' for device '"
+                      << name_
+                      << "' not allowed");
   }
 }
 
@@ -420,45 +424,15 @@ bool Maxon::loadConfigNode(YAML::Node configNode)
 
 bool Maxon::loadConfiguration(const Configuration& configuration)
 {
-  bool success = true;
   reading_.configureReading(configuration);
-
-  // TODO check mapping
-  const std::map<ModeOfOperationEnum, std::pair<RxPdoTypeEnum, TxPdoTypeEnum>> mode2PdoMap = {
-    { ModeOfOperationEnum::CyclicSynchronousPositionMode, { RxPdoTypeEnum::RxPdoCSP, TxPdoTypeEnum::TxPdoCSP } },
-    { ModeOfOperationEnum::CyclicSynchronousTorqueMode, { RxPdoTypeEnum::RxPdoCST, TxPdoTypeEnum::TxPdoCST } },
-    { ModeOfOperationEnum::CyclicSynchronousVelocityMode, { RxPdoTypeEnum::RxPdoCSV, TxPdoTypeEnum::TxPdoCSV } },
-    { ModeOfOperationEnum::HomingMode, { RxPdoTypeEnum::NA, TxPdoTypeEnum::NA } },
-    { ModeOfOperationEnum::ProfiledPositionMode, { RxPdoTypeEnum::NA, TxPdoTypeEnum::NA } },
-    { ModeOfOperationEnum::ProfiledVelocityMode, { RxPdoTypeEnum::RxPdoPVM, TxPdoTypeEnum::TxPdoPVM } },
-    { ModeOfOperationEnum::NA, { RxPdoTypeEnum::NA, TxPdoTypeEnum::NA } },
-  };
-
-  if (configuration.modesOfOperation.size() == 1)
-  {
-    rxPdoTypeEnum_ = mode2PdoMap.at(configuration.modesOfOperation[0]).first;
-    txPdoTypeEnum_ = mode2PdoMap.at(configuration.modesOfOperation[0]).second;
-  }
-  else
-  {
-    if (isAllowedModeCombination(configuration.modesOfOperation))
-    {
-      allowModeChange_ = true;
-      auto mixedPdoTypes = getMixedPdoType(configuration.modesOfOperation);
-      rxPdoTypeEnum_ = mixedPdoTypes.first;
-      txPdoTypeEnum_ = mixedPdoTypes.second;
-    }
-    else
-    {
-      MELO_ERROR_STREAM("[maxon_epos_ethercat_sdk:Maxon::loadConfiguration] "
-                        << "The chosen mode of operation combination is not supported.")
-      success = false;
-    }
-  }
   modeOfOperation_ = configuration.modesOfOperation[0];
-
+  const auto pdoTypeSolution = configuration.getPdoTypeSolution();
+  rxPdoTypeEnum_ = pdoTypeSolution.first;
+  txPdoTypeEnum_ = pdoTypeSolution.second;
   configuration_ = configuration;
-  return success;
+
+  MELO_INFO_STREAM("[maxon_epos_ethercat_sdk] Sanity check for '" << name_ << "':");
+  return configuration.sanityCheck();
 }
 
 Configuration Maxon::getConfiguration() const
@@ -1046,54 +1020,5 @@ void Maxon::engagePdoStateMachine()
   // set the "hasRead" variable to false such that there will definitely be a
   // new reading when this method is called again
   hasRead_ = false;
-}
-bool Maxon::isAllowedModeCombination(const std::vector<ModeOfOperationEnum> modes)
-{
-  const std::array<std::vector<ModeOfOperationEnum>, 2> allowedModeCombinations = {
-    { { ModeOfOperationEnum::CyclicSynchronousTorqueMode, ModeOfOperationEnum::CyclicSynchronousPositionMode },
-      { ModeOfOperationEnum::CyclicSynchronousTorqueMode, ModeOfOperationEnum::CyclicSynchronousPositionMode,
-        ModeOfOperationEnum::CyclicSynchronousVelocityMode } },
-  };
-  bool success = false;
-  for (const auto& allowedCombination : allowedModeCombinations)
-  {
-    // all of 'modes' in allowedCombination
-    bool includedSuccess1 = true;
-    for (const auto& mode : modes)
-      includedSuccess1 &=
-          (std::find(allowedCombination.begin(), allowedCombination.end(), mode) != allowedCombination.end());
-
-    // all of 'allowedCombination' in modes
-    bool includedSuccess2 = true;
-    for (const auto& mode : allowedCombination)
-      includedSuccess2 &= (std::find(modes.begin(), modes.end(), mode) != modes.end());
-
-    success |= (includedSuccess1 && includedSuccess2);
-  }
-  return success;
-}
-std::pair<RxPdoTypeEnum, TxPdoTypeEnum> Maxon::getMixedPdoType(std::vector<ModeOfOperationEnum> modes)
-{
-  const std::map<std::vector<ModeOfOperationEnum>, std::pair<RxPdoTypeEnum, TxPdoTypeEnum>> mixedModePdoMap = {
-    { { ModeOfOperationEnum::CyclicSynchronousTorqueMode, ModeOfOperationEnum::CyclicSynchronousPositionMode },
-      { RxPdoTypeEnum::RxPdoCSTCSP, TxPdoTypeEnum::TxPdoCSTCSP } },
-    { { ModeOfOperationEnum::CyclicSynchronousTorqueMode, ModeOfOperationEnum::CyclicSynchronousPositionMode,
-        ModeOfOperationEnum::CyclicSynchronousVelocityMode },
-      { RxPdoTypeEnum::RxPdoCSTCSPCSV, TxPdoTypeEnum::TxPdoCSTCSPCSV } },
-  };
-
-  for (const auto& entry : mixedModePdoMap)
-  {
-    bool includedSuccess1 = true;
-    for (const auto& mode : modes)
-      includedSuccess1 &= (std::find(entry.first.begin(), entry.first.end(), mode) != entry.first.end());
-    bool includedSuccess2 = true;
-    for (const auto& mode : entry.first)
-      includedSuccess2 &= (std::find(modes.begin(), modes.end(), mode) != modes.end());
-
-    if (includedSuccess1 && includedSuccess2)
-      return entry.second;
-  }
-  return std::pair<RxPdoTypeEnum, TxPdoTypeEnum>{ RxPdoTypeEnum::NA, TxPdoTypeEnum::NA };
 }
 }  // namespace maxon
