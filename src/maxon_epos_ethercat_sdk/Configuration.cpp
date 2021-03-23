@@ -213,7 +213,7 @@ bool Configuration::sanityCheck(bool silent) const
       message += "\033[m\n";
       success &= true;
     } else {
-      message += "\033[31m❌\t";
+      message += "\033[31m✕\t";
       message += test.second;
       message += "\033[m\n";
       success = false;

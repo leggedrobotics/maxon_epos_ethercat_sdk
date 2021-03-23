@@ -717,11 +717,12 @@ bool Maxon::configParam() {
       sdoVerifyWrite(OD_INDEX_MAX_MOTOR_SPEED, 0x00, false, maxMotorSpeed,
                      configuration_.configRunSdoVerifyTimeout);
 
-  maxProfileVelocity =
-      static_cast<uint32_t>(maxMotorSpeed * 60.0 * 1e6 / (2 * M_PI));
-  configSuccess &=
-      sdoVerifyWrite(OD_INDEX_MAX_PROFILE_VELOCITY, 0x00, false, maxMotorSpeed,
-                     configuration_.configRunSdoVerifyTimeout);
+  maxProfileVelocity = static_cast<uint32_t>(configuration_.maxProfileVelocity *
+                                             60.0 * 1e6 / (2 * M_PI));
+
+  configSuccess &= sdoVerifyWrite(OD_INDEX_MAX_PROFILE_VELOCITY, 0x00, false,
+                                  maxProfileVelocity,
+                                  configuration_.configRunSdoVerifyTimeout);
 
   maxGearSpeed =
       static_cast<uint32_t>(maxMotorSpeed / configuration_.gearRatio);
