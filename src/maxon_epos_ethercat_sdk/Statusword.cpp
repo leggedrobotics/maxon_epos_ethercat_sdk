@@ -1,3 +1,4 @@
+// clang-format off
 /*
 ** Copyright (2020-2021) Robotics Systems Lab - ETH Zurich:
 ** Linghao Zhang, Jonas Junger, Lennart Nachtigall
@@ -16,6 +17,7 @@
 ** You should have received a copy of the GNU General Public License
 ** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
 */
+// clang-format on
 
 #include "maxon_epos_ethercat_sdk/Statusword.hpp"
 

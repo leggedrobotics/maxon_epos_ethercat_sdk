@@ -1,3 +1,4 @@
+// clang-format off
 /*
 ** Copyright (2020-2021) Robotics Systems Lab - ETH Zurich:
 ** Linghao Zhang, Jonas Junger, Lennart Nachtigall
@@ -16,6 +17,7 @@
 ** You should have received a copy of the GNU General Public License
 ** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
 */
+// clang-format on
 
 #include <array>
 #include <thread>
@@ -717,11 +719,12 @@ bool Maxon::configParam() {
       sdoVerifyWrite(OD_INDEX_MAX_MOTOR_SPEED, 0x00, false, maxMotorSpeed,
                      configuration_.configRunSdoVerifyTimeout);
 
-  maxProfileVelocity =
-      static_cast<uint32_t>(maxMotorSpeed * 60.0 * 1e6 / (2 * M_PI));
-  configSuccess &=
-      sdoVerifyWrite(OD_INDEX_MAX_PROFILE_VELOCITY, 0x00, false, maxMotorSpeed,
-                     configuration_.configRunSdoVerifyTimeout);
+  maxProfileVelocity = static_cast<uint32_t>(configuration_.maxProfileVelocity *
+                                             60.0 * 1e6 / (2 * M_PI));
+
+  configSuccess &= sdoVerifyWrite(OD_INDEX_MAX_PROFILE_VELOCITY, 0x00, false,
+                                  maxProfileVelocity,
+                                  configuration_.configRunSdoVerifyTimeout);
 
   maxGearSpeed =
       static_cast<uint32_t>(maxMotorSpeed / configuration_.gearRatio);
