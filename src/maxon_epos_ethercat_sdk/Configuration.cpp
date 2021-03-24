@@ -1,3 +1,4 @@
+// clang-format off
 /*
 ** Copyright (2020-2021) Robotics Systems Lab - ETH Zurich:
 ** Linghao Zhang, Jonas Junger, Lennart Nachtigall
@@ -16,6 +17,7 @@
 ** You should have received a copy of the GNU General Public License
 ** along with the maxon_epos_ethercat_sdk. If not, see <https://www.gnu.org/licenses/>.
 */
+// clang-format on
 
 #include "maxon_epos_ethercat_sdk/Configuration.hpp"
 
@@ -140,46 +142,48 @@ std::ostream& operator<<(std::ostream& os, const Configuration& configuration)
 
 std::pair<RxPdoTypeEnum, TxPdoTypeEnum> Configuration::getPdoTypeSolution() const
 {
+  // clang-format off
   // {ModeOfOperationEnum1, ..., ModeOfOperationEnumN} -> {RxPdoTypeEnum, TxPdoTypeEnum}
   const std::map<std::vector<ModeOfOperationEnum>, std::pair<RxPdoTypeEnum, TxPdoTypeEnum>> modes2PdoTypeMap = {
-    {
-      { ModeOfOperationEnum::CyclicSynchronousTorqueMode, ModeOfOperationEnum::CyclicSynchronousPositionMode },
-      { RxPdoTypeEnum::RxPdoCSTCSP, TxPdoTypeEnum::TxPdoCSTCSP }
-    },
-    {
-      { ModeOfOperationEnum::CyclicSynchronousTorqueMode, ModeOfOperationEnum::CyclicSynchronousPositionMode,
-        ModeOfOperationEnum::CyclicSynchronousVelocityMode },
-      { RxPdoTypeEnum::RxPdoCSTCSPCSV, TxPdoTypeEnum::TxPdoCSTCSPCSV }
-    },
-    {
-      { ModeOfOperationEnum::CyclicSynchronousPositionMode },
-      { RxPdoTypeEnum::RxPdoCSP, TxPdoTypeEnum::TxPdoCSP }
-    },
-    {
-      { ModeOfOperationEnum::CyclicSynchronousTorqueMode },
-      { RxPdoTypeEnum::RxPdoCST, TxPdoTypeEnum::TxPdoCST }
-    },
-    {
-      { ModeOfOperationEnum::CyclicSynchronousVelocityMode },
-      { RxPdoTypeEnum::RxPdoCSV, TxPdoTypeEnum::TxPdoCSV }
-    },
-    {
-      { ModeOfOperationEnum::HomingMode },
-      { RxPdoTypeEnum::NA, TxPdoTypeEnum::NA }
-    },
-    {
-      { ModeOfOperationEnum::ProfiledPositionMode },
-      { RxPdoTypeEnum::NA, TxPdoTypeEnum::NA }
-    },
-    {
-      { ModeOfOperationEnum::ProfiledVelocityMode },
-      { RxPdoTypeEnum::RxPdoPVM, TxPdoTypeEnum::TxPdoPVM }
-    },
-    {
-      { ModeOfOperationEnum::NA },
-      { RxPdoTypeEnum::NA, TxPdoTypeEnum::NA }
-    },
+      {
+        { ModeOfOperationEnum::CyclicSynchronousTorqueMode, ModeOfOperationEnum::CyclicSynchronousPositionMode },
+        { RxPdoTypeEnum::RxPdoCSTCSP, TxPdoTypeEnum::TxPdoCSTCSP }
+      },
+      {
+        { ModeOfOperationEnum::CyclicSynchronousTorqueMode, ModeOfOperationEnum::CyclicSynchronousPositionMode,
+          ModeOfOperationEnum::CyclicSynchronousVelocityMode },
+        { RxPdoTypeEnum::RxPdoCSTCSPCSV, TxPdoTypeEnum::TxPdoCSTCSPCSV }
+      },
+      {
+        { ModeOfOperationEnum::CyclicSynchronousPositionMode },
+        { RxPdoTypeEnum::RxPdoCSP, TxPdoTypeEnum::TxPdoCSP }
+      },
+      {
+        { ModeOfOperationEnum::CyclicSynchronousTorqueMode },
+        { RxPdoTypeEnum::RxPdoCST, TxPdoTypeEnum::TxPdoCST }
+      },
+      {
+        { ModeOfOperationEnum::CyclicSynchronousVelocityMode },
+        { RxPdoTypeEnum::RxPdoCSV, TxPdoTypeEnum::TxPdoCSV }
+      },
+      {
+        { ModeOfOperationEnum::HomingMode },
+        { RxPdoTypeEnum::NA, TxPdoTypeEnum::NA }
+      },
+      {
+        { ModeOfOperationEnum::ProfiledPositionMode },
+        { RxPdoTypeEnum::NA, TxPdoTypeEnum::NA }
+      },
+      {
+        { ModeOfOperationEnum::ProfiledVelocityMode },
+        { RxPdoTypeEnum::RxPdoPVM, TxPdoTypeEnum::TxPdoPVM }
+      },
+      {
+        { ModeOfOperationEnum::NA },
+        { RxPdoTypeEnum::NA, TxPdoTypeEnum::NA }
+      },
   };
+  // clang-format on
 
   bool setsAreEqual;
   for (const auto& modes2PdoTypeEntry : modes2PdoTypeMap)
@@ -220,60 +224,62 @@ bool Configuration::sanityCheck(bool silent) const
     }
   };
   auto pdoTypePair = getPdoTypeSolution();
+  // clang-format off
   const std::vector<std::pair<bool, std::string>> sanity_tests = {
-    {
-      (polePairs > 0),
-      "pole_pairs > 0"
-    },
-    {
-      (motorConstant > 0),
-      "motor_constant > 0"
-    },
-    {
-      (nominalCurrentA > 0),
-      "nominal_current > 0"
-    },
-    {
-      (maxCurrentA > 0),
-      "max_current > 0"
-    },
-    {
-      (torqueConstantNmA > 0),
-      "torque_constant > 0"
-    },
-    {
-      (maxProfileVelocity > 0),
-      "max_profile_velocity > 0"
-    },
-    {
-      (quickStopDecel > 0),
-      "quick_stop_decel > 0"
-    },
-    {
-      (profileDecel > 0),
-      "profile_decel > 0"
-    },
-    {
-      (profileDecel > 0),
-      "profile_decel > 0"
-    },
-    {
-      (positionEncoderResolution > 0),
-      "position_encoder_resolution > 0"
-    },
-    {
-      (gearRatio > 0),
-      "gear_ratio > 0"
-    },
-    {
-      (pdoTypePair.first != RxPdoTypeEnum::NA && pdoTypePair.second != TxPdoTypeEnum::NA),
-      "modes of operation combination allowed"
-    },
-    {
-      (driveStateChangeMinTimeout <= driveStateChangeMaxTimeout),
-      "drive_state_change_min_timeout ≤ drive_state_change_max_timeout"
-    },
+      {
+        (polePairs > 0),
+        "pole_pairs > 0"
+      },
+      {
+        (motorConstant > 0),
+        "motor_constant > 0"
+      },
+      {
+        (nominalCurrentA > 0),
+        "nominal_current > 0"
+      },
+      {
+        (maxCurrentA > 0),
+        "max_current > 0"
+      },
+      {
+        (torqueConstantNmA > 0),
+        "torque_constant > 0"
+      },
+      {
+        (maxProfileVelocity > 0),
+        "max_profile_velocity > 0"
+      },
+      {
+        (quickStopDecel > 0),
+        "quick_stop_decel > 0"
+      },
+      {
+        (profileDecel > 0),
+        "profile_decel > 0"
+      },
+      {
+        (profileDecel > 0),
+        "profile_decel > 0"
+      },
+      {
+        (positionEncoderResolution > 0),
+        "position_encoder_resolution > 0"
+      },
+      {
+        (gearRatio > 0),
+        "gear_ratio > 0"
+      },
+      {
+        (pdoTypePair.first != RxPdoTypeEnum::NA && pdoTypePair.second != TxPdoTypeEnum::NA),
+        "modes of operation combination allowed"
+      },
+      {
+        (driveStateChangeMinTimeout <= driveStateChangeMaxTimeout),
+        "drive_state_change_min_timeout ≤ drive_state_change_max_timeout"
+      },
   };
+  // clang-format on
 
   std::for_each(sanity_tests.begin(), sanity_tests.end(), check_and_inform);
 
