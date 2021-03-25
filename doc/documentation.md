@@ -29,7 +29,7 @@ The driver can switch between the selected modes. Currently the following modes 
 | Single Mode of Operation | Multiple Modes of Operation |
 | ------------------------ | --------------------------- |
 | PVM                      | CST and CSP                 |
-| CSP                      |
+| CSP                      | CST, CSP, and CSV           |
 | CST                      |
 | CSV                      |
 
@@ -37,7 +37,7 @@ The driver can switch between the selected modes. Currently the following modes 
 
 If the desired mode of operation is not supported, they can be added with these steps:
 
-1. Create add corresponding `Pdo` types to `RxPdoTypeEnum` an `TxPdoTypeEnum` in [PdoTypeEnum.hpp](include/maxon_epos_ethercat_sdk/PdoTypeEnum.hpp), the `operator<<` methods in [PdoTypeEnum.cpp](src/maxon_epos_ethercat_sdk/PdoTypeEnum.cpp), and `std::string *xPdoString()` in [Configuration.cpp](src/maxon_epos_ethercat_sdk/Configuration.cpp).
+1. Create add corresponding `Pdo` types to `RxPdoTypeEnum` an `TxPdoTypeEnum` in [PdoTypeEnum.hpp](include/maxon_epos_ethercat_sdk/PdoTypeEnum.hpp), the `operator<<` methods in [PdoTypeEnum.cpp](src/maxon_epos_ethercat_sdk/PdoTypeEnum.cpp), and `std::string modeOfOperationString(ModeOfOperationEnum modeOfOperation_)` & `std::string *xPdoString(*xPdoTypeEnum *xPdo)` methods in [Configuration.cpp](src/maxon_epos_ethercat_sdk/Configuration.cpp).
  
     For example, for the mixed CSP and CST mode, `Pdo` type `*xPdoCSTCSP` is created in [PdoTypeEnum.hpp](include/maxon_epos_ethercat_sdk/PdoTypeEnum.hpp):
 
@@ -95,7 +95,7 @@ If the desired mode of operation is not supported, they can be added with these 
 
     **Note**: the `RxPdo` `struct` contains all command parameters required by **all** modes, and the **control word** and **mode of operation** even not required by the firmware documentation. Similarly, the `TxPdo` `struct` contains all output data and **status word**.
 
-3. If mixed modes of operation are desired, in [Maxon.cpp](src/maxon_epos_ethercat_sdk/Maxon.cpp), add your combination inside `bool Maxon::isAllowedModeCombination()` and their `Pdo` mappings in `std::pair<RxPdoTypeEnum, TxPdoTypeEnum> Maxon::getMixedPdoType()`.
+3. If new combination modes of operation are desired, in [Configuration.cpp](src/maxon_epos_ethercat_sdk/Configuration.cpp), add your combination of operation modes and `Rx/TxPdo` modes in the method `std::pair<RxPdoTypeEnum, TxPdoTypeEnum> Configuration::getPdoTypeSolution() const`.
 
 4. Then in [ConfigureParameters.cpp](src/maxon_epos_ethercat_sdk/ConfigureParameters.cpp), add your `Pdo` mappings to `bool Maxon::mapPdos()`. e.g.:
 
@@ -210,6 +210,8 @@ If the desired mode of operation is not supported, they can be added with these 
   - [ConfigureParameters.cpp](src/maxon_epos_ethercat_sdk/ConfigureParameters.cpp)
   - [Command.cpp](src/maxon_epos_ethercat_sdk/Command.cpp) and [Command.hpp](src/maxon_epos_ethercat_sdk/Command.hpp)
   - [Reading.cpp](src/maxon_epos_ethercat_sdk/Reading.cpp) and [Reading.hpp](src/maxon_epos_ethercat_sdk/Reading.hpp)
+
+  Also refers to the firmware specification for the required parameters. **Note**: `statusword` and `controlword` are always required in the `Pdo`s, despite the omission in the documentation.
 
 ## Usage
 
