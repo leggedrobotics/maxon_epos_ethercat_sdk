@@ -6,10 +6,11 @@ When contributing to this repository, please first discuss the change you wish t
 
 ## Pull Request Process
 
-1. Ensure any install or build dependencies are removed before the end of the layer when doing a build.
+1. The code must compile without error. If possible, test the SDK with hardware, using [ethercat_device_configurator](https://github.com/leggedrobotics/ethercat_device_configurator).
 2. Update the [README.md](README.md) and [Usage.md](doc/Usage.md) with details of changes to the SDK, this includes new methods and new `Pdo` and `ModeOfOperation` types.
-3. Format your code using `clang-format` following the style specified in [.clang-format](.clang-format).
-4. The Pull Request will be reviewed by the maintainers before merging.
+3. Add BSD License header to new files created.
+4. Format your code using `clang-format` following the style specified in [.clang-format](.clang-format).
+5. The Pull Request will be reviewed by the maintainers before merging.
 
 ## Attribution
 
