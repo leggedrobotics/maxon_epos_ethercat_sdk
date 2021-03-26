@@ -28,13 +28,11 @@
 
 #include <cstdint>
 
-namespace maxon
-{
+namespace maxon {
 /*!
  * Standard Tx Pdo type
  */
-struct TxPdoStandard
-{
+struct TxPdoStandard {
   uint16_t statusword_;
 } __attribute__((packed));
 
@@ -42,24 +40,21 @@ struct TxPdoStandard
  * CST Tx PDO type
  * Includes padding_ byte for firmware version 01.01.15.00 (october 2018)
  */
-struct TxPdoCSP
-{
+struct TxPdoCSP {
   uint16_t statusword_;
   int16_t actualTorque_;
   int32_t actualVelocity_;
   int32_t actualPosition_;
 } __attribute__((packed));
 
-struct TxPdoCST
-{
+struct TxPdoCST {
   uint16_t statusword_;
   int16_t actualTorque_;
   int32_t actualVelocity_;
   int32_t actualPosition_;
 } __attribute__((packed));
 
-struct TxPdoCSV
-{
+struct TxPdoCSV {
   uint16_t statusword_;
   int16_t actualTorque_;
   int32_t actualVelocity_;
@@ -67,8 +62,7 @@ struct TxPdoCSV
 } __attribute__((packed));
 
 // Mixed operation mode for CST and CSP
-struct TxPdoCSTCSP
-{
+struct TxPdoCSTCSP {
   uint16_t statusword_;
   int16_t actualTorque_;
   int32_t actualVelocity_;
@@ -76,16 +70,14 @@ struct TxPdoCSTCSP
 } __attribute__((packed));
 
 // Mixed operation mode for CST, CSP, and CSV
-struct TxPdoCSTCSPCSV
-{
+struct TxPdoCSTCSPCSV {
   uint16_t statusword_;
   int16_t actualTorque_;
   int32_t actualVelocity_;
   int32_t actualPosition_;
 } __attribute__((packed));
 
-struct TxPdoPVM
-{
+struct TxPdoPVM {
   uint16_t statusword_;
   int32_t demandVelocity_;
 } __attribute__((packed));

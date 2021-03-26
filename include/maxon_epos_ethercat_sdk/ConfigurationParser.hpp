@@ -28,14 +28,12 @@
 
 #include "maxon_epos_ethercat_sdk/Configuration.hpp"
 
-namespace maxon
-{
+namespace maxon {
 /*!
  * @brief	Read configuration data from a yaml file
  */
-class ConfigurationParser
-{
-public:
+class ConfigurationParser {
+ public:
   /*!
    * no default constructor
    */
@@ -66,7 +64,7 @@ public:
    */
   Configuration getConfiguration() const;
 
-private:
+ private:
   /*!
    * @brief	Parse the configuration data
    * @param configNode	yaml node containing the config data

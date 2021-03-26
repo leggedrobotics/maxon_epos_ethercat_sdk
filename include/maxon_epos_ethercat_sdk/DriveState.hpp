@@ -22,10 +22,8 @@
 #pragma once
 #include <ostream>
 
-namespace maxon
-{
-enum class DriveState : uint8_t
-{
+namespace maxon {
+enum class DriveState : uint8_t {
   NotReadyToSwitchOn,
   SwitchOnDisabled,
   ReadyToSwitchOn,
@@ -37,8 +35,7 @@ enum class DriveState : uint8_t
   NA
 };
 
-enum class StateTransition : uint8_t
-{
+enum class StateTransition : uint8_t {
   _2,
   _3,
   _4,

@@ -28,22 +28,19 @@
 
 #include <cstdint>
 
-namespace maxon
-{
+namespace maxon {
 /*!
  * Standard Rx PDO type.
  */
-struct RxPdoStandard
-{
+struct RxPdoStandard {
   uint16_t controlWord_;
   int8_t modeOfOperation_;
 } __attribute__((packed));
 
 /*!
  * CSP Rx PDO type.
-*/
-struct RxPdoCSP
-{
+ */
+struct RxPdoCSP {
   int32_t targetPosition_;
   int32_t positionOffset_;
   int16_t torqueOffset_;
@@ -54,20 +51,17 @@ struct RxPdoCSP
 /*!
  * CST Rx PDO type.
  */
-struct RxPdoCST
-{
+struct RxPdoCST {
   int16_t targetTorque_;
   int16_t torqueOffset_;
   uint16_t controlWord_;
   int8_t modeOfOperation_;
 } __attribute__((packed));
 
-
 /*!
  * CSV Rx PDO type.
  */
-struct RxPdoCSV
-{
+struct RxPdoCSV {
   int32_t targetVelocity_;
   int32_t velocityOffset_;
   uint16_t controlWord_;
@@ -75,8 +69,7 @@ struct RxPdoCSV
 } __attribute__((packed));
 
 // Mixed operation mode for CST and CSP
-struct RxPdoCSTCSP
-{
+struct RxPdoCSTCSP {
   int16_t targetTorque_;
   int16_t torqueOffset_;
   int32_t targetPosition_;
@@ -86,8 +79,7 @@ struct RxPdoCSTCSP
 } __attribute__((packed));
 
 // Mixed operation mode for CST, CSP and CSV
-struct RxPdoCSTCSPCSV
-{
+struct RxPdoCSTCSPCSV {
   int16_t targetTorque_;
   int16_t torqueOffset_;
   int32_t targetPosition_;
@@ -98,8 +90,7 @@ struct RxPdoCSTCSPCSV
   int8_t modeOfOperation_;
 } __attribute__((packed));
 
-struct RxPdoPVM
-{
+struct RxPdoPVM {
   uint16_t controlWord_;
   int32_t targetVelocity_;
   uint32_t profileAccel_;

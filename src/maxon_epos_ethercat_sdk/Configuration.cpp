@@ -27,13 +27,9 @@
 #include <algorithm>
 #include <utility>
 
-
-namespace maxon
-{
-std::string modeOfOperationString(ModeOfOperationEnum modeOfOperation_)
-{
-  switch (modeOfOperation_)
-  {
+namespace maxon {
+std::string modeOfOperationString(ModeOfOperationEnum modeOfOperation_) {
+  switch (modeOfOperation_) {
     case ModeOfOperationEnum::ProfiledPositionMode:
       return "Profiled Position Mode";
     case ModeOfOperationEnum::ProfiledVelocityMode:
@@ -51,10 +47,8 @@ std::string modeOfOperationString(ModeOfOperationEnum modeOfOperation_)
   }
 }
 
-std::string rxPdoString(RxPdoTypeEnum rxPdo)
-{
-  switch (rxPdo)
-  {
+std::string rxPdoString(RxPdoTypeEnum rxPdo) {
+  switch (rxPdo) {
     case RxPdoTypeEnum::NA:
       return "NA";
     case RxPdoTypeEnum::RxPdoStandard:
@@ -76,10 +70,8 @@ std::string rxPdoString(RxPdoTypeEnum rxPdo)
   }
 }
 
-std::string txPdoString(TxPdoTypeEnum txPdo)
-{
-  switch (txPdo)
-  {
+std::string txPdoString(TxPdoTypeEnum txPdo) {
+  switch (txPdo) {
     case TxPdoTypeEnum::NA:
       return "NA";
     case TxPdoTypeEnum::TxPdoCSP:
@@ -101,14 +93,15 @@ std::string txPdoString(TxPdoTypeEnum txPdo)
   }
 }
 
-std::ostream& operator<<(std::ostream& os, const Configuration& configuration)
-{
-  std::string modeOfOperation_ = modeOfOperationString(configuration.modesOfOperation[0]);
+std::ostream& operator<<(std::ostream& os, const Configuration& configuration) {
+  std::string modeOfOperation_ =
+      modeOfOperationString(configuration.modesOfOperation[0]);
   unsigned int tmp3 = modeOfOperation_.size();
   unsigned int len2 = tmp3;
   len2++;
 
-  os << std::boolalpha << std::left << std::setw(43) << std::setfill('-') << "|" << std::setw(len2 + 2) << "-"
+  os << std::boolalpha << std::left << std::setw(43) << std::setfill('-') << "|"
+     << std::setw(len2 + 2) << "-"
      << "|\n"
      << std::setfill(' ') << std::setw(43 + len2 + 2) << "| Configuration"
      << "|\n"
@@ -117,15 +110,19 @@ std::ostream& operator<<(std::ostream& os, const Configuration& configuration)
      << std::setfill(' ') << std::setw(43) << "| 1st Mode of Operation:"
      << "| " << std::setw(len2) << modeOfOperation_ << "|\n"
      << std::setw(43) << "| Config Run SDO verify timeout:"
-     << "| " << std::setw(len2) << configuration.configRunSdoVerifyTimeout << "|\n"
+     << "| " << std::setw(len2) << configuration.configRunSdoVerifyTimeout
+     << "|\n"
      << std::setw(43) << "| Print Debug Messages:"
      << "| " << std::setw(len2) << configuration.printDebugMessages << "|\n"
      << std::setw(43) << "| Drive State Change Min Timeout:"
-     << "| " << std::setw(len2) << configuration.driveStateChangeMinTimeout << "|\n"
+     << "| " << std::setw(len2) << configuration.driveStateChangeMinTimeout
+     << "|\n"
      << std::setw(43) << "| Drive State Change Max Timeout:"
-     << "| " << std::setw(len2) << configuration.driveStateChangeMaxTimeout << "|\n"
+     << "| " << std::setw(len2) << configuration.driveStateChangeMaxTimeout
+     << "|\n"
      << std::setw(43) << "| Min Successful Target State Readings:"
-     << "| " << std::setw(len2) << configuration.minNumberOfSuccessfulTargetStateReadings << "|\n"
+     << "| " << std::setw(len2)
+     << configuration.minNumberOfSuccessfulTargetStateReadings << "|\n"
      << std::setw(43) << "| Force Append Equal Error:"
      << "| " << std::setw(len2) << configuration.forceAppendEqualError << "|\n"
      << std::setw(43) << "| Force Append Equal Fault:"
@@ -140,8 +137,8 @@ std::ostream& operator<<(std::ostream& os, const Configuration& configuration)
   return os;
 }
 
-std::pair<RxPdoTypeEnum, TxPdoTypeEnum> Configuration::getPdoTypeSolution() const
-{
+std::pair<RxPdoTypeEnum, TxPdoTypeEnum> Configuration::getPdoTypeSolution()
+    const {
   // clang-format off
   // {ModeOfOperationEnum1, ..., ModeOfOperationEnumN} -> {RxPdoTypeEnum, TxPdoTypeEnum}
   const std::map<std::vector<ModeOfOperationEnum>, std::pair<RxPdoTypeEnum, TxPdoTypeEnum>> modes2PdoTypeMap = {
@@ -186,32 +183,30 @@ std::pair<RxPdoTypeEnum, TxPdoTypeEnum> Configuration::getPdoTypeSolution() cons
   // clang-format on
 
   bool setsAreEqual;
-  for (const auto& modes2PdoTypeEntry : modes2PdoTypeMap)
-  {
+  for (const auto& modes2PdoTypeEntry : modes2PdoTypeMap) {
     setsAreEqual = true;
     for (const auto& modeOfOperation : modesOfOperation)
-      setsAreEqual &= std::find(modes2PdoTypeEntry.first.begin(),
-                              modes2PdoTypeEntry.first.end(),
-                              modeOfOperation)
-        != modes2PdoTypeEntry.first.end();
+      setsAreEqual &=
+          std::find(modes2PdoTypeEntry.first.begin(),
+                    modes2PdoTypeEntry.first.end(),
+                    modeOfOperation) != modes2PdoTypeEntry.first.end();
     for (const auto& modeOfOperation : modes2PdoTypeEntry.first)
-      setsAreEqual &= std::find(modesOfOperation.begin(),
-                                modesOfOperation.end(),
-                                modeOfOperation)
-        != modesOfOperation.end();
-    if(setsAreEqual)
-      return modes2PdoTypeEntry.second;
+      setsAreEqual &=
+          std::find(modesOfOperation.begin(), modesOfOperation.end(),
+                    modeOfOperation) != modesOfOperation.end();
+    if (setsAreEqual) return modes2PdoTypeEntry.second;
   }
-  return std::pair<RxPdoTypeEnum, TxPdoTypeEnum>{ RxPdoTypeEnum::NA, TxPdoTypeEnum::NA };
+  return std::pair<RxPdoTypeEnum, TxPdoTypeEnum>{RxPdoTypeEnum::NA,
+                                                 TxPdoTypeEnum::NA};
 }
 
-bool Configuration::sanityCheck(bool silent) const
-{
+bool Configuration::sanityCheck(bool silent) const {
   bool success = true;
   std::string message = "";
 
-  auto check_and_inform = [&message, &success] (std::pair<bool, std::string> test) {
-    if(test.first) {
+  auto check_and_inform = [&message,
+                           &success](std::pair<bool, std::string> test) {
+    if (test.first) {
       message += "\033[32m✓\t";
       message += test.second;
       message += "\033[m\n";
@@ -283,8 +278,7 @@ bool Configuration::sanityCheck(bool silent) const
 
   std::for_each(sanity_tests.begin(), sanity_tests.end(), check_and_inform);
 
-  if(!silent)
-  {
+  if (!silent) {
     std::cout << message << std::endl;
   }
 

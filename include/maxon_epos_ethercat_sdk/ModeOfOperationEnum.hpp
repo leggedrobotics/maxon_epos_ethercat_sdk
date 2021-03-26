@@ -24,10 +24,8 @@
 #include <cstdint>
 #include <iostream>
 
-namespace maxon
-{
-enum class ModeOfOperationEnum : int8_t
-{
+namespace maxon {
+enum class ModeOfOperationEnum : int8_t {
   NA = 0,
   ProfiledPositionMode = 1,
   ProfiledVelocityMode = 3,
@@ -39,4 +37,5 @@ enum class ModeOfOperationEnum : int8_t
 
 }  // namespace maxon
 
-std::ostream& operator << (std::ostream& os, const maxon::ModeOfOperationEnum modeOfOperation);
+std::ostream& operator<<(std::ostream& os,
+                         const maxon::ModeOfOperationEnum modeOfOperation);

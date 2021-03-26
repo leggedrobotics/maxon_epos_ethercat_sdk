@@ -21,10 +21,9 @@
 
 #include "maxon_epos_ethercat_sdk/DriveState.hpp"
 
-std::ostream& operator<<(std::ostream& os, const maxon::DriveState& driveState)
-{
-  switch (driveState)
-  {
+std::ostream& operator<<(std::ostream& os,
+                         const maxon::DriveState& driveState) {
+  switch (driveState) {
     case maxon::DriveState::NotReadyToSwitchOn:
       os << "NotReadyToSwitchOn";
       break;

@@ -24,15 +24,17 @@
 
 #include "maxon_epos_ethercat_sdk/Reading.hpp"
 
-std::ostream& operator<<(std::ostream& os, const maxon::Reading& reading)
-{
+std::ostream& operator<<(std::ostream& os, const maxon::Reading& reading) {
   // TODO(duboisf) make table, remove statusword
-  os << std::left << std::setw(30) << "Actual Position:" << reading.getActualPosition() << "\n"
-     << std::setw(30) << "Actual Velocity:" << reading.getActualVelocity() << "\n"
+  os << std::left << std::setw(30)
+     << "Actual Position:" << reading.getActualPosition() << "\n"
+     << std::setw(30) << "Actual Velocity:" << reading.getActualVelocity()
+     << "\n"
      << std::setw(30) << "Actual Torque:" << reading.getActualTorque() << "\n"
      << std::setw(30) << "Analog input" << reading.getAnalogInput() << "\n"
      << std::setw(30) << "Actual Current:" << reading.getActualCurrent() << "\n"
-     << std::setw(30) << "Digital Inputs:" << reading.getDigitalInputString() << "\n"
+     << std::setw(30) << "Digital Inputs:" << reading.getDigitalInputString()
+     << "\n"
      << std::setw(30) << "Bus Voltage:" << reading.getBusVoltage() << "\n"
      << std::setw(30) << "\nStatusword:"
      << "\n"
@@ -40,23 +42,16 @@ std::ostream& operator<<(std::ostream& os, const maxon::Reading& reading)
   return os;
 }
 
-namespace maxon
-{
-std::string Reading::getDigitalInputString() const
-{
+namespace maxon {
+std::string Reading::getDigitalInputString() const {
   std::string binString;
-  for (unsigned int i = 0; i < 8 * sizeof(digitalInputs_); i++)
-  {
-    if ((digitalInputs_ & (1 << (8 * sizeof(digitalInputs_) - 1 - i))) != 0)
-    {
+  for (unsigned int i = 0; i < 8 * sizeof(digitalInputs_); i++) {
+    if ((digitalInputs_ & (1 << (8 * sizeof(digitalInputs_) - 1 - i))) != 0) {
       binString += "1";
-    }
-    else
-    {
+    } else {
       binString += "0";
     }
-    if ((i + 1) % 8 == 0)
-    {
+    if ((i + 1) % 8 == 0) {
       binString += " ";
     }
   }
@@ -64,13 +59,11 @@ std::string Reading::getDigitalInputString() const
   return binString;
 }
 
-DriveState Reading::getDriveState() const
-{
+DriveState Reading::getDriveState() const {
   return getStatusword().getDriveState();
 }
 
-double Reading::getAgeOfLastReadingInMicroseconds() const
-{
+double Reading::getAgeOfLastReadingInMicroseconds() const {
   ReadingDuration readingDuration = ReadingClock::now() - lastReadingTimePoint_;
   return readingDuration.count();
 }
@@ -78,205 +71,140 @@ double Reading::getAgeOfLastReadingInMicroseconds() const
 /*!
  * Raw get methods
  */
-int32_t Reading::getActualPositionRaw() const
-{
-  return actualPosition_;
-}
-int32_t Reading::getActualVelocityRaw() const
-{
-  return actualVelocity_;
-}
-uint16_t Reading::getRawStatusword() const
-{
-  return statusword_;
-}
-int16_t Reading::getActualCurrentRaw() const
-{
-  return actualCurrent_;
-}
-uint16_t Reading::getAnalogInputRaw() const
-{
-  return analogInput_;
-}
-uint32_t Reading::getBusVoltageRaw() const
-{
-  return busVoltage_;
-}
+int32_t Reading::getActualPositionRaw() const { return actualPosition_; }
+int32_t Reading::getActualVelocityRaw() const { return actualVelocity_; }
+uint16_t Reading::getRawStatusword() const { return statusword_; }
+int16_t Reading::getActualCurrentRaw() const { return actualCurrent_; }
+uint16_t Reading::getAnalogInputRaw() const { return analogInput_; }
+uint32_t Reading::getBusVoltageRaw() const { return busVoltage_; }
 
 /*!
  * User unit get methods
  */
-double Reading::getActualPosition() const
-{
+double Reading::getActualPosition() const {
   return static_cast<double>(actualPosition_) * positionFactorIntegerToRad_;
 }
-double Reading::getActualVelocity() const
-{
-  return static_cast<double>(actualVelocity_) * velocityFactorMicroRPMToRadPerSec_;
+double Reading::getActualVelocity() const {
+  return static_cast<double>(actualVelocity_) *
+         velocityFactorMicroRPMToRadPerSec_;
 }
-double Reading::getActualCurrent() const
-{
+double Reading::getActualCurrent() const {
   return static_cast<double>(actualCurrent_) * currentFactorIntegerToAmp_;
 }
-double Reading::getActualTorque() const
-{
+double Reading::getActualTorque() const {
   return static_cast<double>(actualCurrent_) * torqueFactorIntegerToNm_;
 }
-double Reading::getAnalogInput() const
-{
+double Reading::getAnalogInput() const {
   return static_cast<double>(analogInput_) * 0.001;
 }
 
 /*!
  * Other readings
  */
-int32_t Reading::getDigitalInputs() const
-{
-  return digitalInputs_;
-}
-Statusword Reading::getStatusword() const
-{
+int32_t Reading::getDigitalInputs() const { return digitalInputs_; }
+Statusword Reading::getStatusword() const {
   Statusword statusword;
   statusword.setFromRawStatusword(statusword_);
   return statusword;
 }
-double Reading::getBusVoltage() const
-{
+double Reading::getBusVoltage() const {
   return 0.001 * static_cast<double>(busVoltage_);
 }
 
 /*!
  * Raw set methods
  */
-void Reading::setActualPosition(int32_t actualPosition)
-{
+void Reading::setActualPosition(int32_t actualPosition) {
   actualPosition_ = actualPosition;
 }
-void Reading::setDigitalInputs(int32_t digitalInputs)
-{
+void Reading::setDigitalInputs(int32_t digitalInputs) {
   digitalInputs_ = digitalInputs;
 }
-void Reading::setActualVelocity(int32_t actualVelocity)
-{
+void Reading::setActualVelocity(int32_t actualVelocity) {
   actualVelocity_ = actualVelocity;
 }
-void Reading::setDemandVelocity(int32_t demandVelocity)
-{
+void Reading::setDemandVelocity(int32_t demandVelocity) {
   demandVelocity_ = demandVelocity;
 }
-void Reading::setStatusword(uint16_t statusword)
-{
-  statusword_ = statusword;
-}
+void Reading::setStatusword(uint16_t statusword) { statusword_ = statusword; }
 
-void Reading::setAnalogInput(int16_t analogInput)
-{
+void Reading::setAnalogInput(int16_t analogInput) {
   analogInput_ = analogInput;
 }
-void Reading::setActualCurrent(int16_t actualCurrent)
-{
+void Reading::setActualCurrent(int16_t actualCurrent) {
   actualCurrent_ = actualCurrent;
 }
-void Reading::setBusVoltage(uint32_t busVoltage)
-{
-  busVoltage_ = busVoltage;
-}
-void Reading::setTimePointNow()
-{
-  lastReadingTimePoint_ = ReadingClock::now();
-}
+void Reading::setBusVoltage(uint32_t busVoltage) { busVoltage_ = busVoltage; }
+void Reading::setTimePointNow() { lastReadingTimePoint_ = ReadingClock::now(); }
 
-void Reading::setPositionFactorIntegerToRad(double positionFactor)
-{
+void Reading::setPositionFactorIntegerToRad(double positionFactor) {
   positionFactorIntegerToRad_ = positionFactor;
 }
-void Reading::setCurrentFactorIntegerToAmp(double currentFactor)
-{
+void Reading::setCurrentFactorIntegerToAmp(double currentFactor) {
   currentFactorIntegerToAmp_ = currentFactor;
 }
-void Reading::setTorqueFactorIntegerToNm(double torqueFactor)
-{
+void Reading::setTorqueFactorIntegerToNm(double torqueFactor) {
   torqueFactorIntegerToNm_ = torqueFactor;
 }
 
-double Reading::getAgeOfLastErrorInMicroseconds() const
-{
+double Reading::getAgeOfLastErrorInMicroseconds() const {
   ReadingDuration errorDuration = ReadingClock::now() - lastError_.second;
   return errorDuration.count();
 }
 
-double Reading::getAgeOfLastFaultInMicroseconds() const
-{
+double Reading::getAgeOfLastFaultInMicroseconds() const {
   ReadingDuration faultDuration = ReadingClock::now() - lastFault_.second;
   return faultDuration.count();
 }
 
-void Reading::addError(ErrorType errorType)
-{
+void Reading::addError(ErrorType errorType) {
   ErrorPair errorPair;
   errorPair.first = errorType;
   errorPair.second = ReadingClock::now();
-  if (lastError_.first == errorType)
-  {
-    if (forceAppendEqualError_)
-    {
+  if (lastError_.first == errorType) {
+    if (forceAppendEqualError_) {
       errors_.push_front(errorPair);
-    }
-    else
-    {
+    } else {
       errors_.pop_front();
       errors_.push_front(errorPair);
     }
-  }
-  else
-  {
+  } else {
     errors_.push_front(errorPair);
   }
   lastError_ = errorPair;
-  if (errors_.size() > errorStorageCapacity_)
-  {
+  if (errors_.size() > errorStorageCapacity_) {
     errors_.pop_back();
   }
   hasUnreadError_ = true;
 }
 
-void Reading::addFault(uint16_t faultCode)
-{
+void Reading::addFault(uint16_t faultCode) {
   FaultPair faultPair;
   faultPair.first = faultCode;
   faultPair.second = ReadingClock::now();
-  if (lastFault_.first == faultCode)
-  {
-    if (forceAppendEqualFault_)
-    {
+  if (lastFault_.first == faultCode) {
+    if (forceAppendEqualFault_) {
       faults_.push_front(faultPair);
-    }
-    else
-    {
+    } else {
       faults_.pop_front();
       faults_.push_front(faultPair);
     }
-  }
-  else
-  {
+  } else {
     faults_.push_front(faultPair);
   }
   lastFault_ = faultPair;
-  if (faults_.size() > faultStorageCapacity_)
-  {
+  if (faults_.size() > faultStorageCapacity_) {
     faults_.pop_back();
   }
   hasUnreadFault_ = true;
 }
 
-ErrorTimePairDeque Reading::getErrors() const
-{
+ErrorTimePairDeque Reading::getErrors() const {
   ReadingTimePoint now = ReadingClock::now();
   ErrorTimePairDeque errors;
   errors.resize(errors_.size());
   ReadingDuration duration;
-  for (unsigned int i = 0; i < errors_.size(); i++)
-  {
+  for (unsigned int i = 0; i < errors_.size(); i++) {
     errors[i].first = errors_[i].first;
     duration = now - errors_[i].second;
     errors[i].second = duration.count();
@@ -285,14 +213,12 @@ ErrorTimePairDeque Reading::getErrors() const
   return errors;
 }
 
-FaultTimePairDeque Reading::getFaults() const
-{
+FaultTimePairDeque Reading::getFaults() const {
   ReadingTimePoint now = ReadingClock::now();
   FaultTimePairDeque faults;
   faults.resize(faults_.size());
   ReadingDuration duration;
-  for (unsigned int i = 0; i < faults_.size(); i++)
-  {
+  for (unsigned int i = 0; i < faults_.size(); i++) {
     faults[i].first = faults_[i].first;
     duration = now - faults_[i].second;
     faults[i].second = duration.count();
@@ -301,35 +227,33 @@ FaultTimePairDeque Reading::getFaults() const
   return faults;
 }
 
-ErrorType Reading::getLastError() const
-{
+ErrorType Reading::getLastError() const {
   hasUnreadError_ = false;
   return lastError_.first;
 }
-uint16_t Reading::getLastFault() const
-{
+uint16_t Reading::getLastFault() const {
   // return 0 if no fault occured
-  if (!hasUnreadFault_)
-  {
+  if (!hasUnreadFault_) {
     return 0;
   }
   hasUnreadFault_ = false;
   return lastFault_.first;
 }
 
-void Reading::configureReading(const Configuration& configuration)
-{
+void Reading::configureReading(const Configuration& configuration) {
   errorStorageCapacity_ = configuration.errorStorageCapacity;
   faultStorageCapacity_ = configuration.faultStorageCapacity;
   forceAppendEqualError_ = configuration.forceAppendEqualError;
   forceAppendEqualFault_ = configuration.forceAppendEqualFault;
 
-
   double currentFactor = configuration.nominalCurrentA / 1000.0;
 
   currentFactorIntegerToAmp_ = currentFactor;
-  positionFactorIntegerToRad_ = (2.0 * M_PI) / static_cast<double>(configuration.positionEncoderResolution);
-  torqueFactorIntegerToNm_ = configuration.nominalCurrentA * configuration.torqueConstantNmA / 1000.0;
+  positionFactorIntegerToRad_ =
+      (2.0 * M_PI) /
+      static_cast<double>(configuration.positionEncoderResolution);
+  torqueFactorIntegerToNm_ =
+      configuration.nominalCurrentA * configuration.torqueConstantNmA / 1000.0;
 }
 
 }  // namespace maxon
