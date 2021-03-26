@@ -1,4 +1,4 @@
-# Maxon EPOS Ethercat SDK Documentation
+# Maxon EPOS Ethercat SDK Usage
 
 ## Configuration
 
