@@ -50,3 +50,10 @@ git clone https://github.com/leggedrobotics/maxon_epos_ethercat_sdk.git
 cd ../
 catkin build maxon_epos_ethercat_sdk
 ```
+## Usage
+
+See [Usage.md](doc/Usage.md).
+
+## Contributing
+
+See [Contributing.md](Contributing.md)
