@@ -11,11 +11,11 @@ The `maxon_epos_ethercat_sdk` is developed on Ubuntu 20.04 LTS with [ROS Noetic]
 The source code is released under the BSD-3-Clause license.
 A copy of the license is available in the [LICENSE](LICENSE) file.
 
-**Authors:** Jonas Junger, Johannes Pankert
+**Authors:** Linghao Zhang, Jonas Junger, Lennart Nachtigall
 
 **Maintainer:** Linghao Zhang, lingzhang@ethz.ch
 
-**Contributors:** Fabio Dubois, Lennart Nachtigall, Markus Staeuble, Martin Wermelinger, Linghao Zhang
+**Contributors:** Fabio Dubois, Markus Staeuble, Martin Wermelinger
 
 ## Installation
 
