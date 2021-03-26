@@ -8,8 +8,8 @@ The lower level EtherCAT communication is handled by the [soem_interface](https:
 
 The `maxon_epos_ethercat_sdk` is developed on Ubuntu 20.04 LTS with [ROS Noetic](https://wiki.ros.org/noetic).
 
-The source code is released under the GPLv3 license.
-A copy of the license is available in the *COPYING* file.
+The source code is released under the BSD-3-Clause license.
+A copy of the license is available in the [LICENSE](LICENSE) file.
 
 **Authors:** Jonas Junger, Johannes Pankert
 
@@ -50,7 +50,6 @@ git clone https://github.com/leggedrobotics/maxon_epos_ethercat_sdk.git
 cd ../
 catkin build maxon_epos_ethercat_sdk
 ```
-
 ## Usage
 
 See [Usage.md](doc/Usage.md).
