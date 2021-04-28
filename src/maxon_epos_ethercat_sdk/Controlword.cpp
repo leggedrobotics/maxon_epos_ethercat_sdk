@@ -130,7 +130,6 @@ void Controlword::setStateTransition2() {
   setAllFalse();
   enableVoltage_ = true;
   quickStop_ = true;
-  std::cout << "State Transition 2" << std::endl;
 }
 
 void Controlword::setStateTransition3() {
@@ -138,7 +137,6 @@ void Controlword::setStateTransition3() {
   switchOn_ = true;
   enableVoltage_ = true;
   quickStop_ = true;
-  std::cout << "State Transition 3" << std::endl;
 }
 
 void Controlword::setStateTransition4() {
@@ -147,7 +145,6 @@ void Controlword::setStateTransition4() {
   enableVoltage_ = true;
   quickStop_ = true;
   enableOperation_ = true;
-  std::cout << "State Transition 4" << std::endl;
 }
 
 void Controlword::setStateTransition5() {
@@ -155,53 +152,44 @@ void Controlword::setStateTransition5() {
   switchOn_ = true;
   enableVoltage_ = true;
   quickStop_ = true;
-  std::cout << "State Transition 5" << std::endl;
 }
 
 void Controlword::setStateTransition6() {
   setAllFalse();
   enableVoltage_ = true;
   quickStop_ = true;
-  std::cout << "State Transition 6" << std::endl;
 }
 
 void Controlword::setStateTransition7() {
   setAllFalse();
-  std::cout << "State Transition 7" << std::endl;
 }
 
 void Controlword::setStateTransition8() {
   setAllFalse();
   enableVoltage_ = true;
   quickStop_ = true;
-  std::cout << "State Transition 8" << std::endl;
 }
 
 void Controlword::setStateTransition9() {
   setAllFalse();
-  std::cout << "State Transition 9" << std::endl;
 }
 
 void Controlword::setStateTransition10() {
   setAllFalse();
-  std::cout << "State Transition 10" << std::endl;
 }
 
 void Controlword::setStateTransition11() {
   setAllFalse();
   enableVoltage_ = true;
-  std::cout << "State Transition 11" << std::endl;
 }
 
 void Controlword::setStateTransition12() {
   setAllFalse();
-  std::cout << "State Transition 12" << std::endl;
 }
 
 void Controlword::setStateTransition15() {
   setAllFalse();
   faultReset_ = true;
-  std::cout << "State Transition 15" << std::endl;
 }
 
 void Controlword::setStateTransition16() {
@@ -210,7 +198,6 @@ void Controlword::setStateTransition16() {
   enableVoltage_ = true;
   quickStop_ = true;
   enableOperation_ = true;
-  std::cout << "State Transition 16" << std::endl;
 }
 
 void Controlword::setAllFalse() {
