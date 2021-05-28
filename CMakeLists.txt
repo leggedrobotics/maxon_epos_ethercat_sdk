@@ -74,20 +74,9 @@ include_directories(
   SYSTEM
     ${catkin_INCLUDE_DIRS}
 )
-
+FILE(GLOB CPPSources src/${PROJECT_NAME}/*.cpp)
 add_library(${PROJECT_NAME}
-  src/${PROJECT_NAME}/Maxon.cpp
-  src/${PROJECT_NAME}/Configuration.cpp
-  src/${PROJECT_NAME}/ConfigurationParser.cpp
-  src/${PROJECT_NAME}/ConfigureParameters.cpp
-  src/${PROJECT_NAME}/Diagnostics.cpp
-  src/${PROJECT_NAME}/Reading.cpp
-  src/${PROJECT_NAME}/Command.cpp
-  src/${PROJECT_NAME}/Controlword.cpp
-  src/${PROJECT_NAME}/Statusword.cpp
-  src/${PROJECT_NAME}/DriveState.cpp
-  src/${PROJECT_NAME}/PdoTypeEnum.cpp
-  src/${PROJECT_NAME}/ModeOfOperationEnum.cpp
+  ${CPPSources}
 )
 add_dependencies(
   ${PROJECT_NAME}
