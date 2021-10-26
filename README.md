@@ -34,7 +34,7 @@ A copy of the license is available in the [LICENSE](LICENSE) file.
 - [ROS Noetic](https://wiki.ros.org/noetic)
 - catkin
 - yaml-cpp
-  
+
 > Likely to work with [ROS Meolodic](https://wiki.ros.org/melodic) and Ubuntu 18.04 LTS
 
 ### Building from Source
@@ -50,6 +50,11 @@ git clone https://github.com/leggedrobotics/maxon_epos_ethercat_sdk.git
 cd ../
 catkin build maxon_epos_ethercat_sdk
 ```
+
+## Example
+
+See [ethercat_device_configurator](https://github.com/leggedrobotics/ethercat_device_configurator) for an minimal working example.
+
 ## Usage
 
 See [Usage.md](doc/Usage.md).
