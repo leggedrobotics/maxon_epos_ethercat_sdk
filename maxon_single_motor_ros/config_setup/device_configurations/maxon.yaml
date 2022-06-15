@@ -1,0 +1,45 @@
+Maxon:
+  config_run_sdo_verify_timeout: 50000
+  print_debug_messages: true
+  use_raw_commands: false
+  drive_state_change_min_timeout: 2000
+  drive_state_change_max_timeout: 1000000
+  min_number_of_successful_target_state_readings: 50
+
+Reading:
+  force_append_equal_error: true
+  force_append_equal_fault: false
+  error_storage_capacity: 100
+  fault_storage_capacity: 100
+
+#Motor: Maxon EC-60 167132
+
+Hardware:
+  mode_of_operation:
+  - CyclicSynchronousTorqueMode
+  - CyclicSynchronousPositionMode
+  - CyclicSynchronousVelocityMode
+  position_encoder_resolution: 2000
+  gear_ratio: [308,1]
+  maxGearSpeed: 3700
+  motor_constant: 1.0
+  working_voltage: 48
+  pole_pairs: 1
+  speed_constant: 113
+  torque_constant: 0.0849
+  max_current: 10
+  nominal_current: 9.56
+  min_position: 0
+  max_position: 0 # Disable checks
+  max_profile_velocity: 3000
+  quick_stop_decel: 10000
+  profile_decel: 10000
+  current_p_gain: 0.409849
+  current_i_gain: 586.681
+  velocity_p_gain: 0.311
+  velocity_i_gain: 19.591
+  position_p_gain: 17.944
+  position_i_gain: 416.257
+  position_d_gain: 0.256
+  follow_error_window: 2000
+ 

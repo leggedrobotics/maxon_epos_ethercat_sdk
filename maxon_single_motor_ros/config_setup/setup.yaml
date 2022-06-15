@@ -1,0 +1,10 @@
+ethercat_master:
+  time_step:                          0.0025
+  update_rate_too_low_warn_threshold: 50
+
+ethercat_devices:
+  - type:               Maxon
+    name:               Maxon1
+    configuration_file: device_configurations/maxon.yaml
+    ethercat_bus:       enp0s31f6
+    ethercat_address:   1
