@@ -1,0 +1,65 @@
+####################################################################################
+# Copyright 2021 Robotic Systems Lab - ETH Zurich:                                 #
+# Linghao Zhang, Jonas Junger, Lennart Nachtigall                                  #
+#                                                                                  #
+# Redistribution and use in source and binary forms, with or without               #
+# modification, are permitted provided that the following conditions are met:      #
+#                                                                                  #
+# 1. Redistributions of source code must retain the above copyright notice,        #
+#    this list of conditions and the following disclaimer.                         #
+#                                                                                  #
+# 2. Redistributions in binary form must reproduce the above copyright notice,     #
+#    this list of conditions and the following disclaimer in the documentation     #
+#    and/or other materials provided with the distribution.                        #
+#                                                                                  #
+# 3. Neither the name of the copyright holder nor the names of its contributors    #
+#    may be used to endorse or promote products derived from this software without #
+#    specific prior written permission.                                            #
+#                                                                                  #
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"      #
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE        #
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE   #
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE     #
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL       #
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR       #
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER       #
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,    #
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE    #
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.             #
+####################################################################################
+
+# Example config file for Maxon Drives
+Maxon:
+  config_run_sdo_verify_timeout: 50000
+  print_debug_messages: true
+  use_raw_commands: false
+  drive_state_change_min_timeout: 2000
+  drive_state_change_max_timeout: 1000000
+  min_number_of_successful_target_state_readings: 50
+
+Reading:
+  force_append_equal_error: true
+  force_append_equal_fault: false
+  error_storage_capacity: 100
+  fault_storage_capacity: 100
+
+Hardware:
+  mode_of_operation:
+    - CyclicSynchronousTorqueMode
+    - CyclicSynchronousPositionMode
+  position_encoder_resolution: 4096
+  gear_ratio: [1, 1]
+  motor_constant: 1.0
+  working_voltage: 24
+  pole_pairs: 11
+  speed_constant: 26
+  torque_constant: 0.15918367
+  max_current: 4.9
+  nominal_current: 2.0
+  motor_rated_torque: 0.78
+  min_position: 0
+  max_position: 0 # Disable checks
+  max_profile_velocity: 50
+  quick_stop_decel: 1000
+  profile_decel: 1000
+  follow_error_window: 2000
