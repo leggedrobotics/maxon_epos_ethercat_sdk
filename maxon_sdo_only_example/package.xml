@@ -15,7 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 <package format="2">
 
-  <name>hardware_interface</name>
+  <name>maxon_sdo_only_example</name>
   <version>0.6.0</version>
   <description>Core C++ library to interface one or multiple drives. Contains abstract base classes for the communication interface.</description>
 
@@ -24,16 +24,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
   <author email="nachtigall@mavt.ethz.ch">Lennart Nachtigall</author>
   <maintainer email="jungerj@student.ethz.ch">Jonas Junger</maintainer>
   <maintainer email="nachtigall@mavt.ethz.ch">Lennart Nachtigall</maintainer>
-  <url type="website">https://github.com/leggedrobotics/ethercat_device_configurator</url>
   
   <buildtool_depend>catkin</buildtool_depend>
 
-
-  <!-->
-      Optional dependencies.
-      Any single drive sdk or any combination of sdks may be used.
-  <-->
-  
+  <depend>ethercat_device_configurator</depend>
+  <depend>roscpp</depend>
+  <depend>message_logger</depend>
+  <depend>std_msgs</depend>
+  <depend>message_generation</depend>
+  <depend>message_runtime</depend> 
   <depend>maxon_epos_ethercat_sdk</depend>
- 
+
 </package>

@@ -16,9 +16,7 @@ Reading:
 
 Hardware:
   mode_of_operation:
-  - CyclicSynchronousTorqueMode
-  - CyclicSynchronousPositionMode
-  - CyclicSynchronousVelocityMode
+  - ProfiledVelocityMode
   position_encoder_resolution: 2000
   gear_ratio: [308,1]
   maxGearSpeed: 3700
