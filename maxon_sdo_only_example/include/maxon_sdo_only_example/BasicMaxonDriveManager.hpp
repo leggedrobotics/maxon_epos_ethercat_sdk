@@ -34,6 +34,7 @@ private:
   std::map<std::string, MotorReading> motorReadings;
 
   std::mutex commandMutex;
+  std::atomic<bool> receivedUpdate_{false};
   std::map<std::string, MotorCommand> motorCommands;
 
   //should be done by the sdk... but needs improved sdk.

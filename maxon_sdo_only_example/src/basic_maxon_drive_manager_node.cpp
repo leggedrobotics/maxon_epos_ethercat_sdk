@@ -26,8 +26,8 @@ public:
         init();
         velCmdServer_ = nh_.advertiseService("velocity_change", &BasicMaxonDriveManagerRos::velCmdServerCb, this);
         for(const auto& maxonDrive : maxonDriveCollection){
-            readingPublishers_.insert(std::pair(maxonDrive.first,
-                                                nh_.advertise<maxon_sdo_only_example::simple_motor_reading>(maxonDrive.first+"_pub",10)));
+          //insert.
+            readingPublishers_[maxonDrive.first] = nh_.advertise<maxon_sdo_only_example::simple_motor_reading>(maxonDrive.first+"_pub",10);
         }
     }
     
@@ -35,9 +35,9 @@ public:
         ros::Rate loop_rate(400);
         while(ros::ok()){
             ros::spinOnce();
+            publishReadings();
             loop_rate.sleep();
         }
-
         shutdown();
     }
 
@@ -64,7 +64,7 @@ private:
         maxon_sdo_only_example::simple_motor_reading  msg;
         msg.position = reading.position;
         msg.velocity = reading.velocity;
-        readingPublishers_.at(maxonDrive.first+"_pub").publish(msg);
+        readingPublishers_.at(maxonDrive.first).publish(msg);
       }
     }
 };
@@ -79,7 +79,6 @@ int main(int argc, char**argv)
     {
         std::cerr << "pass path to 'setup.yaml' as command line argument" << std::endl;
         return EXIT_FAILURE;
-    
     }
 
     ros::init(argc, argv, "hardware_interface");
