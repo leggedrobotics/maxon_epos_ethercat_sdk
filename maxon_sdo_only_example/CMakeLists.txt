@@ -48,7 +48,6 @@ catkin_package(
   CATKIN_DEPENDS
     ${PACKAGE_DEPENDENCIES}
     message_runtime
-    std_msgs
 )
 
 include_directories(
@@ -72,33 +71,45 @@ target_link_libraries(
 
 
 add_executable(
-  basic_maxon_drive_manager_node
+    maxon_sdo_only_example_node
   src/basic_maxon_drive_manager_node.cpp
 )
 add_dependencies(
-  basic_maxon_drive_manager_node
+    maxon_sdo_only_example_node
   ${PROJECT_NAME}
   ${maxon_epos_ethercat_sdk_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
 target_link_libraries(
-  basic_maxon_drive_manager_node
+    maxon_sdo_only_example_node
   ${PROJECT_NAME}
   ${maxon_epos_ethercat_sdk_LIBRARIES}
   ${YAML_CPP_LIBRARIES}
+    ${catkin_LIBRARIES}
   -pthread
   stdc++fs
 )
 
 
-install(TARGETS ${PROJECT_NAME} basic_maxon_drive_manager_node
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+install(TARGETS
+    ${PROJECT_NAME}
+    maxon_sdo_only_example_node
+  ARCHIVE DESTINATION
+    ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION
+    ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION
+    ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
+
+install(DIRECTORY launch
+    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+install(DIRECTORY config_setup
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 
 
