@@ -67,6 +67,7 @@ class Configuration {
   int32_t maxPosition{0};
   uint32_t maxProfileVelocity{0};
   uint32_t quickStopDecel{10000};
+  uint32_t profileAccel{1000};
   uint32_t profileDecel{10000};
   uint32_t followErrorWindow{2000};
   double currentPGainSI{1.171880};

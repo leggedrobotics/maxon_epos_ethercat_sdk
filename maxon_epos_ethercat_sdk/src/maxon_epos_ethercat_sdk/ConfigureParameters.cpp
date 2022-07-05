@@ -797,6 +797,10 @@ bool Maxon::configParam() {
                                   configuration_.quickStopDecel,
                                   configuration_.configRunSdoVerifyTimeout);
 
+  configSuccess &= sdoVerifyWrite(OD_INDEX_PROFILE_ACCELERATION, 0x00, false,
+                                  configuration_.profileAccel,
+                                  configuration_.configRunSdoVerifyTimeout);
+
   configSuccess &= sdoVerifyWrite(OD_INDEX_PROFILE_DECELERATION, 0x00, false,
                                   configuration_.profileDecel,
                                   configuration_.configRunSdoVerifyTimeout);

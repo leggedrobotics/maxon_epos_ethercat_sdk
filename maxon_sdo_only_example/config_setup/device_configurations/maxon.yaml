@@ -18,7 +18,7 @@ Hardware:
   mode_of_operation:
   - ProfiledVelocityMode
   position_encoder_resolution: 2000
-  gear_ratio: [25,1]
+  gear_ratio: [308,1]
   maxGearSpeed: 3700
   motor_constant: 1.0
   working_voltage: 48
@@ -29,9 +29,10 @@ Hardware:
   nominal_current: 9.56
   min_position: 0
   max_position: 0 # Disable checks
-  max_profile_velocity: 1000
+  max_profile_velocity: 3000
   quick_stop_decel: 10000
-  profile_decel: 10000
+  profile_accel: 100
+  profile_decel: 100
   current_p_gain: 0.409849
   current_i_gain: 586.681
   velocity_p_gain: 0.311

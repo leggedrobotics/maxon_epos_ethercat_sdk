@@ -6,5 +6,5 @@ ethercat_devices:
   - type:               Maxon
     name:               Maxon1
     configuration_file: device_configurations/maxon.yaml
-    ethercat_bus:       enx3c8cf8fbb12d
+    ethercat_bus:       eno1
     ethercat_address:   1

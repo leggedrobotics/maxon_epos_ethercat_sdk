@@ -287,6 +287,11 @@ void ConfigurationParser::parseConfiguration(YAML::Node configNode) {
       configuration_.profileDecel = profileDecel;
     }
 
+    uint32_t profileAccel;
+    if (getValueFromFile(hardwareNode, "profile_accel", profileAccel)) {
+      configuration_.profileAccel = profileAccel;
+    }
+
     uint32_t followErrorWindow;
     if (getValueFromFile(hardwareNode, "follow_error_window",
                          followErrorWindow)) {

@@ -265,8 +265,8 @@ bool Configuration::sanityCheck(bool silent) const {
         "profile_decel > 0"
       },
       {
-        (profileDecel > 0),
-        "profile_decel > 0"
+        (profileAccel > 0),
+        "profile_accel > 0"
       },
       {
         (positionEncoderResolution > 0),
