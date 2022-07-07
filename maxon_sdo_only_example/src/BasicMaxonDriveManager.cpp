@@ -127,7 +127,8 @@ void BasicMaxonDriveManager::shutdown(){
   //make sure we stop.
   for (auto &maxonDrive: maxonDriveCollection) {
     int32_t cmdVelRaw = 0;
-    maxonDrive.second->sendSdoWrite(OD_INDEX_VELOCITY_DEMAND, 0, false, cmdVelRaw);
+    maxonDrive.second->sendSdoWrite(OD_INDEX_TARGET_VELOCITY, 0, false, cmdVelRaw);
+    maxonDrive.second->sendSdoWrite(OD_INDEX_OFFSET_VELOCITY, 0, false, cmdVelRaw);
     maxonDrive.second->setDriveStateViaSdo(maxon::DriveState::SwitchOnDisabled);
   }
 }
