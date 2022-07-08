@@ -19,20 +19,18 @@ Hardware:
   - ProfiledVelocityMode
   position_encoder_resolution: 2000
   gear_ratio: [308,1]
-  maxGearSpeed: 3700
-  motor_constant: 1.0
-  working_voltage: 48
+  working_voltage: 48 #V
   pole_pairs: 1
   speed_constant: 113 # rpm / V
-  torque_constant: 0.0849
-  max_current: 10
-  nominal_current: 9.56
+  torque_constant: 0.0849 #Nm/A
+  max_current: 10 #A
+  nominal_current: 9.56 #A
   min_position: 0
-  max_position: 0 # Disable checks
-  max_profile_velocity: 3000
-  quick_stop_decel: 10000
-  profile_accel: 100
-  profile_decel: 100
+  max_position: 0 # min, max = 0 --> Disable checks
+  max_profile_velocity: 300  #rad/s
+  quick_stop_decel: 10000 # rpm/s
+  profile_accel: 100 # rpm/s
+  profile_decel: 100 # rpm/s
   current_p_gain: 0.409849
   current_i_gain: 586.681
   velocity_p_gain: 0.311
@@ -40,5 +38,6 @@ Hardware:
   position_p_gain: 17.944
   position_i_gain: 416.257
   position_d_gain: 0.256
+  velocity_unit_configuration: 0xFDB44700 # 0xFDB44700 --> milliRPM, 0xFAB44700--> mircoRPM, 0x00B44700 --> RPM
   follow_error_window: 2000
  

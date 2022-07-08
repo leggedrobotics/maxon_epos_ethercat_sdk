@@ -116,6 +116,29 @@ bool getModesFromFile(YAML::Node& yamlNode, const std::string& varName,
   }
 }
 
+double getVelocityFactorConfiguredUnitToRadPerSecFromFile(uint32_t velConfig){
+  switch (velConfig) {
+    case 0x00B44700: //rpm
+      return 2.0 * M_PI / (60.0);
+    case 0xFFB44700: //dezi rpm
+      return (1.0/10.0) * 2.0*M_PI/(60.0);
+    case 0xFEB44700: //centi rpm
+      return (1.0/100.0) * 2.0*M_PI/(60.0);
+    case 0xFDB44700: //milli rpm
+      return (1.0/1000.0) * 2.0*M_PI/(60.0);
+    case 0xFCB44700: //10-e4
+      return (1.0/10000.0) * 2.0*M_PI/(60.0);
+    case 0xFBB44700: //10-e5
+      return (1.0/100000.0) * 2.0*M_PI/(60.0);
+    case 0xFAB44700:
+      MELO_WARN_STREAM("[MaxonSDK] Velocity unit configured in microRPM: max velocity limit by max int to ~210 rad/s")
+      return (1.0/1000000.0) * 2.0*M_PI/(60.0);
+    default:
+      MELO_ERROR_STREAM("[MaxonSDK] Could not read velocity unit configuration")
+      return 0;
+  }
+}
+
 ConfigurationParser::ConfigurationParser(const std::string& filename) {
   YAML::Node configNode;
   try {
@@ -226,11 +249,6 @@ void ConfigurationParser::parseConfiguration(YAML::Node configNode) {
                                  static_cast<double>(gearRatio.second);
     }
 
-    double motorConstant;
-    if (getValueFromFile(hardwareNode, "motor_constant", motorConstant)) {
-      configuration_.motorConstant = motorConstant;
-    }
-
     double workVoltage;
     if (getValueFromFile(hardwareNode, "working_voltage", workVoltage)) {
       configuration_.workVoltage = workVoltage;
@@ -331,6 +349,13 @@ void ConfigurationParser::parseConfiguration(YAML::Node configNode) {
     double velcityIGainSI;
     if (getValueFromFile(hardwareNode, "velocity_i_gain", velcityIGainSI)) {
       configuration_.velocityIGainSI = velcityIGainSI;
+    }
+
+    uint32_t velUnitConfig;
+    if (getValueFromFile(hardwareNode, "velocity_unit_configuration", velUnitConfig)) {
+      configuration_.velocityUnitSetting = velUnitConfig;
+      configuration_.velocityFactorConfiguredUnitToRadPerSec =
+              getVelocityFactorConfiguredUnitToRadPerSecFromFile(velUnitConfig);
     }
   }
 }

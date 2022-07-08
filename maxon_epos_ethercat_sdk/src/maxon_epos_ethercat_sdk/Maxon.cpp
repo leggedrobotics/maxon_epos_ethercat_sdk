@@ -408,6 +408,7 @@ void Maxon::stageCommand(const Command& command) {
   stagedCommand_.setTorqueFactorNmToInteger(
       1000.0 /
       (configuration_.nominalCurrentA * configuration_.torqueConstantNmA));
+  stagedCommand_.setVelocityFactorToRadPerS(configuration_.velocityFactorConfiguredUnitToRadPerSec);
 
   stagedCommand_.setUseRawCommands(configuration_.useRawCommands);
 

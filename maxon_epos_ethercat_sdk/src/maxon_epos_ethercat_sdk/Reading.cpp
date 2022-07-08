@@ -97,7 +97,7 @@ double Reading::getActualPosition() const {
 }
 double Reading::getActualVelocity() const {
   return static_cast<double>(actualVelocity_) *
-         velocityFactorMicroRPMToRadPerSec_;
+         velocityFactorConfiguredUnitToRadPerSec_;
 }
 double Reading::getActualCurrent() const {
   return static_cast<double>(actualCurrent_) * currentFactorIntegerToAmp_;
@@ -259,6 +259,7 @@ void Reading::configureReading(const Configuration& configuration) {
 
   double currentFactor = configuration.nominalCurrentA / 1000.0;
 
+  velocityFactorConfiguredUnitToRadPerSec_ = configuration.velocityFactorConfiguredUnitToRadPerSec;
   currentFactorIntegerToAmp_ = currentFactor;
   positionFactorIntegerToRad_ =
       (2.0 * M_PI) /

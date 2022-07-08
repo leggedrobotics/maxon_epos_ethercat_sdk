@@ -131,8 +131,7 @@ class Reading {
   uint32_t busVoltage_{0};
 
   double positionFactorIntegerToRad_{1};
-  static constexpr double velocityFactorMicroRPMToRadPerSec_ =
-      2.0 * M_PI / (60.0 * 1e6);
+  double velocityFactorConfiguredUnitToRadPerSec_ = 2.0 * M_PI / (60.0); //default reading: rpm
   double currentFactorIntegerToAmp_{1};
   double torqueFactorIntegerToNm_{1};
 

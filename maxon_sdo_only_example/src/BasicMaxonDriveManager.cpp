@@ -67,7 +67,7 @@ void BasicMaxonDriveManager::slowSDOReadAndWrite() {
     int32_t cmdVelRaw = 0;
     {
       std::lock_guard commandLock(commandMutex);
-      cmdVelRaw = static_cast<int32_t>(motorCommands[maxonDrive.first].velocity /velocityFactorMicroRPMToRadPerSec_);
+      cmdVelRaw = static_cast<int32_t>(motorCommands[maxonDrive.first].velocity /maxonDrive.second->configuration_.velocityFactorConfiguredUnitToRadPerSec);
     }
     if(receivedUpdate_) {
       receivedUpdate_=false;
@@ -88,6 +88,7 @@ void BasicMaxonDriveManager::slowSDOReadAndWrite() {
     maxonDrive.second->getStatuswordViaSdo(statusword);
     //abuse some of the conversion stuff meant for pdo communicat
     maxon::Reading reading;
+    reading.configureReading(maxonDrive.second->configuration_);
     reading.setActualPosition(actualPositionRaw);
     reading.setActualVelocity(actualVelRaw);
     {

@@ -237,10 +237,6 @@ bool Configuration::sanityCheck(bool silent) const {
         "pole_pairs > 0"
       },
       {
-        (motorConstant > 0),
-        "motor_constant > 0"
-      },
-      {
         (nominalCurrentA > 0),
         "nominal_current > 0"
       },

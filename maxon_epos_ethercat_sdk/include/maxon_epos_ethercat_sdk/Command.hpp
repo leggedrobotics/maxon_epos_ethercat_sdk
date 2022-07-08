@@ -68,6 +68,7 @@ class Command {
   void setPositionFactorRadToInteger(double factor);
   void setTorqueFactorNmToInteger(double factor);
   void setCurrentFactorAToInteger(double factor);
+  void setVelocityFactorToRadPerS(double factor);
 
   /// set user units
   void setTargetPosition(double targetPosition);
@@ -143,7 +144,7 @@ class Command {
   uint32_t digitalOutputs_{0};
 
   double positionFactorRadToInteger_{1};
-  const double velocityFactorRadPerSecToMicroRPM_{1.0 / (2 * M_PI) * 60 * 1e6};
+  double velocityFactorConfiguredUnitToRadPerSec_{0};
   double torqueFactorNmToInteger_{1};
   double currentFactorAToInteger_{1};
 

@@ -37,9 +37,6 @@ private:
   std::atomic<bool> receivedUpdate_{false};
   std::map<std::string, MotorCommand> motorCommands;
 
-  //should be done by the sdk... but needs improved sdk.
-  static constexpr double velocityFactorMicroRPMToRadPerSec_ =
-          2.0 * M_PI / (60.0 * 1e6);
 
   void slowSDOReadAndWrite();
 

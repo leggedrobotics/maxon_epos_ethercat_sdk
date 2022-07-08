@@ -718,10 +718,8 @@ bool Maxon::configParam() {
   uint32_t velocityIGain;
 
   // Set velocity unit to micro revs per minute
-  uint32_t velocity_unit;
-  velocity_unit = 0xFAB44700;
   configSuccess &=
-      sdoVerifyWrite(OD_INDEX_SI_UNIT_VELOCITY, 0x00, false, velocity_unit,
+      sdoVerifyWrite(OD_INDEX_SI_UNIT_VELOCITY, 0x00, false, configuration_.velocityUnitSetting,
                      configuration_.configRunSdoVerifyTimeout);
 
   maxMotorSpeed = static_cast<uint32_t>(configuration_.workVoltage *
@@ -730,12 +728,16 @@ bool Maxon::configParam() {
       sdoVerifyWrite(OD_INDEX_MAX_MOTOR_SPEED, 0x00, false, maxMotorSpeed,
                      configuration_.configRunSdoVerifyTimeout);
 
-//  maxProfileVelocity = static_cast<uint32_t>(configuration_.maxProfileVelocity *
-//                                             60.0 * 1e6 / (2 * M_PI));
-//
-//  configSuccess &= sdoVerifyWrite(OD_INDEX_MAX_PROFILE_VELOCITY, 0x00, false,
-//                                  maxProfileVelocity,
-//                                  configuration_.configRunSdoVerifyTimeout);
+  double convVel = configuration_.maxProfileVelocity / configuration_.velocityFactorConfiguredUnitToRadPerSec;
+  if(convVel > std::numeric_limits<int32_t>::max()){ //vel values are written in int32, only limit given as uint32.
+    MELO_ERROR_STREAM("[Maxon SDK] Out of integer range. other unit config needed.")
+    return false;
+  }
+  maxProfileVelocity = static_cast<uint32_t>(convVel);
+
+  configSuccess &= sdoVerifyWrite(OD_INDEX_MAX_PROFILE_VELOCITY, 0x00, false,
+                                  maxProfileVelocity,
+                                  configuration_.configRunSdoVerifyTimeout);
 
   maxGearSpeed =
       static_cast<uint32_t>(maxMotorSpeed / configuration_.gearRatio);
