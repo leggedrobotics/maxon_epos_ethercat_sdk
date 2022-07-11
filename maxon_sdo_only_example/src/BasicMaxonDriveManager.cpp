@@ -65,10 +65,16 @@ bool BasicMaxonDriveManager::init() {
 void BasicMaxonDriveManager::slowSDOReadAndWrite() {
   for (auto &maxonDrive: maxonDriveCollection) {
     int32_t cmdVelRaw = 0;
+    double cmdVel = 0;
     {
       std::lock_guard commandLock(commandMutex);
-      cmdVelRaw = static_cast<int32_t>(motorCommands[maxonDrive.first].velocity /maxonDrive.second->configuration_.velocityFactorConfiguredUnitToRadPerSec);
+      cmdVel = motorCommands[maxonDrive.first].velocity /maxonDrive.second->configuration_.velocityFactorConfiguredUnitToRadPerSec;
     }
+    if(cmdVel > std::numeric_limits<int32_t>::max() || cmdVel < std::numeric_limits<int32_t>::min()){
+      MELO_ERROR_STREAM("[MaxonDriveManager] Motorcommmand for Drive " << maxonDrive.first << " is out off int32t range.")
+      cmdVel = 0;
+    }
+    cmdVelRaw = static_cast<int32_t>(cmdVel);
     if(receivedUpdate_) {
       receivedUpdate_=false;
       maxonDrive.second->sendSdoWrite(OD_INDEX_TARGET_VELOCITY, 0, false, cmdVelRaw);
@@ -130,6 +136,12 @@ void BasicMaxonDriveManager::shutdown(){
     int32_t cmdVelRaw = 0;
     maxonDrive.second->sendSdoWrite(OD_INDEX_TARGET_VELOCITY, 0, false, cmdVelRaw);
     maxonDrive.second->sendSdoWrite(OD_INDEX_OFFSET_VELOCITY, 0, false, cmdVelRaw);
+    maxon::Controlword controlword;
+    controlword.setStateTransition4(); //set status word to enable operational. have to be send to trigger the velocity change.
+    maxonDrive.second->setControlwordViaSdo(controlword);
+    //give some time to ramp down.
+    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+
     maxonDrive.second->setDriveStateViaSdo(maxon::DriveState::SwitchOnDisabled);
   }
 }

@@ -245,6 +245,10 @@ bool Configuration::sanityCheck(bool silent) const {
         "max_current > 0"
       },
       {
+        (maxGearboxInputVelocityRPM > 0),
+        "max_gearbox_input_velocity > 0"
+      },
+      {
         (torqueConstantNmA > 0),
         "torque_constant > 0"
       },

@@ -64,6 +64,7 @@ class Configuration {
   double nominalCurrentA{0};
   double torqueConstantNmA{0};
   double maxCurrentA{0};
+  double maxGearboxInputVelocityRPM{0};
   int32_t minPosition{0};
   int32_t maxPosition{0};
   uint32_t maxProfileVelocity{0};

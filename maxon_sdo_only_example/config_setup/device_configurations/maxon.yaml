@@ -22,6 +22,7 @@ Hardware:
   working_voltage: 48 #V
   pole_pairs: 1
   speed_constant: 113 # rpm / V
+  max_gearbox_input_velocity: 3000 # rpm
   torque_constant: 0.0849 #Nm/A
   max_current: 10 #A
   nominal_current: 9.56 #A

@@ -268,6 +268,10 @@ void ConfigurationParser::parseConfiguration(YAML::Node configNode) {
     if (getValueFromFile(hardwareNode, "max_current", maxCurrentA)) {
       configuration_.maxCurrentA = maxCurrentA;
     }
+    double maxGearboxInputVelocityRPM;
+    if (getValueFromFile(hardwareNode, "max_gearbox_input_velocity", maxGearboxInputVelocityRPM)) {
+      configuration_.maxGearboxInputVelocityRPM = maxGearboxInputVelocityRPM;
+    }
 
     double nominalCurrentA;
     if (getValueFromFile(hardwareNode, "nominal_current", nominalCurrentA)) {
