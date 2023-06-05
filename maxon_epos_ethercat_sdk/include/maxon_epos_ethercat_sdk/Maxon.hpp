@@ -68,9 +68,10 @@ class Maxon : public ecat_master::EthercatDevice {
   void updateRead() override;
   bool putIntoOperation() {
     bool success;
-    bus_->setState(EC_STATE_OPERATIONAL, getAddress());
-    success =
-        bus_->waitForState(EC_STATE_OPERATIONAL, getAddress(), 1000, 0.001);
+    bus_->setState(soem_interface_rsl::ETHERCAT_SM_STATE::OPERATIONAL,
+                   getAddress());
+    success = bus_->waitForState(
+        soem_interface_rsl::ETHERCAT_SM_STATE::OPERATIONAL, getAddress());
     return success;
   }
   PdoInfo getCurrentPdoInfo() const override { return pdoInfo_; }

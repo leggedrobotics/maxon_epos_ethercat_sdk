@@ -78,7 +78,8 @@ Maxon::Maxon(const std::string& name, const uint32_t address) {
 
 bool Maxon::startup() {
   bool success = true;
-  success &= bus_->waitForState(EC_STATE_PRE_OP, address_, 50, 0.05);
+  success &= bus_->waitForState(soem_interface_rsl::ETHERCAT_SM_STATE::PRE_OP,
+                                address_);
   // bus_->syncDistributedClock0(address_, true, timeStep_, timeStep_ / 2.f); //
   // Might not need
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -137,7 +138,9 @@ void Maxon::preShutdown() {
   setDriveStateViaSdo(DriveState::SwitchOnDisabled);
 }
 
-void Maxon::shutdown() { bus_->setState(EC_STATE_INIT, address_); }
+void Maxon::shutdown() {
+  bus_->setState(soem_interface_rsl::ETHERCAT_SM_STATE::INIT, address_);
+}
 
 void Maxon::updateWrite() {
   std::lock_guard<std::recursive_mutex> lock(mutex_);
