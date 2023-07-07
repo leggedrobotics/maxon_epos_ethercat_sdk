@@ -10,13 +10,18 @@ BasicMaxonDriveManager::BasicMaxonDriveManager(const std::string &configFilePath
     std::cout << " " << slave->getName() << ": " << slave->getAddress() << std::endl;
     std::shared_ptr<maxon::Maxon> maxonSlavePtr = std::dynamic_pointer_cast<maxon::Maxon>(slave);
     if (maxonSlavePtr) {
-      maxonDriveCollection[maxonSlavePtr->getName()] = maxonSlavePtr;
-      motorCommands[maxonSlavePtr->getName()] = MotorCommand{};
-      motorReadings[maxonSlavePtr->getName()] = MotorReading{};
-      MELO_INFO_STREAM("[Maxon sdo example] maxon drive collection with: " << maxonSlavePtr->getName())
-
+      if (maxonDriveCollection.find(maxonSlavePtr->getName()) ==
+          maxonDriveCollection.end()) {
+        maxonDriveCollection[maxonSlavePtr->getName()] = maxonSlavePtr;
+        motorCommands[maxonSlavePtr->getName()] = MotorCommand{};
+        motorReadings[maxonSlavePtr->getName()] = MotorReading{};
+        MELO_INFO_STREAM("[MaxonSDOexample] maxon drive collection with: "
+                         << maxonSlavePtr->getName())
+      } else {
+        MELO_ERROR_STREAM("[MaxonSDOexample] Duplicate maxon drive with name: "
+                          << maxonSlavePtr->getName())
+      }
     }
-    //else not a maxon slave.
   }
 }
 
@@ -50,7 +55,8 @@ bool BasicMaxonDriveManager::init() {
       MELO_INFO_STREAM("[Maxons sdo example] Could not reach drive State SwitchedOn")
       return false;
     }
-    MELO_INFO_STREAM("[Maxon sdo example] Reached switched on drive state")
+    MELO_INFO_STREAM("[MaxonSDOexample] "
+                     << maxonDrive.first << ": Reached switched on drive state")
   }
 
   worker_thread = std::make_unique<std::thread>([this]() -> void {
@@ -75,24 +81,33 @@ void BasicMaxonDriveManager::slowSDOReadAndWrite() {
       cmdVel = 0;
     }
     cmdVelRaw = static_cast<int32_t>(cmdVel);
-    if(receivedUpdate_) {
-      receivedUpdate_=false;
-      maxonDrive.second->sendSdoWrite(OD_INDEX_TARGET_VELOCITY, 0, false, cmdVelRaw);
+    if (receivedUpdate_) {
+      maxonDrive.second->sendSdoWrite(OD_INDEX_TARGET_VELOCITY, 0, false,
+                                      cmdVelRaw);
       maxon::Controlword controlword;
-      controlword.setStateTransition4(); //set status word to enable operational. have to be send to trigger the velocity change.
+      controlword.setStateTransition4();  // set status word to enable
+                                          // operational. have to be send to
+                                          // trigger the velocity change.
       maxonDrive.second->setControlwordViaSdo(controlword);
     }
   }
+  if (receivedUpdate_) {  // todo only set the cmd to the drive which receives
+                          // the cmd.
+    // we have updated all drives with the cmds. so unset the flag and accept
+    // new commands
+    receivedUpdate_ = false;
+  }
 
-
-  for (auto &maxonDrive: maxonDriveCollection) {
+  for (auto &maxonDrive : maxonDriveCollection) {
     int32_t actualVelRaw = 0;
     int32_t actualPositionRaw = 0;
-    maxonDrive.second->sendSdoRead(OD_INDEX_VELOCITY_ACTUAL, 0, false, actualVelRaw);
-    maxonDrive.second->sendSdoRead(OD_INDEX_POSITION_ACTUAL, 0, false, actualPositionRaw);
+    maxonDrive.second->sendSdoRead(OD_INDEX_VELOCITY_ACTUAL, 0, false,
+                                   actualVelRaw);
+    maxonDrive.second->sendSdoRead(OD_INDEX_POSITION_ACTUAL, 0, false,
+                                   actualPositionRaw);
     maxon::Statusword statusword;
     maxonDrive.second->getStatuswordViaSdo(statusword);
-    //abuse some of the conversion stuff meant for pdo communicat
+    // abuse some of the conversion stuff meant for pdo communicat
     maxon::Reading reading;
     reading.configureReading(maxonDrive.second->configuration_);
     reading.setActualPosition(actualPositionRaw);
@@ -121,7 +136,8 @@ bool BasicMaxonDriveManager::setMotorCommand(const std::string& motorName, Motor
     return true;
   }
 
-  MELO_ERROR_STREAM("[Maxon Sdo example] Could not find configured motor: " << motorName  << " shutdown.")
+  MELO_ERROR_STREAM("[MaxonSDOexample] Could not find configured motor: "
+                    << motorName << " shutdown.")
   shutdown();
   return false;
 }
@@ -134,15 +150,30 @@ void BasicMaxonDriveManager::shutdown(){
   //make sure we stop.
   for (auto &maxonDrive: maxonDriveCollection) {
     int32_t cmdVelRaw = 0;
-    maxonDrive.second->sendSdoWrite(OD_INDEX_TARGET_VELOCITY, 0, false, cmdVelRaw);
-    maxonDrive.second->sendSdoWrite(OD_INDEX_OFFSET_VELOCITY, 0, false, cmdVelRaw);
+    maxonDrive.second->sendSdoWrite(OD_INDEX_TARGET_VELOCITY, 0, false,
+                                    cmdVelRaw);
+    maxonDrive.second->sendSdoWrite(OD_INDEX_OFFSET_VELOCITY, 0, false,
+                                    cmdVelRaw);
     maxon::Controlword controlword;
-    controlword.setStateTransition4(); //set status word to enable operational. have to be send to trigger the velocity change.
+    controlword
+        .setStateTransition4();  // set status word to enable operational. have
+                                 // to be send to trigger the velocity change.
     maxonDrive.second->setControlwordViaSdo(controlword);
-    //give some time to ramp down.
+    MELO_INFO_STREAM("[MaxonSDOexample] "
+                     << maxonDrive.first
+                     << ": Shutdown velocity set to 0, ramping down.")
+    // give some time to ramp down.
     std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-
-    maxonDrive.second->setDriveStateViaSdo(maxon::DriveState::SwitchOnDisabled);
+    if (maxonDrive.second->setDriveStateViaSdo(
+            maxon::DriveState::SwitchOnDisabled)) {
+      MELO_INFO_STREAM("[MaxonSDOexample] " << maxonDrive.first
+                                            << ": Switched off")
+    } else {
+      MELO_ERROR_STREAM(
+          "[MaxonSDOexample] "
+          << maxonDrive.first
+          << ": Could not switch off your system. E-Stop and Debug!")
+    }
   }
 }
 
