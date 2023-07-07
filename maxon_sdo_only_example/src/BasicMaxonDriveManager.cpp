@@ -39,16 +39,6 @@ bool BasicMaxonDriveManager::init() {
   }
 
 
-  for (auto &maxonDrive: maxonDriveCollection) {
-    //set all the drives back to safeOP so that only SDO communication used.
-    ecatMaster->getBusPtr()->setState(EC_STATE_SAFE_OP, maxonDrive.second->getAddress());
-    if (!ecatMaster->getBusPtr()->waitForState(EC_STATE_SAFE_OP, maxonDrive.second->getAddress(), 50, 0.05)) {
-      MELO_ERROR_STREAM("Could not reach safeOP for slave: " << maxonDrive.second->getName())
-      return false;
-    }
-    MELO_INFO_STREAM("[Maxon sdo example] Reached safe op state")
-  }
-
   //switch on after velocity set to zero by the thread started above (velocity cmd should default to zero)
   for(auto& maxonDrive : maxonDriveCollection){
     if(!maxonDrive.second->setDriveStateViaSdo(maxon::DriveState::OperationEnabled)){
