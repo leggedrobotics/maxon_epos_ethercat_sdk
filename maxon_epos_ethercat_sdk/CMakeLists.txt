@@ -28,7 +28,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.             #
 ####################################################################################
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 project(maxon_epos_ethercat_sdk)
 
 ## Set the C++ standard.
@@ -40,68 +40,57 @@ add_compile_options(-Wall -Wextra -Wpedantic)
 ## Export compile commands for clang.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CATKIN_PACKAGE_DEPENDENCIES
-  message_logger
-  ethercat_sdk_master
-)
+set(PACKAGE_DEPENDENCIES
+    ament_cmake
+    message_logger
+    ethercat_sdk_master
+    yaml-cpp
+    )
 
-find_package(catkin REQUIRED
-  COMPONENTS
-    ${CATKIN_PACKAGE_DEPENDENCIES}
-)
-
+find_package(ament_cmake REQUIRED)
+find_package(message_logger REQUIRED)
+find_package(ethercat_sdk_master REQUIRED)
 find_package(yaml-cpp REQUIRED)
 
-###################################
-## catkin specific configuration ##
-###################################
-
-catkin_package(
-  INCLUDE_DIRS
-    include
-  LIBRARIES
-    ${PROJECT_NAME}
-  CATKIN_DEPENDS
-    ${CATKIN_PACKAGE_DEPENDENCIES}
-)
 
 ###########
 ## Build ##
 ###########
 
-include_directories(
-  include
-  SYSTEM
-    ${catkin_INCLUDE_DIRS}
-)
+
 FILE(GLOB CPPSources src/${PROJECT_NAME}/*.cpp)
 add_library(${PROJECT_NAME}
-  ${CPPSources}
-)
-add_dependencies(
-  ${PROJECT_NAME}
-  ${catkin_EXPORTED_TARGETS}
-)
-target_link_libraries(
-  ${PROJECT_NAME}
-  ${catkin_LIBRARIES}
-  ${YAML_CPP_LIBRARIES}
-)
+    ${CPPSources}
+    )
+
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+
+ament_target_dependencies(
+    ${PROJECT_NAME} ${PACKAGE_DEPENDENCIES})
+
 
 #############
 ## Install ##
 #############
 
 install(
-  TARGETS
-    ${PROJECT_NAME}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+    TARGETS ${PROJECT_NAME}
+    EXPORT ${PROJECT_NAME}_export
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
 )
 
 install(
-  DIRECTORY
-    include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+    DIRECTORY include/
+    DESTINATION include
 )
+
+ament_export_dependencies(${PACKAGE_DEPENDENCIES})
+ament_export_targets(${PROJECT_NAME}_export HAS_LIBRARY_TARGET)
+
+ament_package()

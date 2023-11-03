@@ -41,12 +41,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <maintainer email="jungerj@student.ethz.ch">Jonas Junger</maintainer>
   <maintainer email="lingzhang@ethz.ch">Linghao Zhang</maintainer>
   <url type="website">https://github.com/leggedrobotics/maxon_epos_ethercat_sdk</url>
-  
-  <buildtool_depend>catkin</buildtool_depend>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>message_logger</depend>
-  <depend>soem_interface</depend>
   <depend>yaml-cpp</depend>
   <depend>ethercat_sdk_master</depend>
-  
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>
