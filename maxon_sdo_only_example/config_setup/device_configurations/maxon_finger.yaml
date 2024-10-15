@@ -1,0 +1,43 @@
+Maxon:
+  config_run_sdo_verify_timeout: 50000
+  print_debug_messages: true
+  use_raw_commands: false
+  drive_state_change_min_timeout: 2000
+  drive_state_change_max_timeout: 1000000
+  min_number_of_successful_target_state_readings: 50
+
+Reading:
+  force_append_equal_error: true
+  force_append_equal_fault: false
+  error_storage_capacity: 100
+  fault_storage_capacity: 100
+
+#Motor: Maxon EC-60 167132
+
+Hardware:
+  mode_of_operation:
+    - ProfiledPositionMode
+  position_encoder_resolution: 1000 # TODO 1000 pulses = resolution?
+  gear_ratio: [ 35,1 ]
+  working_voltage: 48 #V # todo
+  pole_pairs: 1
+  speed_constant: 113 # rpm / V
+  max_gearbox_input_velocity: 3000 # rpm
+  torque_constant: 0.013260 #Nm/A
+  max_current: 0.308 #A
+  nominal_current: 0.308 #A
+  min_position: 0
+  max_position: 0 # min, max = 0 --> Disable checks
+  max_profile_velocity: 300  #rad/s
+  quick_stop_decel: 10000 # rpm/s
+  profile_accel: 100 # rpm/s
+  profile_decel: 100 # rpm/s
+  current_p_gain: 11.145067 #V/A
+  current_i_gain: 115759.835   #V/As  #Note can be depended on setting see below
+  velocity_p_gain: 0.000958 # A s/rad
+  velocity_i_gain: 0.060380 # A /rad
+  position_p_gain: 0.179300 # A/rad
+  position_i_gain: 7.510503 # A/rad s  #Note can be depended on setting. -> conversion hardcoded in sdk
+  position_d_gain: 0.001415 # A rad / s
+  velocity_unit_configuration: 0x00B44700 # 0xFDB44700 --> milliRPM, 0xFAB44700--> mircoRPM, 0x00B44700 --> RPM
+  follow_error_window: 2000

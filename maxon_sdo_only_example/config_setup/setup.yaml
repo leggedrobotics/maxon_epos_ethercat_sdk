@@ -4,7 +4,19 @@ ethercat_master:
 
 ethercat_devices:
   - type:               Maxon
-    name:               Maxon1
-    configuration_file: device_configurations/maxon.yaml
+    name: Spindel
+    configuration_file: device_configurations/maxon_shaft.yaml
     ethercat_bus:       eno1
     ethercat_address:   1
+
+  - type: Maxon
+    name: Finger_1
+    configuration_file: device_configurations/maxon_finger.yaml
+    ethercat_bus: eno1
+    ethercat_address: 2
+
+  - type: Maxon
+    name: Finger_2
+    configuration_file: device_configurations/maxon_finger.yaml
+    ethercat_bus: eno1
+    ethercat_address: 3
