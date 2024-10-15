@@ -58,6 +58,14 @@ struct Controlword {
   uint16_t getRawControlword();
 
   /*!
+   * get the control word as a 16 bit unsigned integer
+   * for Profiled Position Mode (PPM)
+   * The usually used cyclic modes do not need mode specific options.
+   * @return	the raw controlword
+   */
+  uint16_t getRawControlwordPPM();
+
+  /*!
    * State transition 2
    * This corresponds to a "shutdown" Controlword
    */

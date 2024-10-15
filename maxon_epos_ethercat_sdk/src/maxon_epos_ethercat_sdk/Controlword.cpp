@@ -126,6 +126,42 @@ uint16_t Controlword::getRawControlword() {
   return rawControlword;
 }
 
+uint16_t Controlword::getRawControlwordPPM() {
+  uint16_t rawControlword = 0;
+
+  if (switchOn_) {
+    rawControlword |= (1 << 0);
+  }
+  if (enableVoltage_) {
+    rawControlword |= (1 << 1);
+  }
+  if (quickStop_) {
+    rawControlword |= (1 << 2);
+  }
+  if (enableOperation_) {
+    rawControlword |= (1 << 3);
+  }
+  if (newSetPoint_) {
+    rawControlword |= (1 << 4);
+  }
+  if (changeSetImmediately_) {
+    rawControlword |= (1 << 5);
+  }
+  if (relative_) {
+    rawControlword |= (1 << 6);
+  }
+  if (faultReset_) {
+    rawControlword |= (1 << 7);
+  }
+  if (halt_) {
+    rawControlword |= (1 << 8);
+  }
+  if (endlessMovement_) {
+    rawControlword |= (1 << 15);
+  }
+  return rawControlword;
+}
+
 void Controlword::setStateTransition2() {
   setAllFalse();
   enableVoltage_ = true;
