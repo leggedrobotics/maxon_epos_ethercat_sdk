@@ -15,6 +15,7 @@ BasicMaxonDriveManager::BasicMaxonDriveManager(const std::string &configFilePath
         maxonDriveCollection[maxonSlavePtr->getName()] = maxonSlavePtr;
         motorCommands[maxonSlavePtr->getName()] = MotorCommand{};
         motorReadings[maxonSlavePtr->getName()] = MotorReading{};
+        receivedUpdates_[maxonSlavePtr->getName()] = false;
         MELO_INFO_STREAM("[MaxonSDOexample] maxon drive collection with: "
                          << maxonSlavePtr->getName())
       } else {
@@ -60,32 +61,76 @@ bool BasicMaxonDriveManager::init() {
 
 void BasicMaxonDriveManager::slowSDOReadAndWrite() {
   for (auto &maxonDrive: maxonDriveCollection) {
-    int32_t cmdVelRaw = 0;
-    double cmdVel = 0;
-    {
-      std::lock_guard commandLock(commandMutex);
-      cmdVel = motorCommands[maxonDrive.first].velocity /maxonDrive.second->configuration_.velocityFactorConfiguredUnitToRadPerSec;
-    }
-    if(cmdVel > std::numeric_limits<int32_t>::max() || cmdVel < std::numeric_limits<int32_t>::min()){
-      MELO_ERROR_STREAM("[MaxonDriveManager] Motorcommmand for Drive " << maxonDrive.first << " is out off int32t range.")
-      cmdVel = 0;
-    }
-    cmdVelRaw = static_cast<int32_t>(cmdVel);
-    if (receivedUpdate_) {
-      maxonDrive.second->sendSdoWrite(OD_INDEX_TARGET_VELOCITY, 0, false,
-                                      cmdVelRaw);
+    if (receivedUpdates_.at(maxonDrive.first)) {
+      int32_t cmdVelRaw = 0;
+      int32_t cmdPosRaw = 0;
+      double cmdVel = 0;
+      double cmdPos = 0;
+      maxon::ModeOfOperationEnum modeOfOperation_;
+      {
+        std::lock_guard commandLock(commandMutex);
+        modeOfOperation_ = motorCommands[maxonDrive.first].modeOfOperation;
+        cmdVel = motorCommands[maxonDrive.first].velocity /
+                 maxonDrive.second->configuration_
+                     .velocityFactorConfiguredUnitToRadPerSec;
+        cmdPos =
+            motorCommands[maxonDrive.first].position *
+            static_cast<double>(
+                maxonDrive.second->configuration_.positionEncoderResolution) /
+            (2.0 * M_PI);
+      }
+      if (cmdVel > std::numeric_limits<int32_t>::max() ||
+          cmdVel < std::numeric_limits<int32_t>::min()) {
+        MELO_ERROR_STREAM("[MaxonDriveManager] Motorcommmand for Drive "
+                          << maxonDrive.first << " is out off int32t range.")
+        cmdVel = 0;
+      }
+      cmdVelRaw = static_cast<int32_t>(cmdVel);
+      cmdPosRaw = static_cast<int32_t>(cmdPos);
+
       maxon::Controlword controlword;
-      controlword.setStateTransition4();  // set status word to enable
-                                          // operational. have to be send to
-                                          // trigger the velocity change.
-      maxonDrive.second->setControlwordViaSdo(controlword);
+
+      switch (modeOfOperation_) {
+        case maxon::ModeOfOperationEnum::NA:
+          break;
+        case maxon::ModeOfOperationEnum::ProfiledPositionMode:
+          maxonDrive.second->sendSdoWrite(OD_INDEX_TARGET_POSITION, 0, false,
+                                          cmdPosRaw);
+
+          controlword.setStateTransition4();
+          controlword.relative_ = true;
+          controlword.changeSetImmediately_ = true;
+          controlword.relative_ = true;
+          controlword.halt_ = false;
+          controlword.endlessMovement_ = true;
+          maxonDrive.second->sendSdoWrite(OD_INDEX_CONTROLWORD, 0, false,
+                                          controlword.getRawControlwordPPM());
+
+          break;
+        case maxon::ModeOfOperationEnum::ProfiledVelocityMode:
+          maxonDrive.second->sendSdoWrite(OD_INDEX_TARGET_VELOCITY, 0, false,
+                                          cmdVelRaw);
+
+          // controlword juggling for Profiled Velocity Mode
+          controlword.setStateTransition4();  // set status word to enable
+                                              // operational. have to be send to
+                                              // trigger the velocity change.
+          maxonDrive.second->setControlwordViaSdo(controlword);
+          break;
+        case maxon::ModeOfOperationEnum::HomingMode:
+        case maxon::ModeOfOperationEnum::CyclicSynchronousPositionMode:
+        case maxon::ModeOfOperationEnum::CyclicSynchronousVelocityMode:
+        case maxon::ModeOfOperationEnum::CyclicSynchronousTorqueMode:
+          MELO_ERROR_STREAM(
+              "[MaxonDriveManager] This mode not supported in this simple "
+              "example");
+          break;
+      }
+
+      // controldword juggling for Profiled Position Mode
+
+      receivedUpdates_.at(maxonDrive.first) = false;
     }
-  }
-  if (receivedUpdate_) {  // todo only set the cmd to the drive which receives
-                          // the cmd.
-    // we have updated all drives with the cmds. so unset the flag and accept
-    // new commands
-    receivedUpdate_ = false;
   }
 
   for (auto &maxonDrive : maxonDriveCollection) {
@@ -97,7 +142,7 @@ void BasicMaxonDriveManager::slowSDOReadAndWrite() {
                                    actualPositionRaw);
     maxon::Statusword statusword;
     maxonDrive.second->getStatuswordViaSdo(statusword);
-    // abuse some of the conversion stuff meant for pdo communicat
+    // abuse some of the conversion stuff meant for pdo communication
     maxon::Reading reading;
     reading.configureReading(maxonDrive.second->configuration_);
     reading.setActualPosition(actualPositionRaw);
@@ -119,9 +164,11 @@ bool BasicMaxonDriveManager::setMotorCommand(const std::string& motorName, Motor
   std::lock_guard lock(commandMutex);
   bool hasMotorName = motorCommands.find(motorName) != motorCommands.end();
   if(hasMotorName){
-    if(!receivedUpdate_){ //make sure the last cmd was sent before setting a new one, if old one not sent, do nothing.
+    if (!receivedUpdates_.at(
+            motorName)) {  // make sure the last cmd was sent before setting a
+                           // new one, if old one not sent, do nothing.
       motorCommands[motorName] = motorCommand;
-      receivedUpdate_ = true;
+      receivedUpdates_.at(motorName) = true;
     }
     return true;
   }

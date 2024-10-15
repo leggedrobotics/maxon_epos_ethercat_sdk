@@ -18,7 +18,10 @@ struct MotorReading{
 };
 
 struct MotorCommand{
+  maxon::ModeOfOperationEnum modeOfOperation{
+      maxon::ModeOfOperationEnum::ProfiledPositionMode};
   double velocity{0};
+  double position{0};
 };
 
 class BasicMaxonDriveManager{
@@ -34,9 +37,9 @@ private:
   std::map<std::string, MotorReading> motorReadings;
 
   std::mutex commandMutex;
-  std::atomic<bool> receivedUpdate_{false};
   std::map<std::string, MotorCommand> motorCommands;
 
+  std::map<std::string, std::atomic<bool>> receivedUpdates_;
 
   void slowSDOReadAndWrite();
 

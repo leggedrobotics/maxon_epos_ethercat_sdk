@@ -29,6 +29,7 @@ find_package(catkin REQUIRED
 
 add_service_files(DIRECTORY msg FILES 
   trigger_velocity_change.srv
+    trigger_position_change.srv
 )
 add_message_files(DIRECTORY msg FILES 
   simple_motor_reading.msg

@@ -11,10 +11,11 @@
  ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include <ros/ros.h>
+
 #include "maxon_sdo_only_example/BasicMaxonDriveManager.hpp"
 #include "maxon_sdo_only_example/simple_motor_reading.h"
+#include "maxon_sdo_only_example/trigger_position_change.h"
 #include "maxon_sdo_only_example/trigger_velocity_change.h"
 
 namespace basic_maxon_drive_manager{
@@ -25,6 +26,9 @@ public:
      nh_(nh){
         init();
         velCmdServer_ = nh_.advertiseService("velocity_change", &BasicMaxonDriveManagerRos::velCmdServerCb, this);
+        velCmdServer_ = nh_.advertiseService(
+            "position_change", &BasicMaxonDriveManagerRos::posCmdServerCb,
+            this);
         for(const auto& maxonDrive : maxonDriveCollection){
           //insert.
             readingPublishers_[maxonDrive.first] = nh_.advertise<maxon_sdo_only_example::simple_motor_reading>(maxonDrive.first+"_pub",10);
@@ -44,13 +48,31 @@ public:
 private: 
     ros::NodeHandle nh_;
     ros::ServiceServer velCmdServer_;
-    std::map<std::string, ros::Publisher> readingPublishers_; //one publisher per motor.. 
+    std::map<std::string, ros::Publisher>
+        readingPublishers_;  // one publisher per motor..
 
     bool velCmdServerCb(maxon_sdo_only_example::trigger_velocity_change::Request& req,
       maxon_sdo_only_example::trigger_velocity_change::Response& rep ){
       MotorCommand motorCommand;
+      motorCommand.modeOfOperation =
+          maxon::ModeOfOperationEnum::ProfiledVelocityMode;
       motorCommand.velocity = req.req_velocity;
       if(!setMotorCommand(req.motor_name, motorCommand)){
+        rep.success = -1;
+        return false;
+      }
+      rep.success = 1;
+      return true;
+    }
+
+    bool posCmdServerCb(
+        maxon_sdo_only_example::trigger_position_change::Request& req,
+        maxon_sdo_only_example::trigger_position_change::Response& rep) {
+      MotorCommand motorCommand;
+      motorCommand.modeOfOperation =
+          maxon::ModeOfOperationEnum::ProfiledPositionMode;
+      motorCommand.position = req.req_position;
+      if (!setMotorCommand(req.motor_name, motorCommand)) {
         rep.success = -1;
         return false;
       }
