@@ -236,7 +236,7 @@ void BasicMaxonDriveManager::shutdown(){
                        << maxonDrive.first
                        << ": Shutdown velocity set to 0, ramping down.")
       // give some time to ramp down.
-      std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
       if (maxonDrive.second->setDriveStateViaSdo(
               maxon::DriveState::SwitchOnDisabled)) {
         MELO_INFO_STREAM("[MaxonSDOexample] " << maxonDrive.first

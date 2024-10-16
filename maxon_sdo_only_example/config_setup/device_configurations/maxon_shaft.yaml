@@ -40,5 +40,5 @@ Hardware:
   position_i_gain: 7.799775 # A/rad s
   position_d_gain: 0.001448 # A rad / s
   velocity_unit_configuration: 0x00B44700 # 0xFDB44700 --> milliRPM, 0xFAB44700--> mircoRPM, 0x00B44700 --> RPM
-  follow_error_window: 2000
+  follow_error_window: 4294967295
  
