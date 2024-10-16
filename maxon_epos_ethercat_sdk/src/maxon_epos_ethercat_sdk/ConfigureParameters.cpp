@@ -704,6 +704,7 @@ bool Maxon::mapPdos(RxPdoTypeEnum rxPdoTypeEnum, TxPdoTypeEnum txPdoTypeEnum) {
 bool Maxon::configParam() {
   bool configSuccess = true;
   uint32_t maxMotorSpeed;
+  uint32_t profileVelocity;
   uint32_t maxProfileVelocity;
   uint32_t maxGearSpeed;
   uint32_t nominalCurrent;
@@ -737,6 +738,15 @@ bool Maxon::configParam() {
   configSuccess &= sdoVerifyWrite(OD_INDEX_MAX_PROFILE_VELOCITY, 0x00, false,
                                   maxProfileVelocity,
                                   configuration_.configRunSdoVerifyTimeout);
+
+  double profilVelocityD = configuration_.profileVelocity / configuration_.velocityFactorConfiguredUnitToRadPerSec;
+  if (profilVelocityD > std::numeric_limits<int32_t>::max()) {
+    MELO_ERROR_STREAM("[Maxon SDK] Profil veloicty out of integer range. other unit config needed.")
+    return false;
+  }
+
+  profileVelocity = static_cast<uint32_t>(profilVelocityD);
+  configSuccess &= sdoVerifyWrite(OD_INDEX_PROFILE_VELOCITY, 0x00, false, profileVelocity, configuration_.configRunSdoVerifyTimeout);
 
   maxGearSpeed = static_cast<uint32_t>(configuration_.maxGearboxInputVelocityRPM);
   configSuccess &= sdoVerifyWrite(OD_INDEX_GEAR_DATA, 0x03, false, maxGearSpeed,

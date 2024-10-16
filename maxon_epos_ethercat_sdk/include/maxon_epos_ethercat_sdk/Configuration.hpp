@@ -67,7 +67,8 @@ class Configuration {
   double maxGearboxInputVelocityRPM{0};
   int32_t minPosition{0};
   int32_t maxPosition{0};
-  uint32_t maxProfileVelocity{0};
+  double maxProfileVelocity{0};
+  double profileVelocity{0};
   uint32_t quickStopDecel{10000};
   uint32_t profileAccel{1000};
   uint32_t profileDecel{10000};

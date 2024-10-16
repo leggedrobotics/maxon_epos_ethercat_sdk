@@ -253,6 +253,10 @@ bool Configuration::sanityCheck(bool silent) const {
         "torque_constant > 0"
       },
       {
+        (profileVelocity > 0),
+        "profile_velocity > 0"
+      },
+      {
         (maxProfileVelocity > 0),
         "max_profile_velocity > 0"
       },

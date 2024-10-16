@@ -293,7 +293,12 @@ void ConfigurationParser::parseConfiguration(YAML::Node configNode) {
       configuration_.maxPosition = maxPosition;
     }
 
-    uint32_t maxProfileVelocity;
+    double profileVelocity;
+    if (getValueFromFile(hardwareNode, "profile_velocity", profileVelocity)) {
+      configuration_.profileVelocity = profileVelocity;
+    }
+
+    double maxProfileVelocity;
     if (getValueFromFile(hardwareNode, "max_profile_velocity",
                          maxProfileVelocity)) {
       configuration_.maxProfileVelocity = maxProfileVelocity;
