@@ -29,6 +29,7 @@ class BasicMaxonDriveManager{
 private:
   std::unique_ptr<std::thread> worker_thread;
   std::atomic<bool> abrt = false;
+  bool initialized_ = false;
 
   EthercatDeviceConfigurator::SharedPtr configurator;
   ecat_master::EthercatMaster::SharedPtr ecatMaster;
@@ -48,7 +49,9 @@ protected:
 
 public:
   explicit BasicMaxonDriveManager(const std::string& configFilePath);
-  bool init();
+ virtual ~BasicMaxonDriveManager() { shutdown(); }
+
+ bool init();
 
   MotorReading getMotorReading(const std::string& motorName);
   bool setMotorCommand(const std::string& motorName, MotorCommand motorCommand);

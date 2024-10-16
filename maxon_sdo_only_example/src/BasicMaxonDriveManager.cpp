@@ -38,7 +38,7 @@ bool BasicMaxonDriveManager::init() {
     MELO_ERROR_STREAM("Could not startup master")
     return false;
   }
-
+  initialized_ = true;
 
   //switch on after velocity set to zero by the thread started above (velocity cmd should default to zero)
   for(auto& maxonDrive : maxonDriveCollection){
@@ -55,6 +55,8 @@ bool BasicMaxonDriveManager::init() {
       slowSDOReadAndWrite();
     }
   });
+
+  MELO_DEBUG_STREAM("[MaxonSDOexample] Initialized");
 
   return true;
 }
@@ -88,21 +90,40 @@ void BasicMaxonDriveManager::slowSDOReadAndWrite() {
       cmdVelRaw = static_cast<int32_t>(cmdVel);
       cmdPosRaw = static_cast<int32_t>(cmdPos);
 
+      MELO_INFO_STREAM("[MaxonDriveManager] Motor "
+                       << maxonDrive.first
+                       << " received raw commands pos:  " << cmdPosRaw)
+
       maxon::Controlword controlword;
 
       switch (modeOfOperation_) {
         case maxon::ModeOfOperationEnum::NA:
           break;
         case maxon::ModeOfOperationEnum::ProfiledPositionMode:
+          controlword.enableOperation_ = true;
+          controlword.quickStop_ = true;
+          controlword.switchOn_ = true;
+          controlword.enableVoltage_ = true;
+          controlword.relative_ = true;
+          controlword.newSetPoint_ = false;  // we have to toggle new setpoint!
+          controlword.changeSetImmediately_ = true;
+          controlword.halt_ = false;
+          controlword.endlessMovement_ = false;
+          maxonDrive.second->sendSdoWrite(OD_INDEX_CONTROLWORD, 0, false,
+                                          controlword.getRawControlwordPPM());
+
           maxonDrive.second->sendSdoWrite(OD_INDEX_TARGET_POSITION, 0, false,
                                           cmdPosRaw);
 
-          controlword.setStateTransition4();
+          controlword.enableOperation_ = true;
+          controlword.quickStop_ = true;
+          controlword.switchOn_ = true;
+          controlword.enableVoltage_ = true;
           controlword.relative_ = true;
+          controlword.newSetPoint_ = true;
           controlword.changeSetImmediately_ = true;
-          controlword.relative_ = true;
           controlword.halt_ = false;
-          controlword.endlessMovement_ = true;
+          controlword.endlessMovement_ = false;
           maxonDrive.second->sendSdoWrite(OD_INDEX_CONTROLWORD, 0, false,
                                           controlword.getRawControlwordPPM());
 
@@ -140,8 +161,13 @@ void BasicMaxonDriveManager::slowSDOReadAndWrite() {
                                    actualVelRaw);
     maxonDrive.second->sendSdoRead(OD_INDEX_POSITION_ACTUAL, 0, false,
                                    actualPositionRaw);
+
     maxon::Statusword statusword;
     maxonDrive.second->getStatuswordViaSdo(statusword);
+    // todo log if fault.
+    // MELO_INFO_STREAM("[MaxonDriveManager] Motor: " <<maxonDrive.first << "
+    // status: " << statusword);
+
     // abuse some of the conversion stuff meant for pdo communication
     maxon::Reading reading;
     reading.configureReading(maxonDrive.second->configuration_);
@@ -169,6 +195,9 @@ bool BasicMaxonDriveManager::setMotorCommand(const std::string& motorName, Motor
                            // new one, if old one not sent, do nothing.
       motorCommands[motorName] = motorCommand;
       receivedUpdates_.at(motorName) = true;
+      MELO_INFO_STREAM("[MaxonSDOExample] Motor: " << motorName
+                                                   << " received command: "
+                                                   << motorCommand.position);
     }
     return true;
   }
@@ -180,36 +209,44 @@ bool BasicMaxonDriveManager::setMotorCommand(const std::string& motorName, Motor
 }
 
 void BasicMaxonDriveManager::shutdown(){
+  MELO_INFO_STREAM("[MaxonSDOExample] Shutdown")
   //make sure we stop.
   abrt = true;
-  worker_thread->join();
+  if (worker_thread) {
+    if (worker_thread->joinable()) {
+      worker_thread->join();
+    }
+  }
+  MELO_INFO_STREAM("[MaxonSDOExample] Sdo Worker joined")
 
   //make sure we stop.
-  for (auto &maxonDrive: maxonDriveCollection) {
-    int32_t cmdVelRaw = 0;
-    maxonDrive.second->sendSdoWrite(OD_INDEX_TARGET_VELOCITY, 0, false,
-                                    cmdVelRaw);
-    maxonDrive.second->sendSdoWrite(OD_INDEX_OFFSET_VELOCITY, 0, false,
-                                    cmdVelRaw);
-    maxon::Controlword controlword;
-    controlword
-        .setStateTransition4();  // set status word to enable operational. have
-                                 // to be send to trigger the velocity change.
-    maxonDrive.second->setControlwordViaSdo(controlword);
-    MELO_INFO_STREAM("[MaxonSDOexample] "
-                     << maxonDrive.first
-                     << ": Shutdown velocity set to 0, ramping down.")
-    // give some time to ramp down.
-    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-    if (maxonDrive.second->setDriveStateViaSdo(
-            maxon::DriveState::SwitchOnDisabled)) {
-      MELO_INFO_STREAM("[MaxonSDOexample] " << maxonDrive.first
-                                            << ": Switched off")
-    } else {
-      MELO_ERROR_STREAM(
-          "[MaxonSDOexample] "
-          << maxonDrive.first
-          << ": Could not switch off your system. E-Stop and Debug!")
+  if (initialized_) {
+    for (auto &maxonDrive : maxonDriveCollection) {
+      int32_t cmdVelRaw = 0;
+      maxonDrive.second->sendSdoWrite(OD_INDEX_TARGET_VELOCITY, 0, false,
+                                      cmdVelRaw);
+      maxonDrive.second->sendSdoWrite(OD_INDEX_OFFSET_VELOCITY, 0, false,
+                                      cmdVelRaw);
+      maxon::Controlword controlword;
+      controlword.setStateTransition4();  // set status word to enable
+                                          // operational. have to be send to
+                                          // trigger the velocity change.
+      maxonDrive.second->setControlwordViaSdo(controlword);
+      MELO_INFO_STREAM("[MaxonSDOexample] "
+                       << maxonDrive.first
+                       << ": Shutdown velocity set to 0, ramping down.")
+      // give some time to ramp down.
+      std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+      if (maxonDrive.second->setDriveStateViaSdo(
+              maxon::DriveState::SwitchOnDisabled)) {
+        MELO_INFO_STREAM("[MaxonSDOexample] " << maxonDrive.first
+                                              << ": Switched off")
+      } else {
+        MELO_ERROR_STREAM(
+            "[MaxonSDOexample] "
+            << maxonDrive.first
+            << ": Could not switch off your system. E-Stop and Debug!")
+      }
     }
   }
 }

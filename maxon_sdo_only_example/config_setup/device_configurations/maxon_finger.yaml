@@ -22,7 +22,7 @@ Hardware:
   working_voltage: 48 #V # todo
   pole_pairs: 1
   speed_constant: 113 # rpm / V
-  max_gearbox_input_velocity: 3000 # rpm
+  max_gearbox_input_velocity: 4000 # rpm
   torque_constant: 0.013260 #Nm/A
   max_current: 0.308 #A
   nominal_current: 0.308 #A
@@ -30,8 +30,8 @@ Hardware:
   max_position: 0 # min, max = 0 --> Disable checks
   max_profile_velocity: 300  #rad/s
   quick_stop_decel: 10000 # rpm/s
-  profile_accel: 100 # rpm/s
-  profile_decel: 100 # rpm/s
+  profile_accel: 800 # rpm/s
+  profile_decel: 800 # rpm/s
   current_p_gain: 11.145067 #V/A
   current_i_gain: 115759.835   #V/As  #Note can be depended on setting see below
   velocity_p_gain: 0.000958 # A s/rad

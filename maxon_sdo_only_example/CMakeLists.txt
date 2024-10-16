@@ -11,7 +11,7 @@ endif()
 
 set(CMAKE_CXX_STANDARD 17)
 add_definitions(-Wall -Werror)
-
+add_definitions(-DMELO_USE_COUT)
 
 set(PACKAGE_DEPENDENCIES
  ethercat_device_configurator

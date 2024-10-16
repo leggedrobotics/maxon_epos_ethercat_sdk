@@ -1,22 +1,36 @@
-ethercat_master:
-  time_step:                          0.0025
-  update_rate_too_low_warn_threshold: 50
+ethercat_master_s:
+  - name: MyBus1
+    ethercat_bus: enx9cebe88394dd
+    time_step: 0.001
+    update_rate_too_low_warn_threshold: 50
+    # checks if the pdo size read from the slaves, matches the hardcoded one in the slave sdks.
+    # if dynamic PDO mapping is used this check will fail and can therefore be disabled. e.g. Maxon
+    pdo_size_check: false
+    #max retires during slave discover on the bus (waiting 1 sec after every try). some slaves might take a bit till started..
+    #can be interrupted if startupAbortFlag is nicley wired thru everything.
+    slave_discover_retries: 20
+    # periodically mentionors the bus application layer state and ethercat state machine state
+    # prints some logs in case something falls out of operational.
+    bus_diagnosis: true
+    # saves a diagnosis log to ~/ethercat_master/<data_time>.log
+    # plots can be created with a python script in the folder
+    error_counter_log: true
 
 ethercat_devices:
   - type:               Maxon
     name: Spindel
     configuration_file: device_configurations/maxon_shaft.yaml
-    ethercat_bus:       eno1
+    ethercat_bus: enx9cebe88394dd
     ethercat_address:   1
 
   - type: Maxon
     name: Finger_1
     configuration_file: device_configurations/maxon_finger.yaml
-    ethercat_bus: eno1
+    ethercat_bus: enx9cebe88394dd
     ethercat_address: 2
 
   - type: Maxon
     name: Finger_2
     configuration_file: device_configurations/maxon_finger.yaml
-    ethercat_bus: eno1
+    ethercat_bus: enx9cebe88394dd
     ethercat_address: 3

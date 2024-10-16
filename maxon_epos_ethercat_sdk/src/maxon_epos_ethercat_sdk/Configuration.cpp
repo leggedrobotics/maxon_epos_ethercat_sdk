@@ -180,7 +180,7 @@ std::pair<RxPdoTypeEnum, TxPdoTypeEnum> Configuration::getPdoTypeSolution()
       },
       {
         { ModeOfOperationEnum::ProfiledPositionMode },
-        { RxPdoTypeEnum::NA, TxPdoTypeEnum::NA }
+        { RxPdoTypeEnum::RxPdoCSP, TxPdoTypeEnum::TxPdoCSP }
       },
       {
         { ModeOfOperationEnum::ProfiledVelocityMode },

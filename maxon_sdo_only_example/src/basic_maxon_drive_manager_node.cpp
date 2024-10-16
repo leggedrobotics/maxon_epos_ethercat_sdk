@@ -17,37 +17,30 @@
 #include "maxon_sdo_only_example/simple_motor_reading.h"
 #include "maxon_sdo_only_example/trigger_position_change.h"
 #include "maxon_sdo_only_example/trigger_velocity_change.h"
+#include "message_logger/message_logger.hpp"
 
 namespace basic_maxon_drive_manager{
 class BasicMaxonDriveManagerRos : public BasicMaxonDriveManager{
 public:
-    BasicMaxonDriveManagerRos(const std::string& configFilePath, ros::NodeHandle& nh) :
-     BasicMaxonDriveManager(configFilePath),
-     nh_(nh){
-        init();
+    BasicMaxonDriveManagerRos(const std::string& configFilePath, ros::NodeHandle& nh) : BasicMaxonDriveManager(configFilePath), nh_(nh) {
+   init();
         velCmdServer_ = nh_.advertiseService("velocity_change", &BasicMaxonDriveManagerRos::velCmdServerCb, this);
-        velCmdServer_ = nh_.advertiseService(
-            "position_change", &BasicMaxonDriveManagerRos::posCmdServerCb,
-            this);
-        for(const auto& maxonDrive : maxonDriveCollection){
+   posCmdServer_ = nh_.advertiseService(
+       "position_change", &BasicMaxonDriveManagerRos::posCmdServerCb, this);
+   for(const auto& maxonDrive : maxonDriveCollection){
           //insert.
             readingPublishers_[maxonDrive.first] = nh_.advertise<maxon_sdo_only_example::simple_motor_reading>(maxonDrive.first+"_pub",10);
         }
-    }
-    
-    void runUpdate(){
-        ros::Rate loop_rate(400);
-        while(ros::ok()){
-            ros::spinOnce();
-            publishReadings();
-            loop_rate.sleep();
-        }
-        shutdown();
+   timer_ = nh_.createTimer(
+       ros::Duration(0.01),
+       std::bind(&BasicMaxonDriveManagerRos::publishReadings, this));
     }
 
-private: 
-    ros::NodeHandle nh_;
+private:
+    ros::NodeHandle& nh_;
     ros::ServiceServer velCmdServer_;
+    ros::ServiceServer posCmdServer_;
+    ros::Timer timer_;
     std::map<std::string, ros::Publisher>
         readingPublishers_;  // one publisher per motor..
 
@@ -105,8 +98,9 @@ int main(int argc, char**argv)
 
     ros::init(argc, argv, "hardware_interface");
     ros::NodeHandle nh;
-    basic_maxon_drive_manager::BasicMaxonDriveManagerRos maxonDriveManagerRos(argv[1], nh);
-
-    maxonDriveManagerRos.runUpdate();
-
+    auto maxonDriveManagerRos =
+        std::make_shared<basic_maxon_drive_manager::BasicMaxonDriveManagerRos>(
+            argv[1], nh);
+    ros::spin();
+    return 0;
 }
