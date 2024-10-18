@@ -1,0 +1,21 @@
+repositories:
+  src/ethercat_device_configurator:
+    type: git
+    url: git@github.com:leggedrobotics/ethercat_device_configurator.git
+    version: f35c922a04d7c710d18598ece3523d04ceefb1e6
+  src/ethercat_sdk_master:
+    type: git
+    url: git@github.com:leggedrobotics/ethercat_sdk_master.git
+    version: 4d90093d3064fad202f362c440c70fab9127dec0
+  src/maxon_epos_ethercat_sdk:
+    type: git
+    url: git@github.com:leggedrobotics/maxon_epos_ethercat_sdk.git
+    version: 2655d1bd4c083fdaccb9190d5293cf89709e8ffe
+  src/message_logger:
+    type: git
+    url: git@github.com:leggedrobotics/message_logger.git
+    version: bdb867e57059f21d22f9454f6910920bfe5caac2
+  src/soem_interface:
+    type: git
+    url: git@github.com:leggedrobotics/soem_interface.git
+    version: 6e8ab4d62bc9204dcd25454e19abfa9318bfed6f
