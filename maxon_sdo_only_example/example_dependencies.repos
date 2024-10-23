@@ -6,7 +6,7 @@ repositories:
   src/ethercat_device_configurator:
     type: git
     url: git@github.com:leggedrobotics/ethercat_device_configurator.git
-    version: dev/elena
+    version: f35c922a04d7c710d18598ece3523d04ceefb1e6
   src/ethercat_sdk_master:
     type: git
     url: git@github.com:leggedrobotics/ethercat_sdk_master.git
@@ -14,7 +14,7 @@ repositories:
   src/maxon_epos_ethercat_sdk:
     type: git
     url: git@github.com:leggedrobotics/maxon_epos_ethercat_sdk.git
-    version: 37fc6270ce470076d184a52720d8a81de5187ba8
+    version: dev/elena
   src/message_logger:
     type: git
     url: git@github.com:leggedrobotics/message_logger.git
