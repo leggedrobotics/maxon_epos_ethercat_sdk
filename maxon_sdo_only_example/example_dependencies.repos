@@ -1,8 +1,12 @@
 repositories:
+  src/any_node:
+    type: git
+    url: git@github.com:ANYbotics/any_node.git
+    version: 8ede73f92761f42cb8e8726c25ae9964f84c4fb1
   src/ethercat_device_configurator:
     type: git
     url: git@github.com:leggedrobotics/ethercat_device_configurator.git
-    version: f35c922a04d7c710d18598ece3523d04ceefb1e6
+    version: dev/elena
   src/ethercat_sdk_master:
     type: git
     url: git@github.com:leggedrobotics/ethercat_sdk_master.git
@@ -10,7 +14,7 @@ repositories:
   src/maxon_epos_ethercat_sdk:
     type: git
     url: git@github.com:leggedrobotics/maxon_epos_ethercat_sdk.git
-    version: 2655d1bd4c083fdaccb9190d5293cf89709e8ffe
+    version: 37fc6270ce470076d184a52720d8a81de5187ba8
   src/message_logger:
     type: git
     url: git@github.com:leggedrobotics/message_logger.git

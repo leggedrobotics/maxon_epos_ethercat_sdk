@@ -10,20 +10,20 @@ Install yaml-cpp and vcs tools
 
 ```
  sudo apt install python3-vcstool\
- python3-colcon-common-extensions\
  libyaml-cpp-dev
 ```
 
 Create a ros workspace and clone this repo and pull in all the deps with vcs tools.
 
 * setup workspace `mkdir -p maxon_test_ws/src`
-* clone this repo into `src`
+* clone this repo into `src` folder
 * in the workspace import all required repos with:
 
 ```
-vcs import < src/maxon_epos_thercat_sdk/maxon_sdo_only_example/example_dependencies.repos --recursive
+vcs import < src/maxon_epos_ethercat_sdk/maxon_sdo_only_example/example_dependencies.repos --recursive
 ```
 
+* source ros noetic `source /opt/ros/noetic/setup.bash`
 * build the examples with: `catkin build maxon_epos_ethercat_sdk_example`
 
 # Launch
